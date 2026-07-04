@@ -589,9 +589,11 @@ p {
   text-shadow: 0 0 6px rgba(179, 18, 27, 0.5);
 }
 
+/* Спойлер: placeholder ВСЕГДА задаёт ширину и не меняет её.
+   Расшифровка всплывает рамкой над спойлером (как у .ghost). */
 .redacted {
   background: #000;
-  color: #000;
+  color: #cbcbc4;            /* placeholder виден как «затёртый» текст */
   padding: 0 0.35em;
   border-radius: 1px;
   cursor: help;
@@ -601,37 +603,49 @@ p {
   display: inline-block;
   font-size: inherit;
   line-height: inherit;
-  overflow: hidden;
   vertical-align: baseline;
+  transition: background 0.2s;
 }
+/* тёмная «плашка цензуры» поверх placeholder-а */
 .redacted::after {
-  content: "░";
-  color: #2c2c2c;
+  content: "";
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 2;
   background: #000;
-}
-.redacted:hover::after {
-  content: "";
-  display: none;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.2s;
 }
 .redacted:hover {
-  background: rgba(179, 18, 27, 0.08);
-  color: transparent;
+  background: rgba(179, 18, 27, 0.12);
 }
+.redacted:hover::after {
+  opacity: 0;             /* при наведении плашка гаснет, ширина не меняется */
+}
+/* всплывающая расшифровка — абсолютный слой, не влияет на поток */
 .redacted .r-reveal {
-  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 6px;
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  padding: 3px 9px;
+  background: #0a0a0a;
+  border: 1px solid var(--red);
+  color: var(--red-soft);
+  font-family: "VT323", monospace;
+  font-size: 0.95em;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 8px rgba(210, 58, 66, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 20;
 }
 .redacted:hover .r-reveal {
-  display: inline;
-  color: var(--red-soft);
-  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
-  letter-spacing: 0.02em;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .ghost {
@@ -666,20 +680,16 @@ p {
   transform: translateY(0);
 }
 
-/* touch-to-reveal для redacted */
+/* touch-to-reveal для redacted (мобильные, по клику) */
 .redacted.touch-reveal {
-  background: rgba(179, 18, 27, 0.08) !important;
-  color: transparent !important;
+  background: rgba(179, 18, 27, 0.12) !important;
 }
 .redacted.touch-reveal::after {
-  content: "" !important;
-  display: none !important;
+  opacity: 0 !important;
 }
 .redacted.touch-reveal .r-reveal {
-  display: inline !important;
-  color: var(--red-soft) !important;
-  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
-  letter-spacing: 0.02em;
+  opacity: 1 !important;
+  transform: translateX(-50%) translateY(0) !important;
 }
 
 /* glitch */
