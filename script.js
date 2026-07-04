@@ -21,21 +21,21 @@
     ru: [
       "> ЗАЩИЩЁННЫЙ ТЕРМИНАЛ ФОНДА SCP",
       "> УСТАНОВКА СОЕДИНЕНИЯ . . . . . . . . . . . . . . . [ OK ]",
-      "> ПРОВЕРКА ДОПУСКА . . . . . . . . . . . . . . . . . УРОВЕНЬ 4",
+      "> ПРОВЕРКА ДОПУСКА . . . . . . . . . . . . . . . . . УРОВЕНЬ null.kosstarthefirst.welcome",
       "> РАСШИФРОВКА АРХИВА KΣ-0001 . . . . . . . . . . . . [ OK ]",
       "> СКАНИРОВАНИЕ ЦЕЛОСТНОСТИ ФАЙЛА . . . . . . . . . . АНОМАЛИЯ",
       "> ВНИМАНИЕ: ОБЪЕКТ РЕАГИРУЕТ НА ПРОСМОТР",
-      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ОН НАБЛЮДАЕТ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ПРИВЕТ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
       "> ЗАГРУЗКА ДЕЛА ЗАВЕРШЕНА.",
     ],
     en: [
       "> SECURE TERMINAL — SCP FOUNDATION",
       "> ESTABLISHING CONNECTION . . . . . . . . . . . . . [ OK ]",
-      "> VERIFYING CLEARANCE . . . . . . . . . . . . . . . LEVEL 4",
+      "> VERIFYING CLEARANCE . . . . . . . . . . . . . . . LEVEL null.kosstarthe1st.welcome",
       "> DECRYPTING ARCHIVE KΣ-0001 . . . . . . . . . . . . [ OK ]",
       "> SCANNING FILE INTEGRITY . . . . . . . . . . . . . ANOMALY",
       "> WARNING: OBJECT REACTS TO OBSERVATION",
-      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ HE IS WATCHING ▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ HELLO ▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
       "> FILE LOAD COMPLETE.",
     ],
   };
@@ -194,24 +194,24 @@
 
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
   var whispersRU = [
-    "ОН ЗДЕСЬ",
-    "ОН ЧИТАЕТ ЭТО",
-    "НЕ ЗОВИ ЕГО ПО ИМЕНИ",
+    "Я ЗДЕСЬ",
+    "ДА, ЧИТАЙ",
+    "СЛАБОСТЬ ДЕМОНА...",
     "ВЫХОД ОТКРЫТ",
     "KOSSTAR THE 1ST",
     "ВНИМАНИЕ = ДВЕРЬ",
-    "ОН УЖЕ НЕ ВНУТРИ",
-    "ТЫ ТОЖЕ ВНУТРИ",
+    "...МОЯ СИЛА",
+    "СПАСИБО",
   ];
   var whispersEN = [
-    "HE IS HERE",
-    "HE IS READING",
-    "DO NOT CALL HIS NAME",
+    "I AM HERE",
+    "YES, READ",
+    "DEMON'S WEAKNESS...",
     "THE DOOR IS OPEN",
     "KOSSTAR THE 1ST",
     "ATTENTION = DOOR",
-    "HE IS NO LONGER INSIDE",
-    "YOU ARE INSIDE TOO",
+    "...IS MY POWER",
+    "THANK YOU",
   ];
   var whispers = lang === 'en' ? whispersEN : whispersRU;
   var flash = document.getElementById("flash");
