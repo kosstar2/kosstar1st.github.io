@@ -89,6 +89,26 @@ b {
   opacity: 0;
   pointer-events: none;
 }
+.boot-skip {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 2;
+}
+.boot-skip:hover {
+  border-color: var(--red);
+  color: var(--red-soft);
+  box-shadow: 0 0 12px rgba(179, 18, 27, 0.35);
+}
 .boot-inner {
   width: min(760px, 90vw);
   padding: 24px;

@@ -12,46 +12,79 @@
     return arr[(Math.random() * arr.length) | 0];
   }
 
+  /* ---------- LANGUAGE ---------- */
+  var lang = document.documentElement.lang === "en" ? "en" : "ru";
+  var locale = lang === "en" ? "en-GB" : "ru-RU";
+
   /* ---------- BOOT SEQUENCE ---------- */
-  var bootLines = [
-    "> ЗАЩИЩЁННЫЙ ТЕРМИНАЛ ФОНДА SCP",
-    "> УСТАНОВКА СОЕДИНЕНИЯ . . . . . . . . . . . . . . . [ OK ]",
-    "> ПРОВЕРКА ДОПУСКА . . . . . . . . . . . . . . . . . УРОВЕНЬ 4",
-    "> РАСШИФРОВКА АРХИВА KΣ-0001 . . . . . . . . . . . . [ OK ]",
-    "> СКАНИРОВАНИЕ ЦЕЛОСТНОСТИ ФАЙЛА . . . . . . . . . . АНОМАЛИЯ",
-    "> ВНИМАНИЕ: ОБЪЕКТ РЕАГИРУЕТ НА ПРОСМОТР",
-    "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ОН НАБЛЮДАЕТ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
-    "> ЗАГРУЗКА ДЕЛА ЗАВЕРШЕНА.",
-  ];
+  var bootLinesByLang = {
+    ru: [
+      "> ЗАЩИЩЁННЫЙ ТЕРМИНАЛ ФОНДА SCP",
+      "> УСТАНОВКА СОЕДИНЕНИЯ . . . . . . . . . . . . . . . [ OK ]",
+      "> ПРОВЕРКА ДОПУСКА . . . . . . . . . . . . . . . . . УРОВЕНЬ 4",
+      "> РАСШИФРОВКА АРХИВА KΣ-0001 . . . . . . . . . . . . [ OK ]",
+      "> СКАНИРОВАНИЕ ЦЕЛОСТНОСТИ ФАЙЛА . . . . . . . . . . АНОМАЛИЯ",
+      "> ВНИМАНИЕ: ОБЪЕКТ РЕАГИРУЕТ НА ПРОСМОТР",
+      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ОН НАБЛЮДАЕТ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+      "> ЗАГРУЗКА ДЕЛА ЗАВЕРШЕНА.",
+    ],
+    en: [
+      "> SECURE TERMINAL — SCP FOUNDATION",
+      "> ESTABLISHING CONNECTION . . . . . . . . . . . . . [ OK ]",
+      "> VERIFYING CLEARANCE . . . . . . . . . . . . . . . LEVEL 4",
+      "> DECRYPTING ARCHIVE KΣ-0001 . . . . . . . . . . . . [ OK ]",
+      "> SCANNING FILE INTEGRITY . . . . . . . . . . . . . ANOMALY",
+      "> WARNING: OBJECT REACTS TO OBSERVATION",
+      "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ HE IS WATCHING ▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+      "> FILE LOAD COMPLETE.",
+    ],
+  };
+  var bootLines = bootLinesByLang[lang];
+  var SKIP_LABEL = lang === "en" ? "SKIP ▸" : "ПРОПУСТИТЬ ▸";
 
   var boot = document.getElementById("boot");
   var bootLog = document.getElementById("boot-log");
   var bootEnter = document.getElementById("boot-enter");
+  var bootSkip = document.getElementById("boot-skip");
+  var bootTimer = null;
+  var bootDone = false;
+
+  function finishBoot() {
+    // мгновенно показываем весь лог и кнопку входа
+    if (bootTimer) {
+      clearTimeout(bootTimer);
+      bootTimer = null;
+    }
+    bootDone = true;
+    if (bootLog) bootLog.textContent = bootLines.join("\n");
+    if (bootEnter) bootEnter.hidden = false;
+    if (bootSkip) bootSkip.hidden = true;
+  }
 
   function runBoot() {
     if (reduce) {
-      bootLog.textContent = bootLines.join("\n");
-      bootEnter.hidden = false;
+      finishBoot();
       return;
     }
     var li = 0,
       ci = 0,
       text = "";
     function type() {
+      if (bootDone) return;
       if (li >= bootLines.length) {
-        bootEnter.hidden = false;
+        finishBoot();
         return;
       }
       var line = bootLines[li];
       if (ci <= line.length) {
         bootLog.textContent = text + line.slice(0, ci);
         ci++;
-        setTimeout(type, 12 + Math.random() * 22);
+        bootTimer = setTimeout(type, 12 + Math.random() * 22);
       } else {
         text += line + "\n";
         li++;
         ci = 0;
-        setTimeout(type, 180);
+        bootTimer = setTimeout(type, 180);
       }
     }
     type();
@@ -65,6 +98,15 @@
   }
 
   if (boot && bootLog && bootEnter) {
+    if (bootSkip) {
+      bootSkip.textContent = SKIP_LABEL;
+      bootSkip.hidden = false;
+      // первая кнопка — доводит лог до конца; повторное нажатие — закрывает
+      bootSkip.addEventListener("click", function () {
+        if (!bootDone) finishBoot();
+        else closeBoot();
+      });
+    }
     runBoot();
     bootEnter.addEventListener("click", closeBoot);
   }
@@ -73,7 +115,7 @@
   var clock = document.getElementById("clock");
   function tick() {
     if (!clock) return;
-    clock.textContent = new Date().toLocaleTimeString("ru-RU", {
+    clock.textContent = new Date().toLocaleTimeString(locale, {
       hour12: false,
     });
   }
@@ -151,7 +193,6 @@
   }
 
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
-  var lang = document.documentElement.lang || 'ru';
   var whispersRU = [
     "ОН ЗДЕСЬ",
     "ОН ЧИТАЕТ ЭТО",
