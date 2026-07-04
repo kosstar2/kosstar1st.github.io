@@ -597,11 +597,8 @@ p {
   cursor: help;
   user-select: none;
   position: relative;
-  white-space: nowrap;
   display: inline-block;
-  font-size: inherit;
-  line-height: inherit;
-  overflow: hidden;
+  white-space: nowrap;
   vertical-align: baseline;
 }
 .redacted::after {
@@ -616,22 +613,40 @@ p {
   z-index: 2;
   background: #000;
 }
-.redacted:hover::after {
+/*.redacted:hover::after {
   content: "";
   display: none;
-}
+}*/
 .redacted:hover {
-  background: rgba(179, 18, 27, 0.08);
-  color: transparent;
+  box-shadow: 0 0 10px rgba(179, 18, 27, 0.28);
 }
 .redacted .r-reveal {
-  display: none;
-}
-.redacted:hover .r-reveal {
-  display: inline;
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, 4px);
+  margin-bottom: 6px;
+
+  padding: 3px 10px;
+  background: #0a0a0a;
+  border: 1px solid var(--red);
   color: var(--red-soft);
-  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
-  letter-spacing: 0.02em;
+  font-family: "VT323", monospace;
+  font-size: 0.9em;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px rgba(210, 58, 66, 0.6);
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 10;
+}
+
+.redacted:hover .r-reveal,
+.redacted.touch-reveal .r-reveal {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .ghost {
@@ -666,7 +681,7 @@ p {
   transform: translateY(0);
 }
 
-/* touch-to-reveal для redacted */
+/* touch-to-reveal для redacted 
 .redacted.touch-reveal {
   background: rgba(179, 18, 27, 0.08) !important;
   color: transparent !important;
@@ -681,7 +696,7 @@ p {
   text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
   letter-spacing: 0.02em;
 }
-
+*/
 /* glitch */
 .glitch {
   position: relative;
