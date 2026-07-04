@@ -3,17 +3,311 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Секретный файл Фонда SCP. Объект SCP-KΣ-0001 «kosstar the 1st». Материал удалён по приказу O5." />
+    <meta
+      name="description"
+      content="Секретный файл Фонда SCP. Объект SCP-KΣ-0001 «kosstar the 1st», впервые обнаруженный в среде VRChat. Материал сокрыт по приказу O5."
+    />
+    <meta name="theme-color" content="#050505" />
+    <meta property="og:title" content="SCP-KΣ-0001 :: kosstar the 1st" />
+    <meta
+      property="og:description"
+      content="Аномалия, совершившая прорыв из VRChat в реальность. Классификация — [ДАННЫЕ УДАЛЕНЫ]."
+    />
     <title>SCP-KΣ-0001 :: kosstar the 1st — ФОНД SCP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&family=Share+Tech+Mono&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap"
       rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050505'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23b3121b' font-family='monospace'%3EK%3C/text%3E%3C/svg%3E"
     />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- ===================== BOOT / ACCESS GATE ===================== -->
+    <div id="boot" class="boot">
+      <div class="boot-inner">
+        <pre id="boot-log" class="boot-log" aria-hidden="true"></pre>
+        <button id="boot-enter" class="boot-enter" type="button" hidden>
+          ▸ ПРИНЯТЬ РИСК И ВОЙТИ
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== STATUS BAR ===================== -->
+    <header class="statusbar" role="banner">
+      <div class="statusbar-left">
+        <span class="sb-brand">ФОНД&nbsp;SCP</span>
+        <span class="sb-item hide-sm">▸ АРХИВ ОБЪЕКТОВ</span>
+        <span class="sb-item hide-md">▸ ДОПУСК: <b>4</b></span>
+        <span class="sb-item hide-lg"
+          >▸ СОЕДИНЕНИЕ: <b class="blink accent">АКТИВНО</b></span
+        >
+      </div>
+      <div class="statusbar-right">
+        <span class="accent">● REC</span>
+        <span id="clock" class="mono">--:--:--</span>
+      </div>
+    </header>
+
+    <!-- ===================== CRT OVERLAY ===================== -->
+    <div class="crt-overlay" aria-hidden="true">
+      <div class="rgb"></div>
+      <div class="scanlines"></div>
+      <div class="flicker"></div>
+      <div class="vignette"></div>
+    </div>
+
+    <!-- glitch flash + whisper -->
+    <div id="flash" class="glitch-flash" aria-hidden="true"></div>
+    <div id="whisper" class="whisper" aria-hidden="true"></div>
+
+    <!-- progress line -->
+    <div id="progress" class="scroll-progress" aria-hidden="true"></div>
+
+    <!-- ===================== DOCUMENT ===================== -->
+    <main class="doc-shell">
+      <!-- HERO -->
+      <section class="hero reveal">
+        <div class="hero-tag">
+          КОНФИДЕНЦИАЛЬНО / ТОЛЬКО ДЛЯ ПЕРСОНАЛА УРОВНЯ 4
+        </div>
+        <h1 class="hero-title">
+          <span class="glitch glitch-hard" data-text="SCP">SCP</span
+          ><span class="dash">-</span
+          ><span class="glitch glitch-hard" data-text="KΣ-0001">KΣ-0001</span>
+        </h1>
+        <div class="hero-sub">
+          <span class="chip">ОБЪЕКТ:</span>
+          <span class="hero-name">"kosstar&nbsp;the&nbsp;1st"</span>
+        </div>
+        <div class="stamp"><span class="tremor-slow">НЕ ПОДЛЕЖИТ РАСПРОСТРАНЕНИЮ</span></div>
+        <div class="scroll-hint">▾ прокрутите для доступа к делу ▾</div>
+      </section>
+
+      <!-- CLASSIFICATION -->
+      <section class="panel classgrid reveal">
+        <div>
+          <div class="k">НОМЕР ОБЪЕКТА</div>
+          <div class="v">SCP-KΣ-0001</div>
+        </div>
+        <div>
+          <div class="k">КЛАСС ОБЪЕКТА</div>
+          <div class="v accent">
+            <span class="tremor">██████</span>
+            <span class="muted small">(предв. КЕТЕР)</span>
+          </div>
+        </div>
+        <div>
+          <div class="k">СРЕДА ПРОИСХОЖДЕНИЯ</div>
+          <div class="v">VRChat</div>
+        </div>
+      </section>
+
+      <!-- WARNING -->
+      <div class="warn reveal">
+        <span class="warn-lead">⚠ ВНИМАНИЕ.</span> Данный файл описывает
+        аномалию, способную к
+        <span class="flicker-text accent">межсредовому переходу</span>. При
+        обнаружении объекта в физической реальности —
+        <b>НЕ ВСТУПАЙТЕ В КОНТАКТ</b>, не произносите обозначение вслух.
+        Сообщите по каналу
+        <span class="redacted" data-reveal="O5-закрытый">███-███</span>.
+      </div>
+
+      <!-- DESCRIPTION -->
+      <section class="block reveal">
+        <h2 class="section-title">
+          <span class="glitch" data-text="ОПИСАНИЕ">ОПИСАНИЕ</span>
+        </h2>
+        <p>
+          SCP-KΣ-0001, в среде происхождения самообозначенный как
+          <span class="accent">«kosstar the 1st»</span>, — аномальная
+          сущность, впервые зафиксированная
+          <span class="redacted" data-reveal="осень 2018">19██</span> года
+          внутри социальной VR-платформы «VRChat». Объект не
+          классифицируется ни как программная ошибка, ни как аватар
+          пользователя; его поведение демонстрирует паттерны,
+          <span class="accent"
+            >несовместимые с работой какого-либо известного алгоритма</span
+          >.
+        </p>
+        <p>
+          Первые сообщения поступили от группы пользователей (см.
+          Приложение К-1), утверждавших, что «в их мире кто-то поселился».
+          Объект, по их словам, выбирал пустые или удалённые аватары и
+          «оживлял» их, оставаясь невидимым для систем модерации платформы.
+          Он не отвечал на сообщения, но, как сообщают,
+          <span class="ghost" data-whisper="он отвечал, когда его звали по имени"
+            >реагировал на упоминание своего обозначения</span
+          >.
+        </p>
+        <p>
+          Внешний вид объекта не описан ни одним наблюдателем
+          последовательно. Свидетельства противоречивы и исключают друг
+          друга: от «человеческой фигуры без лица» до «пятна, в котором
+          ломается сам свет». Фонд полагает, что объект
+          <span class="redacted" data-reveal="не имеет фиксированной формы в нашем восприятии"
+            >████████████████</span
+          >
+          и существует лишь постольку, поскольку его кто-то воспринимает.
+        </p>
+      </section>
+
+      <!-- CONTAINMENT -->
+      <section class="block reveal">
+        <h2 class="section-title">
+          <span class="glitch" data-text="ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ"
+            >ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ</span
+          >
+        </h2>
+        <p>
+          SCP-KΣ-0001 невозможно поместить в физическое укрытие, поскольку
+          объект, по всей видимости,
+          <span class="accent"
+            >не обладает стабильной материальной формой</span
+          >
+          в нашем пространственно-временном континууме.
+        </p>
+        <p>Установлены следующие процедуры:</p>
+        <ul class="rules">
+          <li>
+            Поддерживать мониторинг ключевых слов и обозначения объекта во
+            всех публичных VR/AR-платформах и соцсетях.
+          </li>
+          <li>
+            Любое упоминание «kosstar the 1st» в несанкционированном
+            контексте
+            <span class="redacted" data-reveal="подавлять и стирать">███</span>
+            в течение 6 часов.
+          </li>
+          <li>
+            Запретить сотрудникам Фонда проникновение в среду происхождения
+            без разрешения O5.
+          </li>
+          <li class="danger">
+            Если объект заговорит первым —
+            <span class="tremor">НЕ ОТВЕЧАЙТЕ</span>. Сеанс немедленно
+            оборвать.
+          </li>
+        </ul>
+      </section>
+
+      <!-- BREACH -->
+      <section class="block reveal">
+        <h2 class="section-title">
+          <span class="glitch glitch-hard" data-text="ПРОРЫВ">ПРОРЫВ</span>
+        </h2>
+        <div class="subtag">
+          ИНЦИДЕНТ KΣ-0001-ВЫХОД // ЗАПИСЬ ЧАСТИЧНО УДАЛЕНА ПО ПРИКАЗУ O5-█
+        </div>
+        <p>
+          <span class="redacted" data-reveal="точная дата скрыта">██.██.20██</span>,
+          в населённом пункте
+          <span class="redacted" data-reveal="не разглашается">[ГОРОД]</span>, на
+          нескольких независимых камерах наблюдения зафиксировано
+          кратковременное искажение пространства, идентичное по сигнатуре
+          аномалиям платформы VRChat. В течение
+          <span class="redacted" data-reveal="примерно 47 секунд">██ секунд</span>
+          локальная реальность «глючила»: свет мигал вне сети, звук
+          расслаивался, а на записях появлялись кадры, на которых
+          присутствовал
+          <span class="redacted" data-reveal="объект вне виртуальной среды"
+            >[ДАННЫЕ УДАЛЕНЫ]</span
+          >.
+        </p>
+        <p>
+          Согласно восстановленному показанию агента █████ (см. Приложение
+          К-2), объект «вышел не через экран. Он вышел через внимание». С тех
+          пор SCP-KΣ-0001, предположительно, существует одновременно в обеих
+          средах.
+          <span class="ghost" data-whisper="мы не знаем, где он настоящий"
+            >Мы не знаем, где он «настоящий».</span
+          >
+        </p>
+        <p>
+          <span class="accent">Намерения объекта</span> остаются
+          неустановленными. Рабочая теория O5 гласит: объект не «хочет» в
+          человеческом смысле. Он <span class="corrupt flicker-text">течёт</span>
+          туда, где возникает внимание. Внимание — пища. Внимание — дверь.
+          Каждый раз, когда кто-то произносит его обозначение, дверь
+          <span class="tremor-slow">приоткрывается</span>.
+        </p>
+      </section>
+
+      <!-- APPENDICES -->
+      <section class="block reveal">
+        <h2 class="section-title">
+          <span class="glitch" data-text="ПРИЛОЖЕНИЯ">ПРИЛОЖЕНИЯ</span>
+        </h2>
+
+        <div class="fold">
+          <button class="fold-btn" type="button" aria-expanded="false">
+            <span>▸ ПРИЛОЖЕНИЕ К-1 — ЛОГ ПЕРВОГО КОНТАКТА (VRChat)</span>
+            <span class="fold-sign blink">+</span>
+          </button>
+          <div class="fold-body">
+            <div class="log">
+              <div><span class="ts">[VRChat // мир: ████-hub]</span> user_v0id: "вы кто"</div>
+              <div><span class="ts">[система]</span> пользователь «kosstar the 1st» не зарегистрирован в базе</div>
+              <div><span class="ts">[VRChat]</span> nova_xx: "он просто стоит. аватар пустой но кто-то внутри"</div>
+              <div><span class="ts">[VRChat]</span> user_v0id: <span class="accent">"kosstar the 1st, ты тут?"</span></div>
+              <div><span class="ts">[система]</span> ▓▓ ОТВЕТ ПОЛУЧЕН ▓▓</div>
+              <div class="accent corrupt-line">[СОДЕРЖИМОЕ СООБЩЕНИЯ УДАЛЕНО ИЗ АРХИВА]</div>
+              <div class="muted note">▸ все 14 свидетелей позднее сообщили об одинаковом сне.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fold">
+          <button class="fold-btn" type="button" aria-expanded="false">
+            <span class="danger">▸ ПРИЛОЖЕНИЕ К-2 — ОТЧЁТ АГЕНТА О ПРОРЫВЕ</span>
+            <span class="fold-sign blink">+</span>
+          </button>
+          <div class="fold-body">
+            <div class="log">
+              <div><span class="ts">[УР ████.██.20██ / 03:14]</span> камера 04: пространственный сбой, 0.4 м</div>
+              <div><span class="ts">[УР]</span> свет: рассинхрон 11 кадров</div>
+              <div><span class="ts">[УР]</span> аудио: голос, не принадлежащий оператору</div>
+              <div class="accent">АГЕНТ █████: "он вышел не через экран. он вышел через внимание. я его звал — и он пришёл."</div>
+              <div class="muted note">▸ агент █████ признан пропавшим без вести. Личное дело закрыто.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fold">
+          <button class="fold-btn" type="button" aria-expanded="false">
+            <span>▸ ПРИЛОЖЕНИЕ К-3 — ПОСЛЕДНЯЯ ЗАПИСЬ НАБЛЮДАТЕЛЯ</span>
+            <span class="fold-sign blink">+</span>
+          </button>
+          <div class="fold-body">
+            <div class="log">
+              <div>наблюдатель D-████ оставил перед исчезновением следующий фрагмент:</div>
+              <div class="accent corrupt-line flicker-text big">"он больше не внутри. он рядом. он читает."</div>
+              <div class="muted note">▸ запись обрывается на 0:47. Устройство найдено через 9 дней в <span class="redacted" data-reveal="другом городе">███</span>, выключенным.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="doc-footer reveal">
+        <div>
+          ФАЙЛ SCP-KΣ-0001 · ПОСЛЕДНЯЯ РЕДАКЦИЯ:
+          <span class="redacted" data-reveal="никем из живых">██████</span> ·
+          СТАТУС: <span class="accent blink">ОТКРЫТ</span>
+        </div>
+        <div class="footer-warn">
+          ЕСЛИ ВЫ ЧИТАЕТЕ ЭТО — ВЫ УЖЕ ОБРАТИЛИ НА НЕГО ВНИМАНИЕ.
+        </div>
+        <div id="ticker" class="corrupt ticker"></div>
+        <div class="copyright">© ФОНД SCP — ВСЕ ПРАВА СОКРЫТЫ</div>
+      </footer>
+    </main>
+
+    <script type="module" src="./script.js"></script>
   </body>
 </html>

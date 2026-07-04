@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[ДАННЫЕ УДАЛЕНЫ] — ФОНД SCP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --red: #b3121b;
+        --red-soft: #d23a42;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #050505;
+        color: #cbcbc4;
+        font-family: "Share Tech Mono", monospace;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+        overflow: hidden;
+      }
+      .scan {
+        position: fixed; inset: 0; pointer-events: none; z-index: 5;
+        background: repeating-linear-gradient(
+          to bottom, transparent 0, transparent 2px,
+          rgba(0,0,0,.3) 3px, rgba(0,0,0,.3) 3px);
+        mix-blend-mode: multiply;
+      }
+      .vig {
+        position: fixed; inset: 0; pointer-events: none; z-index: 5;
+        background: radial-gradient(ellipse at center,
+          transparent 42%, rgba(0,0,0,.6) 100%);
+      }
+      .code {
+        font-family: "VT323", monospace;
+        font-size: clamp(6rem, 26vw, 14rem);
+        line-height: 0.9;
+        color: #cbcbc4;
+        position: relative;
+      }
+      .code::before, .code::after {
+        content: "404"; position: absolute; inset: 0; opacity: .85;
+      }
+      .code::before { left: 3px; text-shadow: -3px 0 var(--red);
+        animation: g 2.4s infinite linear alternate-reverse; }
+      .code::after { left: -3px; text-shadow: 3px 0 #36e0e6;
+        animation: g 3.2s infinite linear alternate-reverse; }
+      @keyframes g {
+        0% { clip-path: inset(0 0 82% 0); }
+        50% { clip-path: inset(55% 0 12% 0); }
+        100% { clip-path: inset(12% 0 70% 0); }
+      }
+      .tag { color: var(--red); letter-spacing: .3em; font-size: 13px; }
+      .msg { margin: 18px 0 26px; color: var(--red-soft);
+        letter-spacing: .1em; }
+      a {
+        color: var(--red-soft); border: 1px solid var(--red);
+        padding: 10px 22px; text-decoration: none;
+        font-family: "VT323", monospace; font-size: 1.4rem;
+        letter-spacing: .1em; transition: .2s;
+      }
+      a:hover { background: var(--red); color: #fff;
+        box-shadow: 0 0 22px rgba(179,18,27,.6); }
+      .blink { animation: b 1.1s steps(2) infinite; }
+      @keyframes b { 50% { opacity: 0; } }
+    </style>
+  </head>
+  <body>
+    <div class="scan"></div>
+    <div class="vig"></div>
+    <main>
+      <div class="tag">ЗАПИСЬ НЕ НАЙДЕНА В АРХИВЕ</div>
+      <div class="code">404</div>
+      <div class="msg">
+        [ДАННЫЕ УДАЛЕНЫ] · этого документа не существует<span class="blink">_</span>
+      </div>
+      <a href="./index.html">▸ ВЕРНУТЬСЯ К ДЕЛУ SCP-KΣ-0001</a>
+    </main>
+  </body>
+</html>
