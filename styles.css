@@ -165,6 +165,21 @@ b {
 .sb-item b {
   color: var(--text);
 }
+.lang-switch {
+  color: var(--dim);
+  font-family: "VT323", monospace;
+  font-size: 1.3rem;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  padding: 0 8px;
+  line-height: 1.4;
+  transition: all 0.2s;
+}
+.lang-switch:hover {
+  border-color: var(--red);
+  color: var(--red-soft);
+  box-shadow: 0 0 10px rgba(179,18,27,0.3);
+}
 @media (max-width: 520px) {
   .hide-sm {
     display: none;
@@ -562,8 +577,12 @@ p {
   cursor: help;
   user-select: none;
   position: relative;
-  transition: background 0.2s, color 0.2s, text-shadow 0.2s, letter-spacing 0.2s;
   white-space: nowrap;
+  display: inline-block;
+  font-size: inherit;
+  line-height: inherit;
+  overflow: hidden;
+  vertical-align: baseline;
 }
 .redacted::after {
   content: "░";
@@ -574,15 +593,25 @@ p {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-}
-.redacted:hover {
-  background: rgba(179, 18, 27, 0.1);
-  color: var(--red-soft);
-  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
-  letter-spacing: 0.02em;
+  z-index: 2;
+  background: #000;
 }
 .redacted:hover::after {
   content: "";
+  display: none;
+}
+.redacted:hover {
+  background: rgba(179, 18, 27, 0.08);
+  color: transparent;
+}
+.redacted .r-reveal {
+  display: none;
+}
+.redacted:hover .r-reveal {
+  display: inline;
+  color: var(--red-soft);
+  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
+  letter-spacing: 0.02em;
 }
 
 .ghost {
@@ -592,17 +621,45 @@ p {
 }
 .ghost::after {
   content: attr(data-whisper);
-  display: block;
-  opacity: 0;
-  transition: opacity 0.5s;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  padding: 3px 8px;
+  background: #0a0a0a;
+  border: 1px solid var(--red);
   color: var(--red);
   font-family: "VT323", monospace;
-  letter-spacing: 0.2em;
-  font-size: 0.9em;
-  margin-top: 3px;
+  letter-spacing: 0.15em;
+  font-size: 0.85em;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.35s, transform 0.35s;
+  z-index: 10;
+  white-space: nowrap;
 }
-.ghost:hover::after {
+.ghost:hover::after,
+.ghost.touch-show::after {
   opacity: 1;
+  transform: translateY(0);
+}
+
+/* touch-to-reveal для redacted */
+.redacted.touch-reveal {
+  background: rgba(179, 18, 27, 0.08) !important;
+  color: transparent !important;
+}
+.redacted.touch-reveal::after {
+  content: "" !important;
+  display: none !important;
+}
+.redacted.touch-reveal .r-reveal {
+  display: inline !important;
+  color: var(--red-soft) !important;
+  text-shadow: 0 0 8px rgba(210, 58, 66, 0.8);
+  letter-spacing: 0.02em;
 }
 
 /* glitch */

@@ -126,8 +126,33 @@
     });
   });
 
+  /* ---------- MOBILE TOUCH FOR REDACTED / GHOST ---------- */
+  // На устройствах без hover включаем клик, чтобы раскрывать
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.querySelectorAll('.redacted').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isRevealed = el.classList.toggle('touch-reveal');
+        if (isRevealed) {
+          // снять через 2.5 с
+          setTimeout(function () { el.classList.remove('touch-reveal'); }, 2500);
+        }
+      });
+    });
+    document.querySelectorAll('.ghost').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isRevealed = el.classList.toggle('touch-show');
+        if (isRevealed) {
+          setTimeout(function () { el.classList.remove('touch-show'); }, 3000);
+        }
+      });
+    });
+  }
+
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
-  var whispers = [
+  var lang = document.documentElement.lang || 'ru';
+  var whispersRU = [
     "ОН ЗДЕСЬ",
     "ОН ЧИТАЕТ ЭТО",
     "НЕ ЗОВИ ЕГО ПО ИМЕНИ",
@@ -137,6 +162,17 @@
     "ОН УЖЕ НЕ ВНУТРИ",
     "ТЫ ТОЖЕ ВНУТРИ",
   ];
+  var whispersEN = [
+    "HE IS HERE",
+    "HE IS READING",
+    "DO NOT CALL HIS NAME",
+    "THE DOOR IS OPEN",
+    "KOSSTAR THE 1ST",
+    "ATTENTION = DOOR",
+    "HE IS NO LONGER INSIDE",
+    "YOU ARE INSIDE TOO",
+  ];
+  var whispers = lang === 'en' ? whispersEN : whispersRU;
   var flash = document.getElementById("flash");
   var whisperEl = document.getElementById("whisper");
 
