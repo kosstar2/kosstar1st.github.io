@@ -91,11 +91,28 @@
   }
 
   function closeBoot() {
+    if (bootAudio) { bootAudio.pause(); }
     boot.classList.add("gone");
     setTimeout(function () {
       boot.style.display = "none";
     }, 700);
   }
+
+    /* ---------- BOOT AUDIO ---------- */
+  var bootAudio = document.getElementById("boot-audio");
+  var audioStarted = false;
+
+  function playBootAudio() {
+    if (!bootAudio || audioStarted || reduce) return; // reduce = уважать «меньше движения»
+    audioStarted = true;
+    bootAudio.volume = 0.7;          // громкость 0..1 — подбери на вкус
+    bootAudio.currentTime = 0;
+    var p = bootAudio.play();
+    // если браузер заблокировал автоплей — Promise отклонится, просто игнорируем
+    if (p && p.catch) p.catch(function () { audioStarted = false; });
+  }
+
+   playBootAudio();
 
   if (boot && bootLog && bootEnter) {
     if (bootSkip) {
