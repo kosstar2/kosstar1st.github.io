@@ -124,6 +124,8 @@
   var gateEnter = document.getElementById("gate-enter");
   var bootStarted = false;
   function startBoot() {
+    var a = document.getElementById("boot-audio");
+    if (a) { a.volume = 0.7; a.currentTime = 0; a.play(); }
     if (bootStarted) return;
     bootStarted = true;
     runBoot();
