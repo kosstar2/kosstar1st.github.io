@@ -175,49 +175,49 @@
       }
     }
   });
-/* expose basic logs on load for immersion */
+
+  /* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
+
   function initTerminalLogs() {
     termLog(lang === "en" ? "FIELD TERMINAL v0.7.3-B // BUILD " + Date.now().toString(36) : "ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B // СБОРКА " + Date.now().toString(36), "sys");
     termLog("SESSION ID: <b>" + sessionId + "</b>", "info");
     termLog(lang === "en" ? "Location trace: LAT " + (50 + Math.random()*10).toFixed(4) + " LON " + (30 + Math.random()*10).toFixed(4) + " [IP MASKED]" : "Трассировка местоположения: ШИР " + (50 + Math.random()*10).toFixed(4) + " ДОЛ " + (30 + Math.random()*10).toFixed(4) + " [IP СКРЫТ]", "info");
-    // Записываем clearance с LVL 0 и присваиваем id для последующего глитча
+    
+    // Изначально - КРАСНЫЙ (отказ)
     var clrText = lang === "en" ? "Clearance verification: LVL 4 REQUIRED // CURRENT: LVL 0" : "Проверка допуска: ТРЕБУЕТСЯ УРОВЕНЬ 4 // ТЕКУЩИЙ: УРОВЕНЬ 0";
     termAddEntry(clrText, "warn");
-    // пометим последнюю запись id, чтобы потом найти
+    
+    // Пометим эту строку ID, чтобы найти её при открытии терминала
     var allEntries = termLogEl ? termLogEl.querySelectorAll(".term-entry") : [];
     if (allEntries.length > 0) {
       allEntries[allEntries.length - 1].id = clearanceEntryId;
     }
-    termLog(lang === "en" ? "Awaiting clearance resolution..." : "Ожидание разрешения допуска...", "info");
   }
   setTimeout(initTerminalLogs, 500);
+
   /** Глитч-подмена clearance — вызывается при первом открытии терминала */
   function runClearanceGlitch() {
     if (clearanceGlitchDone) return;
     clearanceGlitchDone = true;
     var entry = document.getElementById(clearanceEntryId);
     if (!entry) return;
-    // Фаза 1: через 0.6с — LVL 0 → LVL ▓▓▓▓▓ (глитч)
+
+    // Мгновенная глитч-подмена
     setTimeout(function () {
+      // 1. Меняем класс на зелёный (sys)
+      entry.className = "term-entry sys";
+      
+      // 2. Подменяем текст прямо внутри строки
       entry.innerHTML = entry.innerHTML
-        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#e05555">▓▓▓▓▓</span>')
-        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#e05555">▓▓▓▓▓</span>');
-    }, 600);
-    // Фаза 2: через 1.4с — новая строка с kosstarthe1st.welcome
-    setTimeout(function () {
-      termLog(lang === "en"
-        ? "LVL override: <b style='color:#e05555'>kosstarthe1st.welcome</b>"
-        : "ПЕРЕОПРЕД. УРОВНЯ: <b style='color:#e05555'>kosstarthe1st.welcome</b>", "err");
-    }, 1400);
-    // Фаза 3: через 2.5с — «принято», файл открыт
-    setTimeout(function () {
-      termLog(lang === "en"
-        ? "File access granted // Monitoring user interaction..."
-        : "Доступ к файлу предоставлен // Мониторинг действий пользователя...", "sys");
-    }, 2500);
+        .replace(/LVL 0/, 'LVL <b style="color:#e05555">kosstarthe1st.welcome</b>')
+        .replace(/УРОВЕНЬ 0/, 'УРОВЕНЬ <b style="color:#e05555">kosstarthe1st.welcome</b>');
+        
+      termLog(lang === "en" ? "File access granted" : "Доступ к файлу предоставлен", "sys");
+    }, 400);
   }
+  
   /* ---------- BLACKOUT / COOKIE PERSISTENCE ---------- */
   function setBlackoutCookie(until) {
     try {
