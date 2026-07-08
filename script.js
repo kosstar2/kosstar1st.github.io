@@ -20,20 +20,22 @@
   var bootLinesByLang = {
     ru: [
       "> ЗАЩИЩЁННЫЙ ТЕРМИНАЛ ФОНДА SCP",
+      "> ЗАПУСК . . . . . . . . . . . . . . . . . . . . . . [ OK }",
       "> УСТАНОВКА СОЕДИНЕНИЯ . . . . . . . . . . . . . . . [ OK ]",
       "> ПРОВЕРКА ДОПУСКА . . . . . . . . . . . . . . . . . УРОВЕНЬ null.kosstarthe1st.w͚̙̏ͭ͡ẽ̩͍͍̈͞l̛͈̗̼̉c͉̰̲͈̅o̷̺̥͈͖͌ͪm̢̗̞̉ͣ͌ͅe͈͚̘ͮͬ͌",
       "> РАСШИФРОВКА АРХИВА KΣ-0001 . . . . . . . . . . . . [ OK ]",
       "> СКАНИРОВАНИЕ ЦЕЛОСТНОСТИ ФАЙЛА . . . . . . . . . . АНОМАЛИЯ",
       "> ВНИМАНИЕ: ОБЪЕКТ РЕАГИРУЕТ НА ПРОСМОТР",
       "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ПРИВЕТ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
-      "> ЗАГРУЗКА ДЕЛА ЗАВЕРШЕНА.",
+      "> ЗАГРУЗКА ФАЙЛА ЗАВЕРШЕНА.",
     ],
     en: [
       "> SECURE TERMINAL — SCP FOUNDATION",
-      "> ESTABLISHING CONNECTION . . . . . . . . . . . . . [ OK ]",
-      "> VERIFYING CLEARANCE . . . . . . . . . . . . . . . LEVEL null.kosstarthe1st.w͚̙̏ͭ͡ẽ̩͍͍̈͞l̛͈̗̼̉c͉̰̲͈̅o̷̺̥͈͖͌ͪm̢̗̞̉ͣ͌ͅe͈͚̘ͮͬ͌",
+      "> STARTING . . . . . . . . . . . . . . . . . . . . . [ OK ]",
+      "> ESTABLISHING CONNECTION  . . . . . . . . . . . . . [ OK ]",
+      "> VERIFYING CLEARANCE  . . . . . . . . . . . . . . . LEVEL null.kosstarthe1st.w͚̙̏ͭ͡ẽ̩͍͍̈͞l̛͈̗̼̉c͉̰̲͈̅o̷̺̥͈͖͌ͪm̢̗̞̉ͣ͌ͅe͈͚̘ͮͬ͌",
       "> DECRYPTING ARCHIVE KΣ-0001 . . . . . . . . . . . . [ OK ]",
-      "> SCANNING FILE INTEGRITY . . . . . . . . . . . . . ANOMALY",
+      "> SCANNING FILE INTEGRITY  . . . . . . . . . . . . . ANOMALY",
       "> WARNING: OBJECT REACTS TO OBSERVATION",
       "> ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ HELLO ▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
       "> FILE LOAD COMPLETE.",
@@ -111,7 +113,7 @@
     bootStarted = true;
     var bootAudio = document.getElementById("boot-audio");
     if (bootAudio) {
-      bootAudio.volume = 0.7;
+      bootAudio.volume = 0.85;
       bootAudio.currentTime = 0;
       bootAudio.play().catch(function(e) {
         console.warn("Audio play failed, waiting for user gesture:", e);
