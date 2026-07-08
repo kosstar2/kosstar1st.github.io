@@ -230,15 +230,35 @@
     });
   }
 
-var mentions = document.querySelectorAll("[data-kmention]");
-  var totalMentions = mentions.length;
+/* ---------- ESCALATION MECHANIC (K-MENTIONS) ---------- */
+  var mentions = document.querySelectorAll("[data-kmention]");
+  var baseTotalMentions = mentions.length;
+  var dynamicTotalMentions = baseTotalMentions;
   var unlockedCount = 0;
+  var isEasterEggActive = false;
+  var UNLOCKED_HOVER = lang === "en" ? "There is no way back" : "Пути назад нет";
+  var LOCKED_HOVER = lang === "en" ? "Designation classified // Click to decrypt" : "Обозначение засекречено // Нажмите для дешифровки";
+  function refreshMentionHoverTitles() {
+    mentions.forEach(function (el) {
+      if (el.classList.contains("unlocked")) {
+        el.setAttribute("title", UNLOCKED_HOVER);
+      } else {
+        el.setAttribute("title", LOCKED_HOVER);
+      }
+    });
+  }
   function updateMeter() {
     var count = 0;
     mentions.forEach(function (el) {
       if (el.classList.contains("unlocked")) count++;
     });
-    unlockedCount = count;
+    
+    // В нормальном режиме unlockedCount равен реальному количеству открытых спойлеров.
+    // В режиме страшилки dynamicTotalMentions делаем 999
+    if (!isEasterEggActive) {
+      unlockedCount = count;
+      dynamicTotalMentions = baseTotalMentions;
+    }
     var unlockedStates = [];
     mentions.forEach(function (el) {
       unlockedStates.push(el.classList.contains("unlocked") ? 1 : 0);
@@ -246,19 +266,24 @@ var mentions = document.querySelectorAll("[data-kmention]");
     sessionStorage.setItem("scp-km-states", JSON.stringify(unlockedStates));
     var meterText = document.getElementById("k-meter-text");
     if (meterText) {
-      var pct = Math.round((count / (totalMentions || 1)) * 100);
+      var pct = Math.round((unlockedCount / (dynamicTotalMentions || 1)) * 100);
+      var maxVisualBars = 5;
+      var filledBars = Math.round((unlockedCount / (dynamicTotalMentions || 1)) * maxVisualBars);
       var bars = "";
-      for (var i = 0; i < totalMentions; i++) {
-        bars += (i < count) ? "█" : "░";
+      for (var i = 0; i < maxVisualBars; i++) {
+        bars += (i < filledBars) ? "█" : "░";
       }
-      meterText.textContent = count + "/" + totalMentions + " [" + bars + "] " + pct + "%";
-      if (count === totalMentions && totalMentions > 0) {
+      meterText.textContent = unlockedCount + "/" + dynamicTotalMentions + " [" + bars + "] " + pct + "%";
+      if (unlockedCount >= dynamicTotalMentions && dynamicTotalMentions > 0) {
         meterText.classList.add("blink");
+      } else {
+        meterText.classList.remove("blink");
       }
     }
-    return count;
+    refreshMentionHoverTitles();
+    return unlockedCount;
   }
-  if (totalMentions > 0) {
+  if (baseTotalMentions > 0) {
     var savedStates = sessionStorage.getItem("scp-km-states");
     if (savedStates) {
       try {
@@ -292,7 +317,42 @@ var mentions = document.querySelectorAll("[data-kmention]");
         }
       });
     });
+    // Добавляем запуск ультра-страшилки по клику на статус-бар (если открыты все 4 базовых упоминания)
+    document.querySelectorAll(".k-meter").forEach(function (meterEl) {
+      meterEl.addEventListener("click", function () {
+        if (unlockedCount >= baseTotalMentions && !isEasterEggActive) {
+          window.triggerKosstar999Escalation();
+        }
+      });
+    });
   }
+  /**
+   * Запуск ультра-страшилки
+   * Цифра начинает динамически расти к 999, частота глитчей непрерывно нарастает.
+   */
+  window.triggerKosstar999Escalation = function () {
+    if (isEasterEggActive) return;
+    isEasterEggActive = true;
+    
+    unlockedCount = baseTotalMentions;
+    dynamicTotalMentions = 999;
+    updateMeter();
+    var escalationIntervalId = setInterval(function () {
+      if (unlockedCount < 999) {
+        // Ускоряющийся рост
+        var step = Math.floor(1 + (unlockedCount / 40));
+        unlockedCount = Math.min(999, unlockedCount + step);
+        updateMeter();
+        // Чем ближе к 999, тем яростнее бьют глитчи
+        if (unlockedCount % 12 === 0 || Math.random() > 0.8) {
+          burst();
+        }
+      } else {
+        clearInterval(escalationIntervalId);
+        console.log("Уровень аномалии достиг 999. Пасхалка готова к финальной фазе.");
+      }
+    }, 150);
+  };
 
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
   var whispersRU = [
