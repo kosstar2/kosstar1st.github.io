@@ -163,11 +163,16 @@
     termClose.addEventListener("click", termCloseFn);
   }
   document.addEventListener("keydown", function (e) {
+    // если фокус в терминале — не мешаем вводу команд
+    var ae = document.activeElement;
+    var inTerm = ae && (ae.id === "term-input" || (termEl && termEl.contains(ae)));
+
     if (e.key === "Escape" && termEl && !termEl.classList.contains("hidden")) {
       termCloseFn();
+      return;
     }
-    // tilde to toggle
-    if (e.key === "`" || e.key === "ё") {
+    // tilde to toggle (только если не печатаем в инпуте)
+    if (!inTerm && (e.key === "`" || e.key === "ё")) {
       if (termEl) {
         e.preventDefault();
         if (termEl.classList.contains("hidden")) termOpen();
@@ -175,7 +180,7 @@
       }
     }
   });
-  
+
 /* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
@@ -722,4 +727,198 @@ function isBlackoutActive() {
       }, 160);
     });
   }
+
+ /* ---------- TERMINAL COMMANDS ---------- */
+  function rebootTerminal() {
+    termLog(lang === "en" ? "--- SYSTEM REBOOT INITIATED ---" : "--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
+    // clear intervals
+    if (escalationIntervalId) {
+      clearInterval(escalationIntervalId);
+      escalationIntervalId = null;
+    }
+    if (blackoutTimer) {
+      clearTimeout(blackoutTimer);
+      blackoutTimer = null;
+    }
+    // clear blackout
+    deactivateBlackout();
+    // reset mentions
+    try {
+      sessionStorage.removeItem("scp-km-states");
+      sessionStorage.removeItem(BLACKOUT_KEY);
+    } catch(e){}
+    clearBlackoutStorage();
+    isEasterEggActive = false;
+    unlockedCount = 0;
+    dynamicTotalMentions = baseTotalMentions;
+    mentions.forEach(function (el) { el.classList.remove("unlocked"); });
+    updateMeter();
+    // clear glitches
+    document.body.classList.remove("shake-body");
+    if (flash) { flash.classList.remove("on"); flash.style.opacity=""; }
+    if (whisperEl) { whisperEl.classList.remove("on"); whisperEl.style.opacity=""; }
+    if (floodEl) { floodEl.classList.add("hidden"); floodEl.innerHTML=""; }
+    termLog(lang === "en" ? "Memetic residue cleared" : "Меметический осадок очищен", "info");
+    termLog(lang === "en" ? "Session reset to pristine" : "Сессия сброшена до первозданной", "info");
+    termLog(lang === "en" ? "File re-encrypted // 0/5" : "Файл повторно зашифрован // 0/5", "sys");
+  }
+
+  function handleO5Erasure() {
+    termLog(lang === "en" ? "[O5] ERASURE PROTOCOL INITIATED // AUTH CODE ████" : "[O5] ПРОТОКОЛ СТИРАНИЯ ИНИЦИИРОВАН // КОД ████", "err");
+    termLog(lang === "en" ? "Purging document..." : "Очистка документа...", "warn");
+    var doc = document.querySelector(".doc-shell");
+    if (doc) {
+      doc.style.transition = "opacity 0.9s ease, filter 0.9s ease";
+      doc.style.opacity = "0";
+      doc.style.filter = "blur(18px)";
+    }
+    setTimeout(function () {
+      termLog(lang === "en" ? "Document erased by order of O5-█" : "Документ стёрт по приказу O5-█", "err");
+      // redirect to 404
+      var p404 = lang === "en" ? "./404.html" : "../404.html";
+      // respect github pages base? try both
+      if (lang === "ru") {
+        // if we're in /ru/, go to ../404.html else ./404.html
+        if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
+        else p404 = "./404.html";
+      }
+      window.location.href = p404;
+    }, 1800);
+  }
+
+  function handleKosstarCommand() {
+    termLog("kosstarthe1st is not a valid command or application", "err");
+    termLog(lang === "en" ? "Command recognition failed // logging attempt..." : "Распознавание команды не удалось // логирование попытки...", "warn");
+    termLog(lang === "en" ? "ANOMALY: designation vocalized in terminal" : "АНОМАЛИЯ: обозначение произнесено в терминале", "cog");
+    setTimeout(function () {
+      termLog(lang === "en" ? "[CRITICAL] DIRECT COGNITOHAZARD INVOCATION" : "[КРИТИЧНО] ПРЯМОЙ ВЫЗОВ КОГНИТО-УГРОЗЫ", "cog");
+      // если ещё не все 5 открыты — принудительно открываем все
+      mentions.forEach(function (el) { el.classList.add("unlocked"); });
+      updateMeter();
+      // запускаем эскалацию 999
+      window.triggerKosstar999Escalation();
+    }, 10000);
+  }
+
+  function handleErasedFile() {
+    termLog(lang === "en" ? "Opening erased.txt..." : "Открытие erased.txt...", "info");
+    setTimeout(function () {
+      var p404 = lang === "en" || lang === "ru" && window.location.pathname.indexOf("/ru/") === -1 ? "./404.html" : "../404.html";
+      if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
+      else p404 = "./404.html";
+      window.location.href = p404;
+    }, 600);
+  }
+
+  var COMMANDS = {
+    help: function () {
+      termLog(lang === "en" ? "Available commands:" : "Доступные команды:", "sys");
+      termLog("  help / ? - " + (lang === "en" ? "show this list" : "показать список"), "info");
+      termLog("  reboot - " + (lang === "en" ? "reset site to pristine state" : "сбросить сайт до первозданного вида"), "info");
+      termLog("  erased.txt - " + (lang === "en" ? "open erased file (404)" : "открыть стёртый файл (404)"), "info");
+      termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
+      termLog("  kosstarthe1st - ???", "info");
+      termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
+      termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
+    },
+    clear: function () {
+      if (termLogEl) termLogEl.innerHTML = "";
+      termLog(lang === "en" ? "Terminal cleared" : "Терминал очищен", "sys");
+    },
+    status: function () {
+      var until = getBlackoutUntil();
+      var blo = until && Date.now() < until ? (lang === "en" ? "ACTIVE (" + Math.ceil((until-Date.now())/60000) + " min left)" : "АКТИВЕН (осталось " + Math.ceil((until-Date.now())/60000) + " мин)") : "INACTIVE";
+      termLog("Session: " + sessionId, "info");
+      termLog("Mentions: " + unlockedCount + "/" + dynamicTotalMentions, "info");
+      termLog("Blackout: " + blo, (blo.indexOf("ACTIVE") !== -1 || blo.indexOf("АКТИВЕН") !== -1) ? "err" : "info");
+      termLog("Influence: " + (unlockedCount === 0 ? "0% — dormant" : Math.round((unlockedCount/(dynamicTotalMentions||1))*100) + "%"), "info");
+    }
+  };
+
+  function processCommand(raw) {
+    var cmd = raw.trim();
+    if (!cmd) return;
+    termAddEntry(cmd, "user");
+    var low = cmd.toLowerCase().replace(/\s+/g, "");
+    var spacedLow = cmd.toLowerCase().trim();
+
+    if (low === "help" || low === "?") {
+      COMMANDS.help();
+    } else if (low === "clear" || low === "cls") {
+      COMMANDS.clear();
+    } else if (low === "reboot" || low === "restart" || low === "clearall") {
+      rebootTerminal();
+    } else if (low.indexOf("erased.txt") !== -1 || spacedLow === "file erased.txt" || spacedLow === "cat erased.txt" || spacedLow === "open erased.txt") {
+      handleErasedFile();
+    } else if (low === "o5-erasure" || low === "o5erasure" || low === "erasure" || low === "o5") {
+      handleO5Erasure();
+    } else if (low === "kosstarthe1st" || low === "kosstar_the_1st" || spacedLow === "kosstar the 1st" || low === "kosstarthe1st.exe") {
+      handleKosstarCommand();
+    } else if (low === "status" || low === "whoami" || low === "id" || low === "location") {
+      COMMANDS.status();
+    } else {
+      termLog((lang === "en" ? "'" + cmd + "' is not recognized as a command" : "'" + cmd + "' не является командой"), "err");
+      termLog(lang === "en" ? "Type help for list" : "Введите help для списка", "info");
+    }
+  }
+
+  function wireTerminalInput() {
+    var form = document.getElementById("term-form");
+    var input = document.getElementById("term-input") || termInput;
+    if (!input) return;
+
+    // Надёжный Enter через submit формы (работает даже если keydown где-то перехвачен)
+    if (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var v = input.value;
+        input.value = "";
+        processCommand(v);
+      });
+    }
+
+    input.addEventListener("keydown", function (e) {
+      // Enter — дубль на случай, если form нет
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        var v = input.value;
+        input.value = "";
+        processCommand(v);
+        return;
+      }
+      // Tab — автодополнение
+      if (e.key === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        var cur = input.value.toLowerCase();
+        var all = ["help","reboot","erased.txt","o5-erasure","kosstarthe1st","clear","status"];
+        for (var i = 0; i < all.length; i++) {
+          if (all[i].indexOf(cur) === 0) {
+            input.value = all[i];
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  // Подключаем сразу; если что-то упало выше — всё равно пробуем ещё раз после DOM ready
+  try {
+    wireTerminalInput();
+  } catch (err) {
+    console.warn("term wire failed:", err);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      try { wireTerminalInput(); } catch (e) {}
+    });
+  } else {
+    // повтор на всякий случай (после всех init)
+    setTimeout(function () {
+      try { wireTerminalInput(); } catch (e) {}
+    }, 0);
+  }
+
 })();

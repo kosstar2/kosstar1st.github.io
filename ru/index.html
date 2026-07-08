@@ -385,10 +385,11 @@
         </div>
       </div>
       <div id="term-log" class="term-log"></div>
-      <div class="term-input-row">
+      <form id="term-form" class="term-input-row" autocomplete="off" action="javascript:void(0)" method="get" onsubmit="return false;">
         <span class="term-prompt">>_</span>
-        <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
-      </div>
+        <input id="term-input" class="term-input" type="text" name="cmd" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
+        <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" tabindex="-1" aria-hidden="true">go</button>
+      </form>
       <div class="term-help">help — список команд · TAB — автодополнение · ESC — закрыть</div>
     </div>
     <div id="blackout" class="blackout hidden"><div class="blackout-inner">СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — 10:00</div><div class="blackout-inner" style="font-size:12px;letter-spacing:0.2em;color:#2a2a2a">используйте терминал &gt;_ и введите reboot для восстановления</div></div>
@@ -397,6 +398,6 @@
   </body>
 </html>
 
-    <script type="module" src="../script.js"></script>
+    <script type="module" src="../script.js?v=term-fix-1"></script>
   </body>
 </html>
