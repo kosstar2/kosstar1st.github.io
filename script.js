@@ -139,69 +139,28 @@
     // escape minimal? we use innerHTML for bold, but plain text okay. We'll treat msg as HTML-safe (our own strings)
     termAddEntry(msg, type);
   }
-function termOpen() {
-    // всегда берём свежую ссылку на DOM (на случай кэша/перерисовки)
-    termEl = document.getElementById("site-terminal") || termEl;
-    termInput = document.getElementById("term-input") || termInput;
-    termLogEl = document.getElementById("term-log") || termLogEl;
-    if (!termEl) {
-      console.warn("site-terminal not found");
-      return;
-    }
+  function termOpen() {
+    if (!termEl) return;
     termEl.classList.remove("hidden");
-    termEl.style.display = "flex";
     termEl.setAttribute("aria-hidden", "false");
-    // фокус после paint
-    setTimeout(function () {
-      var input = document.getElementById("term-input");
-      if (input) input.focus();
-    }, 30);
+    if (termInput) termInput.focus();
     termLog("terminal opened", "cmd");
     // при первом открытии запускаем глитч clearance
     runClearanceGlitch();
   }
   function termCloseFn() {
-    termEl = document.getElementById("site-terminal") || termEl;
     if (!termEl) return;
     termEl.classList.add("hidden");
-    termEl.style.display = "none";
     termEl.setAttribute("aria-hidden", "true");
   }
-   // Делегирование клика: надёжнее, чем один getElementById (не зависит от порядка/кэша)
-  document.addEventListener("click", function (e) {
-    var t = e.target;
-    if (!t) return;
-    // кнопка открытия / любая вложенность внутри неё
-    var openBtn = t.id === "term-toggle" ? t : (t.closest ? t.closest("#term-toggle") : null);
-    if (openBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (termEl && termEl.classList.contains("hidden")) termOpen();
-      else termCloseFn();
-      return;
-    }
-    var closeBtn = t.id === "term-close" ? t : (t.closest ? t.closest("#term-close") : null);
-    if (closeBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      termCloseFn();
-    }
-  });
-  // fallback на прямую привязку (на всякий)
   if (termToggle) {
-    termToggle.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
+    termToggle.addEventListener("click", function () {
       if (termEl && termEl.classList.contains("hidden")) termOpen();
       else termCloseFn();
     });
   }
   if (termClose) {
-    termClose.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      termCloseFn();
-    });
+    termClose.addEventListener("click", termCloseFn);
   }
   document.addEventListener("keydown", function (e) {
     // если фокус в терминале — не мешаем вводу команд
@@ -221,7 +180,7 @@ function termOpen() {
       }
     }
   });
-
+  
 /* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
@@ -249,6 +208,8 @@ function termOpen() {
       entry.innerHTML = entry.innerHTML
         .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
         .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
+      var a = document.getElementById("decrypt-audio");
+      if (a) { try { var c = a.cloneNode(); c.volume=0.2; c.play().catch(function(){}); } catch(e){} }
     }, 500);
     // Фаза 2: через 1.3с — прямо в той же строке меняется на kosstarthe1st.welcome, а само сообщение становится зелёным
     setTimeout(function () {
@@ -766,8 +727,7 @@ function isBlackoutActive() {
       }, 160);
     });
   }
-
- /* ---------- TERMINAL COMMANDS ---------- */
+  /* ---------- TERMINAL COMMANDS ---------- */
   function rebootTerminal() {
     termLog(lang === "en" ? "--- SYSTEM REBOOT INITIATED ---" : "--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
     // clear intervals
@@ -901,41 +861,21 @@ function isBlackoutActive() {
     }
   }
 
-  function wireTerminalInput() {
-    var form = document.getElementById("term-form");
-    var input = document.getElementById("term-input") || termInput;
-    if (!input) return;
-
-    // Надёжный Enter через submit формы (работает даже если keydown где-то перехвачен)
-    if (form) {
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var v = input.value;
-        input.value = "";
-        processCommand(v);
-      });
-    }
-
-    input.addEventListener("keydown", function (e) {
-      // Enter — дубль на случай, если form нет
+  if (termInput) {
+    termInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        e.stopPropagation();
-        var v = input.value;
-        input.value = "";
+        var v = termInput.value;
+        termInput.value = "";
         processCommand(v);
-        return;
       }
-      // Tab — автодополнение
       if (e.key === "Tab") {
         e.preventDefault();
-        e.stopPropagation();
-        var cur = input.value.toLowerCase();
+        var cur = termInput.value.toLowerCase();
         var all = ["help","reboot","erased.txt","o5-erasure","kosstarthe1st","clear","status"];
         for (var i = 0; i < all.length; i++) {
           if (all[i].indexOf(cur) === 0) {
-            input.value = all[i];
+            termInput.value = all[i];
             break;
           }
         }
@@ -943,21 +883,15 @@ function isBlackoutActive() {
     });
   }
 
-  // Подключаем сразу; если что-то упало выше — всё равно пробуем ещё раз после DOM ready
-  try {
-    wireTerminalInput();
-  } catch (err) {
-    console.warn("term wire failed:", err);
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      try { wireTerminalInput(); } catch (e) {}
+  // Enter через submit формы (доп. страховка)
+  var termForm = document.getElementById("term-form");
+  if (termForm && termInput) {
+    termForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = termInput.value;
+      termInput.value = "";
+      processCommand(v);
     });
-  } else {
-    // повтор на всякий случай (после всех init)
-    setTimeout(function () {
-      try { wireTerminalInput(); } catch (e) {}
-    }, 0);
   }
 
 })();
