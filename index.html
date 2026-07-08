@@ -81,6 +81,7 @@
       </div>
       <div class="statusbar-right">
         <a href="./ru/index.html" class="lang-switch" title="На русском">RU</a>
+        <button id="term-toggle" class="term-toggle" title="Open terminal">>_</button>
         <span class="accent">● REC</span>
         <span id="clock" class="mono">--:--:--</span>
       </div>
@@ -325,7 +326,7 @@
 
         <div class="fold">
           <button class="fold-btn" type="button" aria-expanded="false">
-            <span class="danger">▸ APPENDIX K-4 — O5 ERASURE ORDER</span>
+            <span class="danger">▸ APPENDIX K-4 — ERASURE ORDER</span>
             <span class="fold-sign blink">Ε</span>
           </button>
           <div class="fold-body">
@@ -356,6 +357,28 @@
         <div class="copyright">© SCP FOUNDATION</div>
       </footer>
     </main>
+
+     <!-- SITE TERMINAL -->
+    <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
+      <div class="term-header">
+        <span class="term-title">SCP-KΣ-0001 // FIELD TERMINAL v0.7.3-B</span>
+        <div class="term-controls">
+          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> LINK EST.</span>
+          <button id="term-close" class="term-close" type="button">[X]</button>
+        </div>
+      </div>
+      <div id="term-log" class="term-log"></div>
+      <div class="term-input-row">
+        <span class="term-prompt">>_</span>
+        <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="enter command..." />
+      </div>
+      <div class="term-help">help — commands · TAB — autocomplete · ESC — close</div>
+    </div>
+    <div id="blackout" class="blackout hidden"><div class="blackout-inner">SIGNAL LOST // BLACKOUT ACTIVE — 10:00</div><div class="blackout-inner" style="font-size:12px;letter-spacing:0.2em;color:#2a2a2a">use terminal &gt;_ &amp; type reboot to restore</div></div>
+    <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
 
     <script type="module" src="./script.js"></script>
   </body>

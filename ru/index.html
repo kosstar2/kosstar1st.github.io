@@ -40,7 +40,7 @@
         <div class="gate-title">ЗАЩИЩЁННЫЙ ТЕРМИНАЛ АРХИВА</div>
         <p class="gate-note">
           Доступ к этому файлу ограничен. Все без исключения неавторизованные пользователи с уровнем допуска ниже 4 будут
-          <b>ликвидированы</b>. Сеанс, номер терминала, местоположение и идентификационные данные регистрируются.
+          <b>устранены</b>. Сеанс, номер терминала, местоположение и идентификационные данные регистрируются.
         </p>
         <button id="gate-enter" class="gate-btn" type="button">
           Θ ЗАПУСТИТЬ ТЕРМИНАЛ
@@ -80,6 +80,7 @@
       </div>
       <div class="statusbar-right">
         <a href="../index.html" class="lang-switch" title="View in English">EN</a>
+        <button id="term-toggle" class="term-toggle" title="Открыть терминал">>_</button>
         <span class="accent">● REC</span>
         <span id="clock" class="mono">--:--:--</span>
       </div>
@@ -329,7 +330,7 @@
 
         <div class="fold">
           <button class="fold-btn" type="button" aria-expanded="false">
-            <span class="danger">▸ ПРИЛОЖЕНИЕ К-4 — ПРИКАЗ O5 О СТИРАНИИ</span>
+            <span class="danger">▸ ПРИЛОЖЕНИЕ К-4 — ПРИКАЗ О СТИРАНИИ</span>
             <span class="fold-sign blink">Ε</span>
           </button>
           <div class="fold-body">
@@ -354,7 +355,7 @@
         </ul>
             </div>
           
-          <div class="muted note">▸ Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также по всей видимости враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения. Для его активации</div>
+          <div>Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также по всей видимости враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения. Для его активации</div>
           </div>
         </div>
       </section>
@@ -373,6 +374,28 @@
         <div class="copyright">© ФОНД SCP</div>
       </footer>
     </main>
+
+<!-- SITE TERMINAL -->
+    <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
+      <div class="term-header">
+        <span class="term-title">SCP-KΣ-0001 // ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B</span>
+        <div class="term-controls">
+          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> КАНАЛ УСТ.</span>
+          <button id="term-close" class="term-close" type="button">[X]</button>
+        </div>
+      </div>
+      <div id="term-log" class="term-log"></div>
+      <div class="term-input-row">
+        <span class="term-prompt">>_</span>
+        <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
+      </div>
+      <div class="term-help">help — список команд · TAB — автодополнение · ESC — закрыть</div>
+    </div>
+    <div id="blackout" class="blackout hidden"><div class="blackout-inner">СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — 10:00</div><div class="blackout-inner" style="font-size:12px;letter-spacing:0.2em;color:#2a2a2a">используйте терминал &gt;_ и введите reboot для восстановления</div></div>
+    <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
+    <script type="module" src="../script.js"></script>
+  </body>
+</html>
 
     <script type="module" src="../script.js"></script>
   </body>

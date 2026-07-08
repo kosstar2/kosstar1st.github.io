@@ -100,6 +100,248 @@
     }, 700);
   }
 
+ /* ---------- ELEMENTS: terminal / blackout / flood ---------- */
+  var gate = document.getElementById("gate");
+  var gateEnter = document.getElementById("gate-enter");
+  var termEl = document.getElementById("site-terminal");
+  var termLogEl = document.getElementById("term-log");
+  var termInput = document.getElementById("term-input");
+  var termToggle = document.getElementById("term-toggle");
+  var termClose = document.getElementById("term-close");
+  var blackoutEl = document.getElementById("blackout");
+  var floodEl = document.getElementById("kst-flood");
+  var BLACKOUT_KEY = "scp-blackout-until";
+  var BLACKOUT_DURATION = 10 * 60 * 1000; // 10 minutes
+  var blackoutTimer = null;
+  var blackoutCountdown = null;
+  var escalationIntervalId = null;
+  var sessionId = "SID-" + Math.random().toString(16).slice(2, 10).toUpperCase() + "-" + Date.now().toString(36).toUpperCase();
+  function nowTs() {
+    return new Date().toLocaleTimeString(locale, { hour12: false });
+  }
+  /* ---------- TERMINAL LOGIC ---------- */
+  function termAddEntry(html, cls) {
+    if (!termLogEl) return;
+    var div = document.createElement("div");
+    div.className = "term-entry " + (cls || "info");
+    var ts = document.createElement("span");
+    ts.className = "ts";
+    ts.textContent = "[" + nowTs() + "]";
+    div.appendChild(ts);
+    var span = document.createElement("span");
+    span.innerHTML = " " + html;
+    div.appendChild(span);
+    termLogEl.appendChild(div);
+    termLogEl.scrollTop = termLogEl.scrollHeight;
+  }
+  function termLog(msg, type) {
+    type = type || "info";
+    // escape minimal? we use innerHTML for bold, but plain text okay. We'll treat msg as HTML-safe (our own strings)
+    termAddEntry(msg, type);
+  }
+  function termOpen() {
+    if (!termEl) return;
+    termEl.classList.remove("hidden");
+    termEl.setAttribute("aria-hidden", "false");
+    if (termInput) termInput.focus();
+    termLog("terminal opened", "cmd");
+    // при первом открытии запускаем глитч clearance
+    runClearanceGlitch();
+  }
+  function termCloseFn() {
+    if (!termEl) return;
+    termEl.classList.add("hidden");
+    termEl.setAttribute("aria-hidden", "true");
+  }
+  if (termToggle) {
+    termToggle.addEventListener("click", function () {
+      if (termEl && termEl.classList.contains("hidden")) termOpen();
+      else termCloseFn();
+    });
+  }
+  if (termClose) {
+    termClose.addEventListener("click", termCloseFn);
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && termEl && !termEl.classList.contains("hidden")) {
+      termCloseFn();
+    }
+    // tilde to toggle
+    if (e.key === "`" || e.key === "ё") {
+      if (termEl) {
+        e.preventDefault();
+        if (termEl.classList.contains("hidden")) termOpen();
+        else termCloseFn();
+      }
+    }
+  });
+/* expose basic logs on load for immersion */
+  var clearanceEntryId = "clr-entry-" + Date.now();
+  var clearanceGlitchDone = false;
+  function initTerminalLogs() {
+    termLog(lang === "en" ? "FIELD TERMINAL v0.7.3-B // BUILD " + Date.now().toString(36) : "ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B // СБОРКА " + Date.now().toString(36), "sys");
+    termLog("SESSION ID: <b>" + sessionId + "</b>", "info");
+    termLog(lang === "en" ? "Location trace: LAT " + (50 + Math.random()*10).toFixed(4) + " LON " + (30 + Math.random()*10).toFixed(4) + " [IP MASKED]" : "Трассировка местоположения: ШИР " + (50 + Math.random()*10).toFixed(4) + " ДОЛ " + (30 + Math.random()*10).toFixed(4) + " [IP СКРЫТ]", "info");
+    // Записываем clearance с LVL 0 и присваиваем id для последующего глитча
+    var clrText = lang === "en" ? "Clearance verification: LVL 4 REQUIRED // CURRENT: LVL 0" : "Проверка допуска: ТРЕБУЕТСЯ УРОВЕНЬ 4 // ТЕКУЩИЙ: УРОВЕНЬ 0";
+    termAddEntry(clrText, "warn");
+    // пометим последнюю запись id, чтобы потом найти
+    var allEntries = termLogEl ? termLogEl.querySelectorAll(".term-entry") : [];
+    if (allEntries.length > 0) {
+      allEntries[allEntries.length - 1].id = clearanceEntryId;
+    }
+    termLog(lang === "en" ? "Awaiting clearance resolution..." : "Ожидание разрешения допуска...", "info");
+  }
+  setTimeout(initTerminalLogs, 500);
+  /** Глитч-подмена clearance — вызывается при первом открытии терминала */
+  function runClearanceGlitch() {
+    if (clearanceGlitchDone) return;
+    clearanceGlitchDone = true;
+    var entry = document.getElementById(clearanceEntryId);
+    if (!entry) return;
+    // Фаза 1: через 0.6с — LVL 0 → LVL ▓▓▓▓▓ (глитч)
+    setTimeout(function () {
+      entry.innerHTML = entry.innerHTML
+        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#e05555">▓▓▓▓▓</span>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#e05555">▓▓▓▓▓</span>');
+    }, 600);
+    // Фаза 2: через 1.4с — новая строка с kosstarthe1st.welcome
+    setTimeout(function () {
+      termLog(lang === "en"
+        ? "LVL override: <b style='color:#e05555'>kosstarthe1st.welcome</b>"
+        : "ПЕРЕОПРЕД. УРОВНЯ: <b style='color:#e05555'>kosstarthe1st.welcome</b>", "err");
+    }, 1400);
+    // Фаза 3: через 2.5с — «принято», файл открыт
+    setTimeout(function () {
+      termLog(lang === "en"
+        ? "File access granted // Monitoring user interaction..."
+        : "Доступ к файлу предоставлен // Мониторинг действий пользователя...", "sys");
+    }, 2500);
+  }
+  /* ---------- BLACKOUT / COOKIE PERSISTENCE ---------- */
+  function setBlackoutCookie(until) {
+    try {
+      localStorage.setItem(BLACKOUT_KEY, String(until));
+      document.cookie = BLACKOUT_KEY + "=" + until + "; max-age=" + (10 * 60) + "; path=/";
+    } catch (e) {}
+  }
+  function clearBlackoutStorage() {
+    try {
+      localStorage.removeItem(BLACKOUT_KEY);
+      document.cookie = BLACKOUT_KEY + "=; Max-Age=0; path=/";
+      sessionStorage.removeItem(BLACKOUT_KEY);
+    } catch (e) {}
+  }
+  function getBlackoutUntil() {
+    try {
+      var v = localStorage.getItem(BLACKOUT_KEY);
+      if (v) return parseInt(v, 10);
+      // fallback cookie
+      var m = document.cookie.match(new RegExp("(?:^| )" + BLACKOUT_KEY + "=([^;]+)"));
+      if (m) return parseInt(decodeURIComponent(m[1]), 10);
+    } catch (e) {}
+    return 0;
+  }
+  function activateBlackout() {
+    var until = Date.now() + BLACKOUT_DURATION;
+    setBlackoutCookie(until);
+    if (blackoutEl) {
+      blackoutEl.classList.remove("hidden");
+      // countdown timer display
+      var inner = blackoutEl.querySelectorAll(".blackout-inner");
+      var firstInner = inner[0];
+      if (blackoutCountdown) clearInterval(blackoutCountdown);
+      blackoutCountdown = setInterval(function () {
+        var now = Date.now();
+        var diff = until - now;
+        if (diff <= 0) {
+          clearInterval(blackoutCountdown);
+          deactivateBlackout();
+          termLog(lang === "en" ? "BLACKOUT EXPIRED — signal restored" : "БЛЭКАУТ ИСТЁК — сигнал восстановлен", "sys");
+          return;
+        }
+        var mm = Math.floor(diff / 60000);
+        var ss = Math.floor((diff % 60000) / 1000);
+        var txt = (mm < 10 ? "0" : "") + mm + ":" + (ss < 10 ? "0" : "") + ss;
+        if (firstInner) firstInner.textContent = (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") + txt;
+      }, 1000);
+      // initial
+      var mm0 = 10, ss0 = 0;
+      if (firstInner) firstInner.textContent = (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") + (mm0 < 10 ? "0" : "") + mm0 + ":" + (ss0 < 10 ? "0" : "") + ss0;
+    }
+    termLog(lang === "en" ? "[CRITICAL] BLACKOUT PROTOCOL ENGAGED — 10:00" : "[КРИТИЧНО] ПРОТОКОЛ БЛЭКАУТА АКТИВИРОВАН — 10:00", "cog");
+  }
+  function deactivateBlackout() {
+    if (blackoutEl) blackoutEl.classList.add("hidden");
+    if (floodEl) {
+      floodEl.classList.add("hidden");
+      floodEl.innerHTML = "";
+    }
+    clearBlackoutStorage();
+    if (blackoutCountdown) {
+      clearInterval(blackoutCountdown);
+      blackoutCountdown = null;
+    }
+    if (blackoutTimer) {
+      clearTimeout(blackoutTimer);
+      blackoutTimer = null;
+    }
+  }
+  function checkBlackoutOnLoad() {
+    var until = getBlackoutUntil();
+    if (until && Date.now() < until) {
+      // still in blackout
+      if (blackoutEl) blackoutEl.classList.remove("hidden");
+      // start countdown again
+      var inner = blackoutEl ? blackoutEl.querySelectorAll(".blackout-inner")[0] : null;
+      if (blackoutCountdown) clearInterval(blackoutCountdown);
+      blackoutCountdown = setInterval(function () {
+        var now = Date.now();
+        var diff = until - now;
+        if (diff <= 0) {
+          clearInterval(blackoutCountdown);
+          deactivateBlackout();
+          termLog(lang === "en" ? "BLACKOUT EXPIRED — signal restored" : "БЛЭКАУТ ИСТЁК — сигнал восстановлен", "sys");
+          return;
+        }
+        var mm = Math.floor(diff / 60000);
+        var ss = Math.floor((diff % 60000) / 1000);
+        if (inner) inner.textContent = (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") + (mm < 10 ? "0" : "") + mm + ":" + (ss < 10 ? "0" : "") + ss;
+      }, 1000);
+      termLog(lang === "en" ? "[CRITICAL] BLACKOUT PERSISTS — " + Math.ceil((until - Date.now())/60000) + " min remaining. Use reboot to clear." : "[КРИТИЧНО] БЛЭКАУТ СОХРАНЯЕТСЯ — осталось " + Math.ceil((until - Date.now())/60000) + " мин. Используйте reboot для сброса.", "cog");
+    }
+  }
+  checkBlackoutOnLoad();
+  /* ---------- FLOOD OF TEXTS (EASTER EGG) ---------- */
+  function startKSTTextFlood() {
+    if (!floodEl) {
+      floodEl = document.createElement("div");
+      floodEl.id = "kst-flood";
+      floodEl.className = "kst-flood";
+      document.body.appendChild(floodEl);
+    }
+    floodEl.classList.remove("hidden");
+    floodEl.innerHTML = "";
+    var count = 200;
+    for (var i = 0; i < count; i++) {
+      var span = document.createElement("span");
+      span.textContent = "kosstar the 1st";
+      span.style.left = (Math.random() * 100).toFixed(2) + "%";
+      span.style.top = (Math.random() * 100).toFixed(2) + "%";
+      span.style.transform = "rotate(" + (Math.random() * 120 - 60).toFixed(1) + "deg) translate(-50%,-50%)";
+      span.style.opacity = (0.15 + Math.random() * 0.85).toFixed(2);
+      span.style.fontSize = (12 + Math.random() * 32).toFixed(0) + "px";
+      span.style.textShadow = "0 0 " + (8 + Math.random()*16).toFixed(0) + "px rgba(210,58,66," + (0.4 + Math.random()*0.6).toFixed(2) + ")";
+      floodEl.appendChild(span);
+    }
+    termLog(lang === "en" ? "[CRITICAL] K-class textual flood // containment failure" : "[КРИТИЧНО] K-класс текстовый поток // отказ содержания", "cog");
+    // after a few seconds, trigger blackout
+    blackoutTimer = setTimeout(function () {
+      activateBlackout();
+    }, 3500);
+  }
+
+
     /* ---------- BOOT AUDIO ---------- */
   var bootAudio = document.getElementById("boot-audio");
   var audioStarted = false;
@@ -408,11 +650,24 @@
       document.body.classList.remove("shake-body");
     }, 1300);
   }
+function isBlackoutActive() {
+    var until = getBlackoutUntil();
+    return until && Date.now() < until;
+  }
   function scheduleBurst() {
     var cfg = getGlitchConfig();
-    var delay = cfg ? cfg.interval : 15000;
+    var delay = cfg ? cfg.interval : 28000;
     setTimeout(function () {
       if (boot && boot.style.display !== "none") {
+        scheduleBurst();
+        return;
+      }
+      if (gate && gate.style.display !== "none") {
+        scheduleBurst();
+        return;
+      }
+      // не бьём глитчами во время блэкаута
+      if (isBlackoutActive()) {
         scheduleBurst();
         return;
       }
