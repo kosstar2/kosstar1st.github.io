@@ -103,9 +103,9 @@
   var audioStarted = false;
 
   function playBootAudio() {
-    if (!bootAudio || audioStarted || reduce) return; // reduce = уважать «меньше движения»
+    if (!bootAudio || audioStarted) return;
     audioStarted = true;
-    bootAudio.volume = 0.7;          // громкость 0..1 — подбери на вкус
+    bootAudio.volume = 0.7;          
     bootAudio.currentTime = 0;
     var p = bootAudio.play();
     // если браузер заблокировал автоплей — Promise отклонится, просто игнорируем
@@ -114,18 +114,45 @@
 
    playBootAudio();
 
+    if (boot) {
+    boot.addEventListener("pointerdown", playBootAudio, { once: true });
+    boot.addEventListener("keydown", playBootAudio, { once: true });
+  }
+
+ /* ---------- ACCESS GATE (перед интро) ---------- */
+  var gate = document.getElementById("gate");
+  var gateEnter = document.getElementById("gate-enter");
+  var bootStarted = false;
+  function startBoot() {
+    if (bootStarted) return;
+    bootStarted = true;
+    runBoot();
+  }
+  function closeGate() {
+    if (!gate) return;
+    gate.classList.add("gone");
+    setTimeout(function () {
+      gate.style.display = "none";
+    }, 500);
+  }
   if (boot && bootLog && bootEnter) {
     if (bootSkip) {
       bootSkip.textContent = SKIP_LABEL;
       bootSkip.hidden = false;
-      // первая кнопка — доводит лог до конца; повторное нажатие — закрывает
       bootSkip.addEventListener("click", function () {
         if (!bootDone) finishBoot();
         else closeBoot();
       });
     }
-    runBoot();
     bootEnter.addEventListener("click", closeBoot);
+    if (gate && gateEnter) {
+      gateEnter.addEventListener("click", function () {
+        closeGate();
+        startBoot();
+      });
+    } else {
+      startBoot();
+    }
   }
 
   /* ---------- CLOCK ---------- */

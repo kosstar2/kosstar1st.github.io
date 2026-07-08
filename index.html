@@ -27,6 +27,29 @@
     />
   </head>
   <body>
+    <body>
+
+    <!-- ===================== ACCESS GATE (pre-boot) ===================== -->
+    <div id="gate" class="gate">
+      <div class="gate-inner">
+        <div class="gate-sigil" aria-hidden="true">
+          <span class="gate-ring"></span>
+          <span class="gate-ring gate-ring-2"></span>
+          <span class="gate-k">4</span>
+        </div>
+        <div class="gate-code">SCP-KΣ-0001</div>
+        <div class="gate-title">SECURE ARCHIVE TERMINAL</div>
+        <p class="gate-note">
+          This file is restricted. Any and all unauthorized viewers below clearance level 4 will be
+          <b>terminated</b>. Session, terminal number, location and identity logged.
+        </p>
+        <button id="gate-enter" class="gate-btn" type="button">
+          ⏻ INITIATE TERMINAL
+        </button>
+        <div class="gate-sub">▸ sound warning</div>
+      </div>
+    </div>
+
     <!-- ===================== BOOT / ACCESS GATE ===================== -->
     <div id="boot" class="boot">
       <button id="boot-skip" class="boot-skip" type="button" hidden>
@@ -41,7 +64,7 @@
     </div>
 
     <audio id="boot-audio" src="./boot.mp3" preload="auto"></audio>
-    
+
     <!-- ===================== STATUS BAR ===================== -->
     <header class="statusbar" role="banner">
       <div class="statusbar-left">
