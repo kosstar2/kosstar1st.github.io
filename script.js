@@ -102,32 +102,22 @@
   var bootAudio = document.getElementById("boot-audio");
   var audioStarted = false;
 
-  function playBootAudio() {
-    if (!bootAudio || audioStarted) return;
-    audioStarted = true;
-    bootAudio.volume = 0.7;          
-    bootAudio.currentTime = 0;
-    var p = bootAudio.play();
-    // если браузер заблокировал автоплей — Promise отклонится, просто игнорируем
-    if (p && p.catch) p.catch(function () { audioStarted = false; });
-  }
-
-   playBootAudio();
-
-    if (boot) {
-    boot.addEventListener("pointerdown", playBootAudio, { once: true });
-    boot.addEventListener("keydown", playBootAudio, { once: true });
-  }
-
  /* ---------- ACCESS GATE (перед интро) ---------- */
   var gate = document.getElementById("gate");
   var gateEnter = document.getElementById("gate-enter");
   var bootStarted = false;
   function startBoot() {
-    var a = document.getElementById("boot-audio");
-    if (a) { a.volume = 0.7; a.currentTime = 0; a.play(); }
-    if (bootStarted) return;
+      if (bootStarted) return;
     bootStarted = true;
+    var bootAudio = document.getElementById("boot-audio");
+    if (bootAudio) {
+      bootAudio.volume = 0.7;
+      bootAudio.currentTime = 0;
+      bootAudio.play().catch(function(e) {
+        console.warn("Audio play failed, waiting for user gesture:", e);
+      });
+    }
+    
     runBoot();
   }
   function closeGate() {
