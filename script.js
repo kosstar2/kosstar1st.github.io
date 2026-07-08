@@ -175,49 +175,51 @@
       }
     }
   });
-
-  /* expose basic logs on load for immersion */
+  
+/* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
-
-  function initTerminalLogs() {
+   function initTerminalLogs() {
     termLog(lang === "en" ? "FIELD TERMINAL v0.7.3-B // BUILD " + Date.now().toString(36) : "ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B // СБОРКА " + Date.now().toString(36), "sys");
     termLog("SESSION ID: <b>" + sessionId + "</b>", "info");
     termLog(lang === "en" ? "Location trace: LAT " + (50 + Math.random()*10).toFixed(4) + " LON " + (30 + Math.random()*10).toFixed(4) + " [IP MASKED]" : "Трассировка местоположения: ШИР " + (50 + Math.random()*10).toFixed(4) + " ДОЛ " + (30 + Math.random()*10).toFixed(4) + " [IP СКРЫТ]", "info");
-    
-    // Изначально - КРАСНЫЙ (отказ)
+    // Записываем clearance с LVL 0 (изначально красным)
     var clrText = lang === "en" ? "Clearance verification: LVL 4 REQUIRED // CURRENT: LVL 0" : "Проверка допуска: ТРЕБУЕТСЯ УРОВЕНЬ 4 // ТЕКУЩИЙ: УРОВЕНЬ 0";
-    termAddEntry(clrText, "warn");
-    
-    // Пометим эту строку ID, чтобы найти её при открытии терминала
+    termAddEntry(clrText, "err");
     var allEntries = termLogEl ? termLogEl.querySelectorAll(".term-entry") : [];
     if (allEntries.length > 0) {
       allEntries[allEntries.length - 1].id = clearanceEntryId;
     }
   }
   setTimeout(initTerminalLogs, 500);
-
   /** Глитч-подмена clearance — вызывается при первом открытии терминала */
   function runClearanceGlitch() {
     if (clearanceGlitchDone) return;
     clearanceGlitchDone = true;
     var entry = document.getElementById(clearanceEntryId);
     if (!entry) return;
-
-    // Мгновенная глитч-подмена
+    // Фаза 1: через 0.5с — LVL 0 → LVL ▓▓▓▓▓ (глитчит in-place)
     setTimeout(function () {
-      // 1. Меняем класс на зелёный (sys)
-      entry.className = "term-entry sys";
-      
-      // 2. Подменяем текст прямо внутри строки
       entry.innerHTML = entry.innerHTML
-        .replace(/LVL 0/, 'LVL <b style="color:#e05555">kosstarthe1st.welcome</b>')
-        .replace(/УРОВЕНЬ 0/, 'УРОВЕНЬ <b style="color:#e05555">kosstarthe1st.welcome</b>');
-        
-      termLog(lang === "en" ? "File access granted" : "Доступ к файлу предоставлен", "sys");
-    }, 400);
+        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
+      var a = document.getElementById("decrypt-audio");
+      if (a) { try { var c = a.cloneNode(); c.volume=0.2; c.play().catch(function(){}); } catch(e){} }
+    }, 500);
+    // Фаза 2: через 1.3с — прямо в той же строке меняется на kosstarthe1st.welcome, а само сообщение становится зелёным
+    setTimeout(function () {
+      entry.className = "term-entry sys"; // зелёный системный цвет
+      entry.innerHTML = entry.innerHTML
+        .replace(/CURRENT: LVL <span[^>]*>▓▓▓▓▓<\/span>/, 'CURRENT: LVL <b>kosstarthe1st.welcome</b>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ <span[^>]*>▓▓▓▓▓<\/span>/, 'ТЕКУЩИЙ: УРОВЕНЬ <b>kosstarthe1st.welcome</b>');
+    }, 1300);
+    // Фаза 3: через 2.2с — терминал даёт доступ
+    setTimeout(function () {
+      termLog(lang === "en"
+        ? "File access granted // Monitoring user interaction..."
+        : "Доступ к файлу предоставлен // Мониторинг действий пользователя...", "sys");
+    }, 2200);
   }
-  
   /* ---------- BLACKOUT / COOKIE PERSISTENCE ---------- */
   function setBlackoutCookie(until) {
     try {
