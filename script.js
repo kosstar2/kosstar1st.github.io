@@ -277,10 +277,10 @@ var mentions = document.querySelectorAll("[data-kmention]");
           el.classList.add("unlocked");
           var newCount = updateMeter();
           
-          var a = document.getElementById("boot-audio");
-          if (a) {
+          var decryptAudio = document.getElementById("decrypt-audio");
+          if (decryptAudio) {
             try {
-              var clone = a.cloneNode();
+              var clone = decryptAudio.cloneNode();
               clone.volume = 0.4;
               clone.currentTime = 0;
               clone.play().catch(function(){});
