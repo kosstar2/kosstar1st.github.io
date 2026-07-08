@@ -139,28 +139,69 @@
     // escape minimal? we use innerHTML for bold, but plain text okay. We'll treat msg as HTML-safe (our own strings)
     termAddEntry(msg, type);
   }
-  function termOpen() {
-    if (!termEl) return;
+function termOpen() {
+    // всегда берём свежую ссылку на DOM (на случай кэша/перерисовки)
+    termEl = document.getElementById("site-terminal") || termEl;
+    termInput = document.getElementById("term-input") || termInput;
+    termLogEl = document.getElementById("term-log") || termLogEl;
+    if (!termEl) {
+      console.warn("site-terminal not found");
+      return;
+    }
     termEl.classList.remove("hidden");
+    termEl.style.display = "flex";
     termEl.setAttribute("aria-hidden", "false");
-    if (termInput) termInput.focus();
+    // фокус после paint
+    setTimeout(function () {
+      var input = document.getElementById("term-input");
+      if (input) input.focus();
+    }, 30);
     termLog("terminal opened", "cmd");
     // при первом открытии запускаем глитч clearance
     runClearanceGlitch();
   }
   function termCloseFn() {
+    termEl = document.getElementById("site-terminal") || termEl;
     if (!termEl) return;
     termEl.classList.add("hidden");
+    termEl.style.display = "none";
     termEl.setAttribute("aria-hidden", "true");
   }
+   // Делегирование клика: надёжнее, чем один getElementById (не зависит от порядка/кэша)
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t) return;
+    // кнопка открытия / любая вложенность внутри неё
+    var openBtn = t.id === "term-toggle" ? t : (t.closest ? t.closest("#term-toggle") : null);
+    if (openBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (termEl && termEl.classList.contains("hidden")) termOpen();
+      else termCloseFn();
+      return;
+    }
+    var closeBtn = t.id === "term-close" ? t : (t.closest ? t.closest("#term-close") : null);
+    if (closeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      termCloseFn();
+    }
+  });
+  // fallback на прямую привязку (на всякий)
   if (termToggle) {
-    termToggle.addEventListener("click", function () {
+    termToggle.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       if (termEl && termEl.classList.contains("hidden")) termOpen();
       else termCloseFn();
     });
   }
   if (termClose) {
-    termClose.addEventListener("click", termCloseFn);
+    termClose.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      termCloseFn();
+    });
   }
   document.addEventListener("keydown", function (e) {
     // если фокус в терминале — не мешаем вводу команд
@@ -208,8 +249,6 @@
       entry.innerHTML = entry.innerHTML
         .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
         .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
-      var a = document.getElementById("decrypt-audio");
-      if (a) { try { var c = a.cloneNode(); c.volume=0.2; c.play().catch(function(){}); } catch(e){} }
     }, 500);
     // Фаза 2: через 1.3с — прямо в той же строке меняется на kosstarthe1st.welcome, а само сообщение становится зелёным
     setTimeout(function () {
