@@ -781,6 +781,67 @@ p {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+/* ---------- K-MENTIONS (засекреченные имена) ---------- */
+.k-meter {
+  cursor: help;
+  user-select: none;
+}
+.k-meter b {
+  font-family: "Share Tech Mono", monospace;
+  letter-spacing: 0.05em;
+}
+.k-mention {
+  background: #000;
+  padding: 0 0.35em;
+  border-radius: 1px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: baseline;
+  transition: all 0.25s ease;
+  border: 1px solid #2a2a2a;
+}
+.k-mention .km-hidden {
+  color: #363636;
+  font-family: "VT323", monospace;
+  letter-spacing: 0.1em;
+}
+.k-mention .km-resolved {
+  display: none;
+}
+.k-mention:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(54, 224, 230, 0.35);
+  background: #080808;
+}
+.k-mention:hover .km-hidden {
+  color: var(--cyan);
+}
+.k-mention.unlocked {
+  background: rgba(179, 18, 27, 0.15);
+  border-color: var(--red);
+  box-shadow: 0 0 14px rgba(179, 18, 27, 0.5);
+  padding: 0 0.45em;
+  animation: mention-unlock 0.4s ease-out;
+}
+.k-mention.unlocked .km-hidden {
+  display: none;
+}
+.k-mention.unlocked .km-resolved {
+  display: inline;
+  color: var(--red-soft);
+  font-family: "VT323", monospace;
+  font-size: 1.1em;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 10px rgba(210, 58, 66, 0.8);
+}
+@keyframes mention-unlock {
+  0% { transform: scale(1); filter: brightness(2); }
+  50% { transform: scale(1.08); filter: hue-rotate(90deg); }
+  100% { transform: scale(1); filter: none; }
+}
 
 .ghost {
   position: relative;

@@ -230,6 +230,70 @@
     });
   }
 
+var mentions = document.querySelectorAll("[data-kmention]");
+  var totalMentions = mentions.length;
+  var unlockedCount = 0;
+  function updateMeter() {
+    var count = 0;
+    mentions.forEach(function (el) {
+      if (el.classList.contains("unlocked")) count++;
+    });
+    unlockedCount = count;
+    var unlockedStates = [];
+    mentions.forEach(function (el) {
+      unlockedStates.push(el.classList.contains("unlocked") ? 1 : 0);
+    });
+    sessionStorage.setItem("scp-km-states", JSON.stringify(unlockedStates));
+    var meterText = document.getElementById("k-meter-text");
+    if (meterText) {
+      var pct = Math.round((count / (totalMentions || 1)) * 100);
+      var bars = "";
+      for (var i = 0; i < totalMentions; i++) {
+        bars += (i < count) ? "█" : "░";
+      }
+      meterText.textContent = count + "/" + totalMentions + " [" + bars + "] " + pct + "%";
+      if (count === totalMentions && totalMentions > 0) {
+        meterText.classList.add("blink");
+      }
+    }
+    return count;
+  }
+  if (totalMentions > 0) {
+    var savedStates = sessionStorage.getItem("scp-km-states");
+    if (savedStates) {
+      try {
+        var arr = JSON.parse(savedStates);
+        mentions.forEach(function (el, i) {
+          if (arr[i] === 1) el.classList.add("unlocked");
+        });
+      } catch (e) {}
+    }
+    updateMeter();
+    mentions.forEach(function (el) {
+      el.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!el.classList.contains("unlocked")) {
+          el.classList.add("unlocked");
+          var newCount = updateMeter();
+          
+          var a = document.getElementById("boot-audio");
+          if (a) {
+            try {
+              var clone = a.cloneNode();
+              clone.volume = 0.4;
+              clone.currentTime = 0;
+              clone.play().catch(function(){});
+            } catch(err) {}
+          }
+          if (newCount === 1) {
+            burst();
+          }
+        }
+      });
+    });
+  }
+
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
   var whispersRU = [
     "Я ЗДЕСЬ",
@@ -255,42 +319,65 @@
   var flash = document.getElementById("flash");
   var whisperEl = document.getElementById("whisper");
 
+   function getGlitchConfig() {
+    if (unlockedCount === 0) return null;
+    var baseInterval = 32000 - unlockedCount * 5500;
+    var interval = baseInterval + Math.random() * 4000;
+    var whisperOpacity = 0.15 + (unlockedCount - 1) * 0.21;
+    var flashOpacity = 0.08 + (unlockedCount - 1) * 0.09;
+    return {
+      interval: Math.max(4000, interval),
+      whisperOpacity: Math.min(1, whisperOpacity),
+      flashOpacity: Math.min(0.6, flashOpacity)
+    };
+  }
   function burst() {
-    if (reduce || !flash || !whisperEl) return;
+    var cfg = getGlitchConfig();
+    if (reduce || !flash || !whisperEl || !cfg) return;
+    flash.style.opacity = cfg.flashOpacity;
     flash.classList.add("on");
+    whisperEl.style.opacity = cfg.whisperOpacity;
     whisperEl.textContent = rand(whispers);
     whisperEl.classList.add("on");
     document.body.classList.add("shake-body");
     setTimeout(function () {
       flash.classList.remove("on");
+      flash.style.opacity = "";
       whisperEl.classList.remove("on");
+      whisperEl.style.opacity = "";
       document.body.classList.remove("shake-body");
     }, 1300);
   }
   function scheduleBurst() {
+    var cfg = getGlitchConfig();
+    var delay = cfg ? cfg.interval : 15000;
     setTimeout(function () {
-      // не мешаем во время boot
       if (boot && boot.style.display !== "none") {
         scheduleBurst();
         return;
       }
-      burst();
+      if (getGlitchConfig()) {
+        burst();
+      }
       scheduleBurst();
-    }, 9000 + Math.random() * 14000);
+    }, delay);
   }
   scheduleBurst();
-
   /* ---------- TICKER (scramble) ---------- */
   var ticker = document.getElementById("ticker");
   var TICK_TEXT = "KOSSTAR THE 1ST · KOSSTAR THE 1ST · KOSSTAR THE 1ST";
+  var TICK_TEXT_0 = lang === "en" 
+    ? "[DESIGNATION CLASSIFIED // DECRYPT MENTIONS IN FILE TO ACCESS]" 
+    : "[ОБОЗНАЧЕНИЕ ЗАСЕКРЕЧЕНО // РАССЕКРЕТЬТЕ УПОМИНАНИЯ В ФАЙЛЕ]";
   if (ticker) {
     if (reduce) {
-      ticker.textContent = TICK_TEXT;
+      ticker.textContent = unlockedCount > 0 ? TICK_TEXT : TICK_TEXT_0;
     } else {
       setInterval(function () {
+        var activeText = unlockedCount > 0 ? TICK_TEXT : TICK_TEXT_0;
         var out = "";
-        for (var i = 0; i < TICK_TEXT.length; i++) {
-          var ch = TICK_TEXT[i];
+        for (var i = 0; i < activeText.length; i++) {
+          var ch = activeText[i];
           if (ch === " ") out += " ";
           else if (Math.random() > 0.85) out += rand(GLYPHS);
           else out += ch;
