@@ -59,7 +59,6 @@ b {
   color: var(--red-soft);
 }
 
-/* scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -74,13 +73,11 @@ b {
   background: var(--red);
 }
 
-/* ================= ACCESS GATE (перед интро) ================= */
 .gate {
   position: fixed;
   inset: 0;
   z-index: 10001;
-  background:
-    radial-gradient(120% 90% at 50% 40%, #100404 0%, #030303 55%, #000 100%);
+  background: radial-gradient(120% 90% at 50% 40%, #100404 0%, #030303 55%, #000 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +104,6 @@ b {
     transform: none;
   }
 }
-/* пульсирующий знак-сигил */
 .gate-sigil {
   position: relative;
   width: 120px;
@@ -152,10 +148,20 @@ b {
   animation: gate-flick 5s infinite steps(1);
 }
 @keyframes gate-flick {
-  0%, 96%, 100% { opacity: 1; }
-  97% { opacity: 0.4; }
-  98% { opacity: 1; }
-  99% { opacity: 0.6; }
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.4;
+  }
+  98% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.6;
+  }
 }
 .gate-code {
   font-family: "Share Tech Mono", monospace;
@@ -208,7 +214,6 @@ b {
   color: #4a4a44;
 }
 
-/* ================= BOOT / ACCESS GATE ================= */
 .boot {
   position: fixed;
   inset: 0;
@@ -285,7 +290,6 @@ b {
   }
 }
 
-/* ================= STATUS BAR ================= */
 .statusbar {
   position: fixed;
   top: 0;
@@ -332,7 +336,7 @@ b {
 .lang-switch:hover {
   border-color: var(--red);
   color: var(--red-soft);
-  box-shadow: 0 0 10px rgba(179,18,27,0.3);
+  box-shadow: 0 0 10px rgba(179, 18, 27, 0.3);
 }
 @media (max-width: 520px) {
   .hide-sm {
@@ -350,7 +354,6 @@ b {
   }
 }
 
-/* scroll progress */
 .scroll-progress {
   position: fixed;
   top: 27px;
@@ -362,7 +365,6 @@ b {
   box-shadow: 0 0 8px var(--red);
 }
 
-/* ================= CRT OVERLAY ================= */
 .crt-overlay {
   position: fixed;
   inset: 0;
@@ -385,11 +387,7 @@ b {
 .crt-overlay .vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 0, 0) 44%,
-    rgba(0, 0, 0, 0.58) 100%
-  );
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 44%, rgba(0, 0, 0, 0.58) 100%);
 }
 .crt-overlay .flicker {
   position: absolute;
@@ -400,12 +398,7 @@ b {
 .crt-overlay .rgb {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.04),
-    rgba(0, 255, 255, 0.03),
-    rgba(255, 0, 0, 0.04)
-  );
+  background: linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 255, 0.03), rgba(255, 0, 0, 0.04));
   mix-blend-mode: screen;
 }
 @keyframes scan-move {
@@ -433,7 +426,6 @@ b {
   }
 }
 
-/* ================= LAYOUT ================= */
 .doc-shell {
   max-width: 860px;
   margin: 0 auto;
@@ -465,7 +457,6 @@ p {
   margin-bottom: 16px;
 }
 
-/* ================= HERO ================= */
 .hero {
   text-align: center;
   padding: 130px 0 54px;
@@ -542,7 +533,6 @@ p {
   }
 }
 
-/* ================= PANEL / GRID ================= */
 .panel {
   border: 1px solid var(--line);
   background: linear-gradient(180deg, #0c0c0c, #080808);
@@ -554,13 +544,7 @@ p {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.012) 0,
-    rgba(255, 255, 255, 0.012) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.012) 0, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 3px);
   pointer-events: none;
 }
 .classgrid {
@@ -585,17 +569,10 @@ p {
   color: var(--text);
 }
 
-/* ================= WARNING ================= */
 .warn {
   border: 1px solid var(--red);
   border-left-width: 4px;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(179, 18, 27, 0.07) 0,
-    rgba(179, 18, 27, 0.07) 10px,
-    rgba(0, 0, 0, 0) 10px,
-    rgba(0, 0, 0, 0) 20px
-  );
+  background: repeating-linear-gradient(45deg, rgba(179, 18, 27, 0.07) 0, rgba(179, 18, 27, 0.07) 10px, rgba(0, 0, 0, 0) 10px, rgba(0, 0, 0, 0) 20px);
   color: #e7b1b4;
   padding: 16px 18px;
   margin-bottom: 48px;
@@ -607,7 +584,6 @@ p {
   color: var(--red);
 }
 
-/* ================= RULES ================= */
 .rules {
   list-style: none;
   padding: 0;
@@ -629,7 +605,6 @@ p {
   border-left-color: var(--red);
 }
 
-/* ================= FOLD / APPENDIX ================= */
 .fold {
   border: 1px solid var(--line);
   background: #0a0a0a;
@@ -692,7 +667,6 @@ p {
   letter-spacing: 0.05em;
 }
 
-/* ================= FOOTER ================= */
 .doc-footer {
   border-top: 1px solid var(--line);
   padding-top: 26px;
@@ -716,18 +690,15 @@ p {
   padding-top: 4px;
 }
 
-/* ================= TEXT FX ================= */
 .corrupt {
   color: var(--red);
   letter-spacing: 0.08em;
   text-shadow: 0 0 6px rgba(179, 18, 27, 0.5);
 }
 
-/* Спойлер: placeholder ВСЕГДА задаёт ширину и не меняет её.
-   Расшифровка всплывает рамкой над спойлером (как у .ghost). */
 .redacted {
   background: #000;
-  color: #cbcbc4;            /* placeholder виден как «затёртый» текст */
+  color: #cbcbc4;
   padding: 0 0.35em;
   border-radius: 1px;
   cursor: help;
@@ -740,7 +711,6 @@ p {
   vertical-align: baseline;
   transition: background 0.2s;
 }
-/* тёмная «плашка цензуры» поверх placeholder-а */
 .redacted::after {
   content: "";
   position: absolute;
@@ -754,9 +724,8 @@ p {
   background: rgba(179, 18, 27, 0.12);
 }
 .redacted:hover::after {
-  opacity: 0;             /* при наведении плашка гаснет, ширина не меняется */
+  opacity: 0;
 }
-/* всплывающая расшифровка — абсолютный слой, не влияет на поток */
 .redacted .r-reveal {
   position: absolute;
   left: 50%;
@@ -781,7 +750,7 @@ p {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-/* ---------- K-MENTIONS (засекреченные имена) ---------- */
+
 .k-meter {
   cursor: help;
   user-select: none;
@@ -838,9 +807,18 @@ p {
   text-shadow: 0 0 10px rgba(210, 58, 66, 0.8);
 }
 @keyframes mention-unlock {
-  0% { transform: scale(1); filter: brightness(2); }
-  50% { transform: scale(1.08); filter: hue-rotate(90deg); }
-  100% { transform: scale(1); filter: none; }
+  0% {
+    transform: scale(1);
+    filter: brightness(2);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: hue-rotate(90deg);
+  }
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
 }
 
 .ghost {
@@ -875,7 +853,6 @@ p {
   transform: translateY(0);
 }
 
-/* touch-to-reveal для redacted (мобильные, по клику) */
 .redacted.touch-reveal {
   background: rgba(179, 18, 27, 0.12) !important;
 }
@@ -887,7 +864,6 @@ p {
   transform: translateX(-50%) translateY(0) !important;
 }
 
-/* glitch */
 .glitch {
   position: relative;
   display: inline-block;
@@ -969,7 +945,6 @@ p {
   }
 }
 
-/* tremor / flicker */
 .tremor {
   display: inline-block;
   animation: tremor 1.6s infinite ease-in-out;
@@ -1031,7 +1006,6 @@ p {
   }
 }
 
-/* ================= GLITCH FLASH + WHISPER ================= */
 .glitch-flash {
   position: fixed;
   inset: 0;
@@ -1104,7 +1078,6 @@ p {
   }
 }
 
-/* ================= SCROLL REVEAL ================= */
 .reveal {
   opacity: 0;
   transform: translateY(26px);
@@ -1133,9 +1106,8 @@ p {
 .term-toggle:hover {
   border-color: #57e06a;
   color: #57e06a;
-  box-shadow: 0 0 10px rgba(87,224,106,0.35);
+  box-shadow: 0 0 10px rgba(87, 224, 106, 0.35);
 }
-/* ================= SITE TERMINAL ================= */
 .site-terminal {
   position: fixed;
   left: 12px;
@@ -1146,7 +1118,7 @@ p {
   max-height: min(64vh, 560px);
   background: #060706;
   border: 1px solid #1e3a24;
-  box-shadow: 0 0 0 1px #0a1a0d, 0 18px 48px rgba(0,0,0,0.85), 0 0 24px rgba(87,224,106,0.18);
+  box-shadow: 0 0 0 1px #0a1a0d, 0 18px 48px rgba(0, 0, 0, 0.85), 0 0 24px rgba(87, 224, 106, 0.18);
   z-index: 9950;
   display: flex;
   flex-direction: column;
@@ -1158,8 +1130,14 @@ p {
   display: none;
 }
 @keyframes term-in {
-  from { opacity: 0; transform: translateY(18px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .term-header {
   display: flex;
@@ -1207,7 +1185,7 @@ p {
   font-size: 12px;
   line-height: 1.7;
   color: #a8c9ae;
-  background: repeating-linear-gradient(0deg, rgba(87,224,106,0.02) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(0deg, rgba(87, 224, 106, 0.02) 0 1px, transparent 1px 3px);
 }
 .term-log::-webkit-scrollbar {
   width: 8px;
@@ -1221,14 +1199,36 @@ p {
   color: #3a5a3e;
   margin-right: 6px;
 }
-.term-entry.sys { color: #57e06a; }
-.term-entry.info { color: #8fb89a; }
-.term-entry.warn { color: #d6a545; }
-.term-entry.err { color: #e05555; text-shadow: 0 0 8px rgba(224,48,48,0.5); }
-.term-entry.cog { color: #ff6b6b; background: rgba(179,18,27,0.14); border-left: 2px solid var(--red); padding-left: 6px; }
-.term-entry.user { color: #cbcbc4; }
-.term-entry.user::before { content: "> "; color: #57e06a; }
-.term-entry.cmd { color: #6b6b64; font-style: italic; }
+.term-entry.sys {
+  color: #57e06a;
+}
+.term-entry.info {
+  color: #8fb89a;
+}
+.term-entry.warn {
+  color: #d6a545;
+}
+.term-entry.err {
+  color: #e05555;
+  text-shadow: 0 0 8px rgba(224, 48, 48, 0.5);
+}
+.term-entry.cog {
+  color: #ff6b6b;
+  background: rgba(179, 18, 27, 0.14);
+  border-left: 2px solid var(--red);
+  padding-left: 6px;
+}
+.term-entry.user {
+  color: #cbcbc4;
+}
+.term-entry.user::before {
+  content: "> ";
+  color: #57e06a;
+}
+.term-entry.cmd {
+  color: #6b6b64;
+  font-style: italic;
+}
 .term-input-row {
   display: flex;
   align-items: center;
@@ -1258,7 +1258,7 @@ p {
   letter-spacing: 0.06em;
   border-top: 1px dashed #1a2a1e;
 }
-/* ================= BLACKOUT + FLOOD ================= */
+
 .blackout {
   position: fixed;
   inset: 0;
@@ -1270,18 +1270,25 @@ p {
   flex-direction: column;
   gap: 18px;
 }
-.blackout.hidden { display: none; }
+.blackout.hidden {
+  display: none;
+}
 .blackout-inner {
   font-family: "VT323", monospace;
   font-size: clamp(2rem, 8vw, 4rem);
   letter-spacing: 0.28em;
   color: #111;
-  text-shadow: 0 0 20px rgba(179,18,27,0.24);
+  text-shadow: 0 0 20px rgba(179, 18, 27, 0.24);
   animation: blackout-pulse 2.6s ease-in-out infinite;
 }
 @keyframes blackout-pulse {
-  0%,100% { opacity: 0.18; }
-  50% { opacity: 0.45; }
+  0%,
+  100% {
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
 .kst-flood {
   position: fixed;
@@ -1291,7 +1298,9 @@ p {
   overflow: hidden;
   background: #000;
 }
-.kst-flood.hidden { display: none; }
+.kst-flood.hidden {
+  display: none;
+}
 .kst-flood span {
   position: absolute;
   font-family: "VT323", monospace;
@@ -1303,10 +1312,14 @@ p {
   animation: flood-flick 0.18s steps(2) infinite;
 }
 @keyframes flood-flick {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.25) hue-rotate(6deg); }
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.25) hue-rotate(6deg);
+  }
 }
-/* respect reduced motion */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
