@@ -260,9 +260,21 @@
     } catch (e) {}
     return 0;
   }
+  function setBlackoutUiActive(active) {
+    document.body.classList.toggle("blackout-active", !!active);
+    if (termToggle) {
+      termToggle.setAttribute(
+        "title",
+        active
+          ? (lang === "en" ? "Open recovery terminal" : "Открыть терминал восстановления")
+          : ""
+      );
+    }
+  }
   function activateBlackout() {
     var until = Date.now() + BLACKOUT_DURATION;
     setBlackoutCookie(until);
+    setBlackoutUiActive(true);
     if (blackoutEl) {
       blackoutEl.classList.remove("hidden");
       var inner = blackoutEl.querySelectorAll(".blackout-inner");
@@ -296,9 +308,11 @@
           ss0;
     }
     termLog(lang === "en" ? "[CRITICAL] BLACKOUT PROTOCOL ENGAGED — 10:00" : "[КРИТИЧНО] ПРОТОКОЛ БЛЭКАУТА АКТИВИРОВАН — 10:00", "cog");
+    termLog(lang === "en" ? "Recovery terminal remains available via >_" : "Терминал восстановления доступен через >_", "warn");
   }
   function deactivateBlackout() {
     if (blackoutEl) blackoutEl.classList.add("hidden");
+    setBlackoutUiActive(false);
     if (floodEl) {
       floodEl.classList.add("hidden");
       floodEl.innerHTML = "";
@@ -316,6 +330,7 @@
   function checkBlackoutOnLoad() {
     var until = getBlackoutUntil();
     if (until && Date.now() < until) {
+      setBlackoutUiActive(true);
       if (blackoutEl) blackoutEl.classList.remove("hidden");
       var inner = blackoutEl ? blackoutEl.querySelectorAll(".blackout-inner")[0] : null;
       if (blackoutCountdown) clearInterval(blackoutCountdown);
@@ -345,6 +360,7 @@
           : "[КРИТИЧНО] БЛЭКАУТ СОХРАНЯЕТСЯ — осталось " + Math.ceil((until - Date.now()) / 60000) + " мин. Используйте reboot для сброса.",
         "cog"
       );
+      termLog(lang === "en" ? "Recovery terminal remains available via >_" : "Терминал восстановления доступен через >_", "warn");
     }
   }
   checkBlackoutOnLoad();
@@ -675,8 +691,20 @@
     flash.style.opacity = cfg.flashOpacity;
     flash.classList.add("on");
     whisperEl.style.opacity = cfg.whisperOpacity;
-    whisperEl.textContent = rand(whispers);
+    
+    // Выбираем случайное слово шепота и отображаем
+    var phrase = rand(whispers);
+    whisperEl.textContent = phrase;
     whisperEl.classList.add("on");
+    
+    // ЛОГИРУЕМ появление шепота / глитча в полевом терминале
+    termLog(
+      lang === "en"
+        ? "[COGNITOHAZARD DETECTED] Vocalization: «" + phrase + "»"
+        : "[КОГНИТИВНАЯ УГРОЗА DETECTED] Фиксация шепота: «" + phrase + "»",
+      "cog"
+    );
+
     document.body.classList.add("shake-body");
     setTimeout(function () {
       flash.classList.remove("on");

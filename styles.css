@@ -338,6 +338,43 @@ b {
   color: var(--red-soft);
   box-shadow: 0 0 10px rgba(179, 18, 27, 0.3);
 }
+body.blackout-active .gate,
+body.blackout-active .boot {
+  display: none !important;
+}
+body.blackout-active .statusbar {
+  z-index: 9960;
+  justify-content: flex-end;
+  padding: 18px;
+  background: transparent;
+  border-bottom: 0;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+body.blackout-active .statusbar-left,
+body.blackout-active .statusbar-right > :not(#term-toggle) {
+  display: none;
+}
+body.blackout-active .statusbar-right {
+  overflow: visible;
+  pointer-events: none;
+}
+body.blackout-active #term-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9960;
+  pointer-events: auto;
+  color: #57e06a;
+  background: rgba(3, 7, 3, 0.92);
+  border-color: #1e7a31;
+  box-shadow: 0 0 18px rgba(87, 224, 106, 0.32), 0 0 0 1px rgba(87, 224, 106, 0.12) inset;
+}
+body.blackout-active #term-toggle:hover {
+  color: #d6f0da;
+  border-color: #57e06a;
+  box-shadow: 0 0 26px rgba(87, 224, 106, 0.5), 0 0 0 1px rgba(87, 224, 106, 0.22) inset;
+}
 @media (max-width: 520px) {
   .hide-sm {
     display: none;
@@ -1185,7 +1222,7 @@ p {
   font-size: 12px;
   line-height: 1.7;
   color: #a8c9ae;
-  background: repeating-linear-gradient(0deg, rgba(87, 224, 106, 0.02) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(0deg, rgba(87,224,106,0.02) 0 1px, transparent 1px 3px);
 }
 .term-log::-webkit-scrollbar {
   width: 8px;
@@ -1259,16 +1296,20 @@ p {
   border-top: 1px dashed #1a2a1e;
 }
 
+/* ================= BLACKOUT + FLOOD ================= */
 .blackout {
   position: fixed;
   inset: 0;
-  z-index: 9900;
+  /* Терминал и его кнопка выше блэкаута; остальная страница перекрыта. */
+  z-index: 9940;
   background: #000;
+  backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 18px;
+  user-select: none;
 }
 .blackout.hidden {
   display: none;
