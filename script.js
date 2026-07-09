@@ -218,8 +218,8 @@
     if (!entry) return;
     setTimeout(function () {
       entry.innerHTML = entry.innerHTML
-        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
-        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
+        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</span>');
     }, 500);
     setTimeout(function () {
       entry.className = "term-entry sys";
@@ -286,7 +286,7 @@
         if (diff <= 0) {
           clearInterval(blackoutCountdown);
           deactivateBlackout();
-          termLog(lang === "en" ? "BLACKOUT EXPIRED — signal restored" : "БЛЭКАУТ ИСТЁК — сигнал восстановлен", "sys");
+          termLog(lang === "en" ? "BLACKOUT protocol no longer active — signal restored" : "Действие протокола BLACKOUT прекращено — сигнал восстановлен", "sys");
           return;
         }
         var mm = Math.floor(diff / 60000);
@@ -294,20 +294,20 @@
         var txt = (mm < 10 ? "0" : "") + mm + ":" + (ss < 10 ? "0" : "") + ss;
         if (firstInner)
           firstInner.textContent =
-            (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") + txt;
+            (lang === "en" ? "SIGNAL LOST // BLACKOUT PROTOCOL — " : "СИГНАЛ ПОТЕРЯН // ПРОТОКОЛ BLACKOUT — ") + txt;
       }, 1000);
       var mm0 = 10,
         ss0 = 0;
       if (firstInner)
         firstInner.textContent =
-          (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") +
+          (lang === "en" ? "SIGNAL LOST // BLACKOUT PROTOCOL — " : "СИГНАЛ ПОТЕРЯН // ПРОТОКОЛ BLACKOUT — ") +
           (mm0 < 10 ? "0" : "") +
           mm0 +
           ":" +
           (ss0 < 10 ? "0" : "") +
           ss0;
     }
-    termLog(lang === "en" ? "[CRITICAL] BLACKOUT PROTOCOL ENGAGED — 10:00" : "[КРИТИЧНО] ПРОТОКОЛ БЛЭКАУТА АКТИВИРОВАН — 10:00", "cog");
+    termLog(lang === "en" ? "[CRITICAL] BLACKOUT PROTOCOL ENGAGED — 10:00" : "[КРИТИЧНО] ПРОТОКОЛ BLACKOUT АКТИВИРОВАН — 10:00", "cog");
     termLog(lang === "en" ? "Recovery terminal remains available via >_" : "Терминал восстановления доступен через >_", "warn");
   }
   function deactivateBlackout() {
@@ -340,14 +340,14 @@
         if (diff <= 0) {
           clearInterval(blackoutCountdown);
           deactivateBlackout();
-          termLog(lang === "en" ? "BLACKOUT EXPIRED — signal restored" : "БЛЭКАУТ ИСТЁК — сигнал восстановлен", "sys");
+          termLog(lang === "en" ? "BLACKOUT protocol no longer active — signal restored" : "Действие протокола BLACKOUT прекращено — сигнал восстановлен", "sys");
           return;
         }
         var mm = Math.floor(diff / 60000);
         var ss = Math.floor((diff % 60000) / 1000);
         if (inner)
           inner.textContent =
-            (lang === "en" ? "SIGNAL LOST // BLACKOUT ACTIVE — " : "СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — ") +
+            (lang === "en" ? "SIGNAL LOST // BLACKOUT PROTOCOL — " : "СИГНАЛ ПОТЕРЯН // ПРОТОКОЛ BLACKOUT — ") +
             (mm < 10 ? "0" : "") +
             mm +
             ":" +
@@ -389,7 +389,7 @@
         "0 0 " + (8 + Math.random() * 16).toFixed(0) + "px rgba(210,58,66," + (0.4 + Math.random() * 0.6).toFixed(2) + ")";
       floodEl.appendChild(span);
     }
-    termLog(lang === "en" ? "[CRITICAL] K-class textual flood // containment failure" : "[КРИТИЧНО] K-класс текстовый поток // отказ содержания", "cog");
+    termLog(lang === "en" ? "[CRITICAL] K-class textual flood // containment failure" : "[КРИТИЧНО] Текстовый поток класса K // сдерживание невозможно", "cog");
     blackoutTimer = setTimeout(function () {
       activateBlackout();
     }, 3500);
@@ -701,7 +701,7 @@
     termLog(
       lang === "en"
         ? "[COGNITOHAZARD DETECTED] Vocalization: «" + phrase + "»"
-        : "[КОГНИТИВНАЯ УГРОЗА DETECTED] Фиксация шепота: «" + phrase + "»",
+        : "[ОБНАРУЖЕНА КОГНИТИВНАЯ УГРОЗА] Фиксация: «" + phrase + "»",
       "cog"
     );
 
@@ -829,7 +829,7 @@
     }
     termLog(lang === "en" ? "Memetic residue cleared" : "Меметический осадок очищен", "info");
     termLog(lang === "en" ? "Session reset to pristine" : "Сессия сброшена до первозданной", "info");
-    termLog(lang === "en" ? "File re-encrypted // 0/5" : "Файл повторно зашифрован // 0/5", "sys");
+    termLog(lang === "en" ? "File re-encryption // SUCCESS" : "Повторное шифрование файла // УСПЕХ", "sys");
   }
 
   function handleO5Erasure() {
@@ -858,7 +858,7 @@
   }
 
   function handleKosstarCommand() {
-    termLog("kosstarthe1st is not a valid command or application", "err");
+    termLog("'kosstarthe1st' is not recognized as a command", "err");
     termLog(
       lang === "en"
         ? "Command recognition failed // logging attempt..."
