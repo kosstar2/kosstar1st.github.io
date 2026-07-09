@@ -100,7 +100,7 @@
     }, 700);
   }
 
-/* ---------- ELEMENTS: terminal / blackout / flood ---------- */
+ /* ---------- ELEMENTS: terminal / blackout / flood ---------- */
   var gate = document.getElementById("gate");
   var gateEnter = document.getElementById("gate-enter");
   var termEl = document.getElementById("site-terminal");
@@ -110,19 +110,15 @@
   var termClose = document.getElementById("term-close");
   var blackoutEl = document.getElementById("blackout");
   var floodEl = document.getElementById("kst-flood");
-
   var BLACKOUT_KEY = "scp-blackout-until";
   var BLACKOUT_DURATION = 10 * 60 * 1000; // 10 minutes
   var blackoutTimer = null;
   var blackoutCountdown = null;
   var escalationIntervalId = null;
-
   var sessionId = "SID-" + Math.random().toString(16).slice(2, 10).toUpperCase() + "-" + Date.now().toString(36).toUpperCase();
-
   function nowTs() {
     return new Date().toLocaleTimeString(locale, { hour12: false });
   }
-
   /* ---------- TERMINAL LOGIC ---------- */
   function termAddEntry(html, cls) {
     if (!termLogEl) return;
@@ -138,13 +134,11 @@
     termLogEl.appendChild(div);
     termLogEl.scrollTop = termLogEl.scrollHeight;
   }
-
   function termLog(msg, type) {
     type = type || "info";
     // escape minimal? we use innerHTML for bold, but plain text okay. We'll treat msg as HTML-safe (our own strings)
     termAddEntry(msg, type);
   }
-
   function termOpen() {
     if (!termEl) return;
     termEl.classList.remove("hidden");
@@ -159,7 +153,6 @@
     termEl.classList.add("hidden");
     termEl.setAttribute("aria-hidden", "true");
   }
-
   if (termToggle) {
     termToggle.addEventListener("click", function () {
       if (termEl && termEl.classList.contains("hidden")) termOpen();
@@ -170,11 +163,16 @@
     termClose.addEventListener("click", termCloseFn);
   }
   document.addEventListener("keydown", function (e) {
+    // если фокус в терминале — не мешаем вводу команд
+    var ae = document.activeElement;
+    var inTerm = ae && (ae.id === "term-input" || (termEl && termEl.contains(ae)));
+
     if (e.key === "Escape" && termEl && !termEl.classList.contains("hidden")) {
       termCloseFn();
+      return;
     }
-    // tilde to toggle
-    if (e.key === "`" || e.key === "ё") {
+    // tilde to toggle (только если не печатаем в инпуте)
+    if (!inTerm && (e.key === "`" || e.key === "ё")) {
       if (termEl) {
         e.preventDefault();
         if (termEl.classList.contains("hidden")) termOpen();
@@ -183,11 +181,10 @@
     }
   });
 
-  /* expose basic logs on load for immersion */
+/* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
-
-  function initTerminalLogs() {
+   function initTerminalLogs() {
     termLog(lang === "en" ? "FIELD TERMINAL v0.7.3-B // BUILD " + Date.now().toString(36) : "ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B // СБОРКА " + Date.now().toString(36), "sys");
     termLog("SESSION ID: <b>" + sessionId + "</b>", "info");
     termLog(lang === "en" ? "Location trace: LAT " + (50 + Math.random()*10).toFixed(4) + " LON " + (30 + Math.random()*10).toFixed(4) + " [IP MASKED]" : "Трассировка местоположения: ШИР " + (50 + Math.random()*10).toFixed(4) + " ДОЛ " + (30 + Math.random()*10).toFixed(4) + " [IP СКРЫТ]", "info");
@@ -200,21 +197,18 @@
     }
   }
   setTimeout(initTerminalLogs, 500);
-
   /** Глитч-подмена clearance — вызывается при первом открытии терминала */
   function runClearanceGlitch() {
     if (clearanceGlitchDone) return;
     clearanceGlitchDone = true;
     var entry = document.getElementById(clearanceEntryId);
     if (!entry) return;
-
     // Фаза 1: через 0.5с — LVL 0 → LVL ▓▓▓▓▓ (глитчит in-place)
     setTimeout(function () {
       entry.innerHTML = entry.innerHTML
         .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
         .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
     }, 500);
-
     // Фаза 2: через 1.3с — прямо в той же строке меняется на kosstarthe1st.welcome, а само сообщение становится зелёным
     setTimeout(function () {
       entry.className = "term-entry sys"; // зелёный системный цвет
@@ -222,7 +216,6 @@
         .replace(/CURRENT: LVL <span[^>]*>▓▓▓▓▓<\/span>/, 'CURRENT: LVL <b>kosstarthe1st.welcome</b>')
         .replace(/ТЕКУЩИЙ: УРОВЕНЬ <span[^>]*>▓▓▓▓▓<\/span>/, 'ТЕКУЩИЙ: УРОВЕНЬ <b>kosstarthe1st.welcome</b>');
     }, 1300);
-
     // Фаза 3: через 2.2с — терминал даёт доступ
     setTimeout(function () {
       termLog(lang === "en"
@@ -230,7 +223,6 @@
         : "Доступ к файлу предоставлен // Мониторинг действий пользователя...", "sys");
     }, 2200);
   }
-
   /* ---------- BLACKOUT / COOKIE PERSISTENCE ---------- */
   function setBlackoutCookie(until) {
     try {
@@ -255,7 +247,6 @@
     } catch (e) {}
     return 0;
   }
-
   function activateBlackout() {
     var until = Date.now() + BLACKOUT_DURATION;
     setBlackoutCookie(until);
@@ -285,7 +276,6 @@
     }
     termLog(lang === "en" ? "[CRITICAL] BLACKOUT PROTOCOL ENGAGED — 10:00" : "[КРИТИЧНО] ПРОТОКОЛ БЛЭКАУТА АКТИВИРОВАН — 10:00", "cog");
   }
-
   function deactivateBlackout() {
     if (blackoutEl) blackoutEl.classList.add("hidden");
     if (floodEl) {
@@ -302,7 +292,6 @@
       blackoutTimer = null;
     }
   }
-
   function checkBlackoutOnLoad() {
     var until = getBlackoutUntil();
     if (until && Date.now() < until) {
@@ -328,7 +317,6 @@
     }
   }
   checkBlackoutOnLoad();
-
   /* ---------- FLOOD OF TEXTS (EASTER EGG) ---------- */
   function startKSTTextFlood() {
     if (!floodEl) {
@@ -358,23 +346,29 @@
     }, 3500);
   }
 
-  var bootStarted = false;
 
+    /* ---------- BOOT AUDIO ---------- */
+  var bootAudio = document.getElementById("boot-audio");
+  var audioStarted = false;
+
+ /* ---------- ACCESS GATE (перед интро) ---------- */
+  var gate = document.getElementById("gate");
+  var gateEnter = document.getElementById("gate-enter");
+  var bootStarted = false;
   function startBoot() {
-    if (bootStarted) return;
+      if (bootStarted) return;
     bootStarted = true;
-    // пользовательский звук (если он добавил <audio id="boot-audio">)
     var bootAudio = document.getElementById("boot-audio");
     if (bootAudio) {
-      try {
-        bootAudio.volume = 0.85;
-        bootAudio.currentTime = 0;
-        bootAudio.play().catch(function(){});
-      } catch(e){}
+      bootAudio.volume = 0.85;
+      bootAudio.currentTime = 0;
+      bootAudio.play().catch(function(e) {
+        console.warn("Audio play failed, waiting for user gesture:", e);
+      });
     }
+    
     runBoot();
   }
-
   function closeGate() {
     if (!gate) return;
     gate.classList.add("gone");
@@ -382,14 +376,6 @@
       gate.style.display = "none";
     }, 500);
   }
-
-  function closeBoot() {
-    boot.classList.add("gone");
-    setTimeout(function () {
-      boot.style.display = "none";
-    }, 700);
-  }
-
   if (boot && bootLog && bootEnter) {
     if (bootSkip) {
       bootSkip.textContent = SKIP_LABEL;
@@ -400,7 +386,6 @@
       });
     }
     bootEnter.addEventListener("click", closeBoot);
-
     if (gate && gateEnter) {
       gateEnter.addEventListener("click", function () {
         closeGate();
@@ -461,61 +446,45 @@
   document.querySelectorAll(".fold-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var fold = btn.parentElement;
-      var isOpen = fold.classList.contains("open");
-      var newOpen = fold.classList.toggle("open");
-      btn.setAttribute("aria-expanded", newOpen ? "true" : "false");
+      var open = fold.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
       var sign = btn.querySelector(".fold-sign");
-      if (sign) sign.textContent = newOpen ? "—" : "+";
-      if (newOpen && !isOpen) {
-        var title = btn.textContent.trim().slice(0, 60);
-        termLog((lang === "en" ? "USER ACTION: appendix opened // " : "ДЕЙСТВИЕ ПОЛЬЗОВАТЕЛЯ: приложение открыто // ") + title, "info");
-      }
+      if (sign) sign.textContent = open ? "—" : "+";
     });
   });
 
   /* ---------- MOBILE TOUCH FOR REDACTED / GHOST ---------- */
-  document.querySelectorAll(".redacted").forEach(function (el) {
-    el.addEventListener("click", function (e) {
-      // avoid double handling if it's also k-mention? k-mention is different class
-      e.preventDefault();
-      var revealed = el.classList.toggle("touch-reveal");
-      var txt = el.querySelector(".r-reveal");
-      var txtContent = txt ? txt.textContent : "";
-      if (revealed) {
-        termLog((lang === "en" ? "USER ACTION: field decrypted // " : "ДЕЙСТВИЕ: поле рассекречено // ") + txtContent, "info");
-        setTimeout(function () {
-          el.classList.remove("touch-reveal");
-        }, 2500);
-      }
+  // На устройствах без hover включаем клик, чтобы раскрывать
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.querySelectorAll('.redacted').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isRevealed = el.classList.toggle('touch-reveal');
+        if (isRevealed) {
+          // снять через 2.5 с
+          setTimeout(function () { el.classList.remove('touch-reveal'); }, 2500);
+        }
+      });
     });
-  });
+    document.querySelectorAll('.ghost').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isRevealed = el.classList.toggle('touch-show');
+        if (isRevealed) {
+          setTimeout(function () { el.classList.remove('touch-show'); }, 3000);
+        }
+      });
+    });
+  }
 
-  document.querySelectorAll(".ghost").forEach(function (el) {
-    el.addEventListener("mouseenter", function () {
-      termLog(lang === "en" ? "TRACE: whisper field triggered // anomalous semantics" : "СЛЕД: триггер шёпота // аномальная семантика", "warn");
-    });
-    el.addEventListener("click", function (e) {
-      e.preventDefault();
-      var revealed = el.classList.toggle("touch-show");
-      if (revealed) {
-        termLog(lang === "en" ? "USER ACTION: hidden whisper revealed" : "ДЕЙСТВИЕ: скрытый шёпот раскрыт", "info");
-        setTimeout(function () {
-          el.classList.remove("touch-show");
-        }, 3000);
-      }
-    });
-  });
-
-  /* ---------- ESCALATION MECHANIC (K-MENTIONS) ---------- */
+/* ---------- ESCALATION MECHANIC (K-MENTIONS) ---------- */
   var mentions = document.querySelectorAll("[data-kmention]");
   var baseTotalMentions = mentions.length;
   var dynamicTotalMentions = baseTotalMentions;
   var unlockedCount = 0;
   var isEasterEggActive = false;
-
   var UNLOCKED_HOVER = lang === "en" ? "There is no way back" : "Пути назад нет";
   var LOCKED_HOVER = lang === "en" ? "Designation classified // Click to decrypt" : "Обозначение засекречено // Нажмите для дешифровки";
-
   function refreshMentionHoverTitles() {
     mentions.forEach(function (el) {
       if (el.classList.contains("unlocked")) {
@@ -525,24 +494,23 @@
       }
     });
   }
-
   function updateMeter() {
     var count = 0;
     mentions.forEach(function (el) {
       if (el.classList.contains("unlocked")) count++;
     });
     
+    // В нормальном режиме unlockedCount равен реальному количеству открытых спойлеров.
+    // В режиме страшилки dynamicTotalMentions делаем 999
     if (!isEasterEggActive) {
       unlockedCount = count;
       dynamicTotalMentions = baseTotalMentions;
     }
-
     var unlockedStates = [];
     mentions.forEach(function (el) {
       unlockedStates.push(el.classList.contains("unlocked") ? 1 : 0);
     });
     sessionStorage.setItem("scp-km-states", JSON.stringify(unlockedStates));
-
     var meterText = document.getElementById("k-meter-text");
     if (meterText) {
       var pct = Math.round((unlockedCount / (dynamicTotalMentions || 1)) * 100);
@@ -562,7 +530,6 @@
     refreshMentionHoverTitles();
     return unlockedCount;
   }
-
   if (baseTotalMentions > 0) {
     var savedStates = sessionStorage.getItem("scp-km-states");
     if (savedStates) {
@@ -574,7 +541,6 @@
       } catch (e) {}
     }
     updateMeter();
-
     mentions.forEach(function (el) {
       el.addEventListener("click", function (e) {
         e.preventDefault();
@@ -583,8 +549,6 @@
           el.classList.add("unlocked");
           var newCount = updateMeter();
           
-          termLog((lang === "en" ? "USER ACTION: designation DECRYPTED // " : "ДЕЙСТВИЕ: обозначение РАССЕКРЕЧЕНО // ") + el.textContent.trim(), "warn");
-
           var decryptAudio = document.getElementById("decrypt-audio");
           if (decryptAudio) {
             try {
@@ -594,17 +558,13 @@
               clone.play().catch(function(){});
             } catch(err) {}
           }
-
           if (newCount === 1) {
-            termLog(lang === "en" ? "[CRITICAL] FIRST COGNITOHAZARD MANIFESTATION // object noticed" : "[КРИТИЧНО] ПЕРВАЯ КОГНИТО-МАНИФЕСТАЦИЯ // объект заметил", "cog");
             burst();
-          } else {
-            termLog(lang === "en" ? "ANOMALY ESCALATION: " + newCount + "/" + dynamicTotalMentions + " focus increased" : "ЭСКАЛАЦИЯ АНОМАЛИИ: " + newCount + "/" + dynamicTotalMentions + " фокус усилен", "warn");
           }
         }
       });
     });
-
+    // Добавляем запуск ультра-страшилки по клику на статус-бар (если открыты все 4 базовых упоминания)
     document.querySelectorAll(".k-meter").forEach(function (meterEl) {
       meterEl.addEventListener("click", function () {
         if (unlockedCount >= baseTotalMentions && !isEasterEggActive) {
@@ -613,7 +573,10 @@
       });
     });
   }
-
+  /**
+   * Запуск ультра-страшилки
+   * Цифра начинает динамически расти к 999, частота глитчей непрерывно нарастает.
+   */
   window.triggerKosstar999Escalation = function () {
     if (isEasterEggActive) return;
     isEasterEggActive = true;
@@ -621,103 +584,69 @@
     unlockedCount = baseTotalMentions;
     dynamicTotalMentions = 999;
     updateMeter();
-    termLog(lang === "en" ? "[CRITICAL] K-COUNT ESCALATION BEGINS // 999 TARGET" : "[КРИТИЧНО] ЭСКАЛАЦИЯ K-СЧЁТЧИКА НАЧАЛАСЬ // ЦЕЛЬ 999", "cog");
-
-    if (escalationIntervalId) clearInterval(escalationIntervalId);
-    escalationIntervalId = setInterval(function () {
+    var escalationIntervalId = setInterval(function () {
       if (unlockedCount < 999) {
+        // Ускоряющийся рост
         var step = Math.floor(1 + (unlockedCount / 40));
         unlockedCount = Math.min(999, unlockedCount + step);
         updateMeter();
-        if (unlockedCount % 10 === 0 || Math.random() > 0.78) {
+        // Чем ближе к 999, тем яростнее бьют глитчи
+        if (unlockedCount % 12 === 0 || Math.random() > 0.8) {
           burst();
-        }
-        if (unlockedCount >= 999) {
-          termLog(lang === "en" ? "[ERR] THRESHOLD 999 REACHED // REALITY BREACH" : "[ОШБ] ПОРОГ 999 ДОСТИГНУТ // ПРОРЫВ РЕАЛЬНОСТИ", "err");
         }
       } else {
         clearInterval(escalationIntervalId);
-        escalationIntervalId = null;
-        // финальная фаза: flood + blackout
-        setTimeout(function () {
-          startKSTTextFlood();
-        }, 900);
+        console.log("Уровень аномалии достиг 999. Пасхалка готова к финальной фазе.");
       }
-    }, 145);
+    }, 150);
   };
 
   /* ---------- RANDOM GLITCH BURSTS + WHISPER ---------- */
   var whispersRU = [
-    "ОН ЗДЕСЬ",
-    "ОН ЧИТАЕТ ЭТО",
-    "НЕ ЗОВИ ЕГО ПО ИМЕНИ",
+    "Я ЗДЕСЬ",
+    "ДА, ЧИТАЙ",
+    "СЛАБОСТЬ ДЕМОНА...",
     "ВЫХОД ОТКРЫТ",
     "KOSSTAR THE 1ST",
     "ВНИМАНИЕ = ДВЕРЬ",
-    "ОН УЖЕ НЕ ВНУТРИ",
-    "ТЫ ТОЖЕ ВНУТРИ",
+    "...МОЯ СИЛА",
+    "СПАСИБО",
   ];
   var whispersEN = [
-    "HE IS HERE",
-    "HE IS READING",
-    "DO NOT CALL HIS NAME",
+    "I AM HERE",
+    "YES, READ",
+    "DEMON'S WEAKNESS...",
     "THE DOOR IS OPEN",
     "KOSSTAR THE 1ST",
     "ATTENTION = DOOR",
-    "HE IS NO LONGER INSIDE",
-    "YOU ARE INSIDE TOO",
+    "...IS MY POWER",
+    "THANK YOU",
   ];
-  var whispers = lang === "en" ? whispersEN : whispersRU;
+  var whispers = lang === 'en' ? whispersEN : whispersRU;
   var flash = document.getElementById("flash");
   var whisperEl = document.getElementById("whisper");
 
-  function getGlitchConfig() {
+   function getGlitchConfig() {
     if (unlockedCount === 0) return null;
-    
-    var baseInterval;
-    var whisperOpacity;
-    var flashOpacity;
-
-    if (!isEasterEggActive) {
-      baseInterval = 32000 - unlockedCount * 5500;
-      whisperOpacity = 0.15 + (unlockedCount - 1) * 0.21;
-      flashOpacity = 0.08 + (unlockedCount - 1) * 0.09;
-    } else {
-      var progress = (unlockedCount - baseTotalMentions) / (999 - baseTotalMentions);
-      baseInterval = 4500 - progress * 4200;
-      whisperOpacity = 1.0;
-      flashOpacity = 0.4 + progress * 0.45;
-    }
-
-    var interval = baseInterval + Math.random() * (isEasterEggActive ? 600 : 4000);
-
+    var baseInterval = 32000 - unlockedCount * 5500;
+    var interval = baseInterval + Math.random() * 4000;
+    var whisperOpacity = 0.15 + (unlockedCount - 1) * 0.21;
+    var flashOpacity = 0.08 + (unlockedCount - 1) * 0.09;
     return {
-      interval: Math.max(300, interval),
+      interval: Math.max(4000, interval),
       whisperOpacity: Math.min(1, whisperOpacity),
-      flashOpacity: Math.min(0.9, flashOpacity)
+      flashOpacity: Math.min(0.6, flashOpacity)
     };
   }
-
   function burst() {
     var cfg = getGlitchConfig();
     if (reduce || !flash || !whisperEl || !cfg) return;
-
     flash.style.opacity = cfg.flashOpacity;
     flash.classList.add("on");
-
     whisperEl.style.opacity = cfg.whisperOpacity;
     whisperEl.textContent = rand(whispers);
     whisperEl.classList.add("on");
-
     document.body.classList.add("shake-body");
-
-    // лог когнито-угрозы
-    if (unlockedCount === 1) {
-      termLog("[WARN] COGNITOHAZARD // low visibility manifestation: " + whisperEl.textContent, "warn");
-    } else {
-      termLog("[ERR] TEXTUAL MANIFESTATION // " + whisperEl.textContent, "err");
-    }
-
     setTimeout(function () {
       flash.classList.remove("on");
       flash.style.opacity = "";
@@ -726,12 +655,10 @@
       document.body.classList.remove("shake-body");
     }, 1300);
   }
-
-  function isBlackoutActive() {
+function isBlackoutActive() {
     var until = getBlackoutUntil();
     return until && Date.now() < until;
   }
-
   function scheduleBurst() {
     var cfg = getGlitchConfig();
     var delay = cfg ? cfg.interval : 28000;
@@ -756,14 +683,12 @@
     }, delay);
   }
   scheduleBurst();
-
   /* ---------- TICKER (scramble) ---------- */
   var ticker = document.getElementById("ticker");
   var TICK_TEXT = "KOSSTAR THE 1ST · KOSSTAR THE 1ST · KOSSTAR THE 1ST";
   var TICK_TEXT_0 = lang === "en" 
     ? "[DESIGNATION CLASSIFIED // DECRYPT MENTIONS IN FILE TO ACCESS]" 
     : "[ОБОЗНАЧЕНИЕ ЗАСЕКРЕЧЕНО // РАССЕКРЕТЬТЕ УПОМИНАНИЯ В ФАЙЛЕ]";
-
   if (ticker) {
     if (reduce) {
       ticker.textContent = unlockedCount > 0 ? TICK_TEXT : TICK_TEXT_0;
@@ -787,6 +712,7 @@
     document.querySelectorAll(".corrupt-line").forEach(function (el) {
       var original = el.textContent;
       setInterval(function () {
+        // работаем только если приложение раскрыто (видно)
         if (!el.offsetParent) return;
         var out = "";
         for (var i = 0; i < original.length; i++) {
@@ -799,7 +725,6 @@
       }, 160);
     });
   }
-
   /* ---------- TERMINAL COMMANDS ---------- */
   function rebootTerminal() {
     termLog(lang === "en" ? "--- SYSTEM REBOOT INITIATED ---" : "--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
