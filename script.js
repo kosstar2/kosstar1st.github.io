@@ -489,14 +489,18 @@
     });
   }
 
-  /* ---------- ACCORDIONS ---------- */
+   /* ---------- ACCORDIONS ---------- */
   document.querySelectorAll(".fold-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var fold = btn.parentElement;
+      var body = fold ? fold.querySelector(".fold-body") : null;
       var open = fold.classList.toggle("open");
       btn.setAttribute("aria-expanded", open ? "true" : "false");
       var sign = btn.querySelector(".fold-sign");
       if (sign) sign.textContent = open ? "—" : "+";
+      if (body) {
+        body.style.maxHeight = open ? body.scrollHeight + "px" : "0px";
+      }
     });
   });
 
@@ -894,7 +898,7 @@
       termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
-      termLog(lang === "en" ? "  unknown: command undefined" : "  неизвестно: команда не определена", "info");
+      termLog(lang === "en" ? "  unknown - command undefined" : "  неизвестно - команда не определена", "info");
     },
     clear: function () {
       if (termLogEl) termLogEl.innerHTML = "";

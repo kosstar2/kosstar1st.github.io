@@ -678,7 +678,8 @@ p {
   transition: max-height 0.45s ease;
 }
 .fold.open .fold-body {
-  max-height: 600px;
+  max-height: 2000px;
+}
 }
 .fold-inner-pad {
   padding: 6px 18px 18px;
