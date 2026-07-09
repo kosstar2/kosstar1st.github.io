@@ -859,8 +859,8 @@
 
   function handleKosstarCommand() {
     termLog(lang === "en"
-          ? "'" + cmd + "' is not recognized as a command"
-          : "'" + cmd + "' не является командой",
+          ? "'kosstarthe1st' is not recognized as a command"
+          : "'kosstarthe1st' не является командой",
         "err");
     setTimeout(function () {
       termLog(lang === "en" ? "[CRITICAL] DIRECT COGNITOHAZARD INVOCATION" : "[КРИТИЧНО] ПРЯМОЙ ВЫЗОВ КОГНИТО-УГРОЗЫ", "cog");
@@ -894,7 +894,7 @@
       termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
-      termLog(lang === "en" ? "Unknown: command undefined" : "Неизвестно: команда не определена"), "info";
+      termLog(lang === "en" ? "Unknown: command undefined" : "Неизвестно: команда не определена", "info");
     },
     clear: function () {
       if (termLogEl) termLogEl.innerHTML = "";
