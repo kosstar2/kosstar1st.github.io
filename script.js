@@ -224,8 +224,8 @@
     setTimeout(function () {
       entry.className = "term-entry sys";
       entry.innerHTML = entry.innerHTML
-        .replace(/CURRENT: LVL <span[^>]*>▓▓▓▓▓<\/span>/, 'CURRENT: LVL <b>kosstarthe1st.welcome</b>')
-        .replace(/ТЕКУЩИЙ: УРОВЕНЬ <span[^>]*>▓▓▓▓▓<\/span>/, 'ТЕКУЩИЙ: УРОВЕНЬ <b>kosstarthe1st.welcome</b>');
+        .replace(/CURRENT: LVL <span[^>]*>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓<\/span>/, 'CURRENT: LVL <b>kosstarthe1st.welcome</b>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ <span[^>]*>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓<\/span>/, 'ТЕКУЩИЙ: УРОВЕНЬ <b>kosstarthe1st.welcome</b>');
     }, 1300);
     setTimeout(function () {
       termLog(
@@ -356,8 +356,8 @@
       }, 1000);
       termLog(
         lang === "en"
-          ? "[CRITICAL] BLACKOUT PERSISTS — " + Math.ceil((until - Date.now()) / 60000) + " min remaining. Use reboot to clear."
-          : "[КРИТИЧНО] БЛЭКАУТ СОХРАНЯЕТСЯ — осталось " + Math.ceil((until - Date.now()) / 60000) + " мин. Используйте reboot для сброса.",
+          ? "[CRITICAL] BLACKOUT PROTOCOL PERSISTS — " + Math.ceil((until - Date.now()) / 60000) + " min remaining. Use reboot to clear."
+          : "[КРИТИЧНО] ПРОТОКОЛ BLACKOUT СОХРАНЯЕТСЯ — осталось " + Math.ceil((until - Date.now()) / 60000) + " мин. Используйте reboot для сброса.",
         "cog"
       );
       termLog(lang === "en" ? "Recovery terminal remains available via >_" : "Терминал восстановления доступен через >_", "warn");
@@ -858,14 +858,10 @@
   }
 
   function handleKosstarCommand() {
-    termLog("'kosstarthe1st' is not recognized as a command", "err");
-    termLog(
-      lang === "en"
-        ? "Command recognition failed // logging attempt..."
-        : "Распознавание команды не удалось // логирование попытки...",
-      "warn"
-    );
-    termLog(lang === "en" ? "ANOMALY: designation vocalized in terminal" : "АНОМАЛИЯ: обозначение произнесено в терминале", "cog");
+    termLog(lang === "en"
+          ? "'" + cmd + "' is not recognized as a command"
+          : "'" + cmd + "' не является командой",
+        "err");
     setTimeout(function () {
       termLog(lang === "en" ? "[CRITICAL] DIRECT COGNITOHAZARD INVOCATION" : "[КРИТИЧНО] ПРЯМОЙ ВЫЗОВ КОГНИТО-УГРОЗЫ", "cog");
       mentions.forEach(function (el) {
@@ -896,9 +892,9 @@
       termLog("  reboot - " + (lang === "en" ? "reset site to pristine state" : "сбросить сайт до первозданного вида"), "info");
       termLog("  erased.txt - " + (lang === "en" ? "open erased file (404)" : "открыть стёртый файл (404)"), "info");
       termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
-      termLog("  kosstarthe1st - ???", "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
+      termLog(lang === "en" ? "Unknown: command undefined" : "Неизвестно: команда не определена"), "info";
     },
     clear: function () {
       if (termLogEl) termLogEl.innerHTML = "";
