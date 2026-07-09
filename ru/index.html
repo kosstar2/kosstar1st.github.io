@@ -14,6 +14,7 @@
       content="Аномалия, совершившая прорыв из VRChat в реальность. Классификация — [ДАННЫЕ УДАЛЕНЫ]."
     />
     <title>SCP-KΣ-0001 :: kosstar the 1st — ФОНД SCP</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -27,8 +28,7 @@
     />
   </head>
   <body>
-
-  <!-- ===================== ACCESS GATE (перед интро) ===================== -->
+    <!-- ===================== ACCESS GATE (перед интро) ===================== -->
     <div id="gate" class="gate">
       <div class="gate-inner">
         <div class="gate-sigil" aria-hidden="true">
@@ -80,7 +80,7 @@
       </div>
       <div class="statusbar-right">
         <a href="../index.html" class="lang-switch" title="View in English">EN</a>
-        <button id="term-toggle" class="term-toggle" title="Открыть терминал">>_</button>
+        <button type="button" id="term-toggle" class="term-toggle" title="Открыть терминал">&gt;_</button>
         <span class="accent">● REC</span>
         <span id="clock" class="mono">--:--:--</span>
       </div>
@@ -109,9 +109,7 @@
           КОНФИДЕНЦИАЛЬНО / ТОЛЬКО ДЛЯ ПЕРСОНАЛА УРОВНЯ 4
         </div>
         <h1 class="hero-title">
-          <span class="glitch glitch-hard" data-text="SCP">SCP</span
-          ><span class="dash">-</span
-          ><span class="glitch glitch-hard" data-text="KΣ-0001">KΣ-0001</span>
+          <span class="glitch glitch-hard" data-text="SCP">SCP</span><span class="dash">-</span><span class="glitch glitch-hard" data-text="KΣ-0001">KΣ-0001</span>
         </h1>
         <div class="hero-sub">
           <span class="chip">ОБЪЕКТ:</span>
@@ -156,7 +154,7 @@
         <h2 class="section-title">
           <span class="glitch" data-text="ОПИСАНИЕ">ОПИСАНИЕ</span>
         </h2>
-         <p>
+        <p>
           SCP-KΣ-0001, в среде происхождения самообозначенный как
           <span class="k-mention" data-kmention="true" title="Обозначение засекречено // Нажмите для дешифровки"><span class="km-hidden">███████████████</span><span class="km-resolved">«kosstar the 1st»</span></span>, — аномальная
           сущность, впервые зафиксированная
@@ -164,27 +162,21 @@
           года внутри социальной VR-платформы «VRChat». Объект не
           классифицируется ни как программная ошибка, ни как аватар
           пользователя; его поведение демонстрирует паттерны,
-          <span class="accent"
-            >несовместимые с работой какого-либо известного алгоритма</span
-          >.
+          <span class="accent">несовместимые с работой какого-либо известного алгоритма</span>.
         </p>
         <p>
           Первые сообщения поступили от пользователя (см.
           Приложение К-1), утверждавшего, что он «встретил, пожалуй, наиболее странную херню в этой игре».
           Объект, кажется, не существует в игровой системе аккаунтов, оставаясь невидимым для систем модерации платформы.
           Он не отвечал на обращения или физические контакты, но, как сообщают,
-          <span class="ghost" data-whisper="он отвечал, когда его звали по имени"
-            >реагировал на упоминание своего обозначения</span
-          >.
+          <span class="ghost" data-whisper="он отвечал, когда его звали по имени">реагировал на упоминание своего обозначения</span>.
         </p>
         <p>
           Внешний вид объекта не описан ни одним наблюдателем
           последовательно. Свидетельства противоречивы и исключают друг
           друга: от «человеческой фигуры без лица» до «пятна, в котором
           ломается сам свет». Фонд полагает, что объект
-          <span class="redacted"
-            ><span class="r-reveal">не имеет фиксированной формы в нашем восприятии</span>████████████████</span
-          >
+          <span class="redacted"><span class="r-reveal">не имеет фиксированной формы в нашем восприятии</span>████████████████</span>
           и существует лишь постольку, поскольку его кто-то воспринимает.
         </p>
       </section>
@@ -192,16 +184,12 @@
       <!-- CONTAINMENT -->
       <section class="block reveal">
         <h2 class="section-title">
-          <span class="glitch" data-text="ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ"
-            >ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ</span
-          >
+          <span class="glitch" data-text="ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ">ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ</span>
         </h2>
         <p>
           SCP-KΣ-0001 невозможно поместить в физическое укрытие, поскольку
           объект, по всей видимости,
-          <span class="accent"
-            >не обладает стабильной материальной формой</span
-          >
+          <span class="accent">не обладает стабильной материальной формой</span>
           в нашем пространственно-временном континууме.
         </p>
         <p>Установлены следующие процедуры:</p>
@@ -247,18 +235,14 @@
           локальная реальность «глючила»: свет мигал вне сети, звук
           расслаивался, а на записях появлялись кадры, на которых
           присутствовал
-          <span class="redacted"
-            ><span class="r-reveal">объект вне виртуальной среды</span>[ДАННЫЕ УДАЛЕНЫ]</span
-          >.
+          <span class="redacted"><span class="r-reveal">объект вне виртуальной среды</span>[ДАННЫЕ УДАЛЕНЫ]</span>.
         </p>
         <p>
           Согласно восстановленному показанию агента █████ (см. Приложение
           К-2), объект «вышел не через экран. Он вышел через внимание». С тех
           пор SCP-KΣ-0001, предположительно, существует одновременно в обеих
           средах.
-          <span class="ghost" data-whisper="я не единственный"
-            >Мы не знаем, где он «настоящий».</span
-          >
+          <span class="ghost" data-whisper="я не единственный">Мы не знаем, где он «настоящий».</span>
         </p>
         <p>
           <span class="accent">Намерения объекта</span> остаются
@@ -289,7 +273,7 @@
               Объект проигнорировал пользователя, продолжая двигать конечностями перед зеркалом. Пользователь отметил, что «такую точность отслеживания он никогда не видел». Будто объект «двигался без задержки и ограничений, как живой».
               <div><span class="ts">[VRChat]</span> Urii_Podvalov27: "Are you russian?"</div>
               Объект продолжал игнорировать обращения к себе. Пользователь подошёл вплотную к объекту, перекрыв тому доступ к зеркалу, но тот просто сместился.
-              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: <span class="accent">"Ну и пошёл ты, <span class="accent"><span class="k-mention" data-kmention="true" title="Обозначение засекречено // Нажмите для дешифровки"><span class="km-hidden">███████████████</span><span class="km-resolved">kosstar the 1st</span></span>."</span></div>
+              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: <span class="accent">"Ну и пошёл ты, <span class="k-mention" data-kmention="true" title="Обозначение засекречено // Нажмите для дешифровки"><span class="km-hidden">███████████████</span><span class="km-resolved">kosstar the 1st</span></span>."</span></div>
               Объект резко повернул голову на пользователя, и тому «стало так некомфортно, что захотелось не просто сорвать с себя шлем, а полностью выключить компьютер». Голова объекта продолжала следить за пользователем, а через несколько секунд объект произнёс:
               <div class="accent corrupt-line">[СОДЕРЖИМОЕ СООБЩЕНИЯ УДАЛЕНО ИЗ АРХИВА]</div>
               <div class="muted note">▸ Всего зафиксировано и успешно стёрто четыре контакта с объектом. Все четверо свидетелей позднее сообщили об одинаковом сне. В нём объект (для каждого из свидетелей в своей собственной форме) выражал благодарность за такой интерес к своей персоне, и утверждал, что они позволили ему «продолжить жить»</div>
@@ -337,24 +321,24 @@
             <div class="log">
               <div>После изучения природы объекта, его реакции на внешние контакты, предварительную оценку его намерений и исследование потенциальных методов сдерживания, советом O5 было принято решение назначить объекту класс ████████. Поскольку распространение сведений об объекте предположительно напрямую влияет на уровень его силы, а вместе с тем и угрозы, советом O5 было принято следующее решение:</div>
               <ul class="rules">
-          <li>
-            Все упоминания имени объекта в документах засекретить. Было установлено, что даже простое наличие незашифрованного имени в тексте даёт объекту более явное присутствие в реальности.
-          </li>      
-          <li>
-            Всех установленных свидетелей, исследователей, искателей объекта обработать амнезиаками класса █. <span class="redacted"><span class="r-reveal">Не распространяется на совет O5</span>███████████████████████████████.</span>
-          </li>
-          <li>
-            Развернуть автономные системы по поиску упоминаний об объекте по его названию и ключевым словам и обеспечить DDoS атаки на сайты их содержащие, а затем полное стирание подобных упоминаний и обработку свидетелей амнезиаками.
-          </li>
-          <li>
-            Совместно с разработчиками социальной платформы, на которой впервые был обнаружен объект, разработать систему, которая закрывает приложение с программной ошибкой при обнаружении объекта. По окончании разработки обработать всех причастных амнезиаками, доступ к чтению или изменению кода запретить.
-          </li>
-          <li>
-            Документ и все его копии <span class="accent">полностью уничтожить</span>. Любые упоминания, истории, рассказы, напоминающие объект <span class="accent">также уничтожить</span>.
-          </li>
-        </ul>
+                <li>
+                  Все упоминания имени объекта в документах засекретить. Было установлено, что даже простое наличие незашифрованного имени в тексте даёт объекту более явное присутствие в реальности.
+                </li>
+                <li>
+                  Всех установленных свидетелей, исследователей, искателей объекта обработать амнезиаками класса █. <span class="redacted"><span class="r-reveal">Не распространяется на совет O5</span>███████████████████████████████.</span>
+                </li>
+                <li>
+                  Развернуть автономные системы по поиску упоминаний об объекте по его названию и ключевым словам и обеспечить DDoS атаки на сайты их содержащие, а затем полное стирание подобных упоминаний и обработку свидетелей амнезиаками.
+                </li>
+                <li>
+                  Совместно с разработчиками социальной платформы, на которой впервые был обнаружен объект, разработать систему, которая закрывает приложение с программной ошибкой при обнаружении объекта. По окончании разработки обработать всех причастных амнезиаками, доступ к чтению или изменению кода запретить.
+                </li>
+                <li>
+                  Документ и все его копии <span class="accent">полностью уничтожить</span>. Любые упоминания, истории, рассказы, напоминающие объект <span class="accent">также уничтожить</span>.
+                </li>
+              </ul>
+              <div>Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также по всей видимости враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения. Для его активации</div>
             </div>
-          <div>Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также по всей видимости враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения. Для его активации</div>
           </div>
         </div>
       </section>
@@ -374,28 +358,30 @@
       </footer>
     </main>
 
-<!-- SITE TERMINAL -->
+    <!-- SITE TERMINAL -->
     <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
       <div class="term-header">
         <span class="term-title">SCP-KΣ-0001 // ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B</span>
         <div class="term-controls">
-          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> КАНАЛ УСТ.</span>
+          <span class="term-status"><span class="livedot" style="width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #57e06a"></span> КАНАЛ УСТ.</span>
           <button id="term-close" class="term-close" type="button">[X]</button>
         </div>
       </div>
       <div id="term-log" class="term-log"></div>
-      <div class="term-input-row">
-        <span class="term-prompt">>_</span>
-        <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
-      </div>
+      <form id="term-form" class="term-input-row" autocomplete="off" action="javascript:void(0)" method="get" onsubmit="return false;">
+        <span class="term-prompt">&gt;_</span>
+        <input id="term-input" class="term-input" type="text" name="cmd" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
+        <button type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0" tabindex="-1" aria-hidden="true">go</button>
+      </form>
       <div class="term-help">help — список команд · TAB — автодополнение · ESC — закрыть</div>
     </div>
-    <div id="blackout" class="blackout hidden"><div class="blackout-inner">СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — 10:00</div><div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">используйте терминал &gt;_ и введите reboot для восстановления</div></div>
-    <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
-    <script type="module" src="../script.js"></script>
-  </body>
-</html>
 
-    <script type="module" src="../script.js"></script>
+    <div id="blackout" class="blackout hidden">
+      <div class="blackout-inner">СИГНАЛ ПОТЕРЯН // ПРОТОКОЛ BLACKOUT — 10:00</div>
+      <div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">используйте терминал &gt;_ и введите reboot для восстановления</div>
+    </div>
+    <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
+
+    <script src="../script.js"></script>
   </body>
 </html>
