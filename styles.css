@@ -1318,17 +1318,17 @@ p {
   font-family: "VT323", monospace;
   font-size: clamp(2rem, 8vw, 4rem);
   letter-spacing: 0.28em;
-  color: #111;
-  text-shadow: 0 0 20px rgba(179, 18, 27, 0.24);
+  color: #3a3a3a;
+  text-shadow: 0 0 20px rgba(179, 18, 27, 0.34);
   animation: blackout-pulse 2.6s ease-in-out infinite;
 }
 @keyframes blackout-pulse {
   0%,
   100% {
-    opacity: 0.18;
+    opacity: 0.42;
   }
-  30% {
-    opacity: 0.45;
+  50% {
+    opacity: 0.82;
   }
 }
 .kst-flood {
