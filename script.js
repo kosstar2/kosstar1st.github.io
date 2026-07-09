@@ -163,16 +163,11 @@
     termClose.addEventListener("click", termCloseFn);
   }
   document.addEventListener("keydown", function (e) {
-    // если фокус в терминале — не мешаем вводу команд
-    var ae = document.activeElement;
-    var inTerm = ae && (ae.id === "term-input" || (termEl && termEl.contains(ae)));
-
     if (e.key === "Escape" && termEl && !termEl.classList.contains("hidden")) {
       termCloseFn();
-      return;
     }
-    // tilde to toggle (только если не печатаем в инпуте)
-    if (!inTerm && (e.key === "`" || e.key === "ё")) {
+    // tilde to toggle
+    if (e.key === "`" || e.key === "ё") {
       if (termEl) {
         e.preventDefault();
         if (termEl.classList.contains("hidden")) termOpen();
@@ -180,21 +175,22 @@
       }
     }
   });
-
 /* expose basic logs on load for immersion */
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
-   function initTerminalLogs() {
+  function initTerminalLogs() {
     termLog(lang === "en" ? "FIELD TERMINAL v0.7.3-B // BUILD " + Date.now().toString(36) : "ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B // СБОРКА " + Date.now().toString(36), "sys");
     termLog("SESSION ID: <b>" + sessionId + "</b>", "info");
     termLog(lang === "en" ? "Location trace: LAT " + (50 + Math.random()*10).toFixed(4) + " LON " + (30 + Math.random()*10).toFixed(4) + " [IP MASKED]" : "Трассировка местоположения: ШИР " + (50 + Math.random()*10).toFixed(4) + " ДОЛ " + (30 + Math.random()*10).toFixed(4) + " [IP СКРЫТ]", "info");
-    // Записываем clearance с LVL 0 (изначально красным)
+    // Записываем clearance с LVL 0 и присваиваем id для последующего глитча
     var clrText = lang === "en" ? "Clearance verification: LVL 4 REQUIRED // CURRENT: LVL 0" : "Проверка допуска: ТРЕБУЕТСЯ УРОВЕНЬ 4 // ТЕКУЩИЙ: УРОВЕНЬ 0";
-    termAddEntry(clrText, "err");
+    termAddEntry(clrText, "warn");
+    // пометим последнюю запись id, чтобы потом найти
     var allEntries = termLogEl ? termLogEl.querySelectorAll(".term-entry") : [];
     if (allEntries.length > 0) {
       allEntries[allEntries.length - 1].id = clearanceEntryId;
     }
+    termLog(lang === "en" ? "Awaiting clearance resolution..." : "Ожидание разрешения допуска...", "info");
   }
   setTimeout(initTerminalLogs, 500);
   /** Глитч-подмена clearance — вызывается при первом открытии терминала */
@@ -203,25 +199,24 @@
     clearanceGlitchDone = true;
     var entry = document.getElementById(clearanceEntryId);
     if (!entry) return;
-    // Фаза 1: через 0.5с — LVL 0 → LVL ▓▓▓▓▓ (глитчит in-place)
+    // Фаза 1: через 0.6с — LVL 0 → LVL ▓▓▓▓▓ (глитч)
     setTimeout(function () {
       entry.innerHTML = entry.innerHTML
-        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#36e0e6">▓▓▓▓▓</span>')
-        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#36e0e6">▓▓▓▓▓</span>');
-    }, 500);
-    // Фаза 2: через 1.3с — прямо в той же строке меняется на kosstarthe1st.welcome, а само сообщение становится зелёным
+        .replace(/CURRENT: LVL 0/, 'CURRENT: LVL <span style="color:#e05555">▓▓▓▓▓</span>')
+        .replace(/ТЕКУЩИЙ: УРОВЕНЬ 0/, 'ТЕКУЩИЙ: УРОВЕНЬ <span style="color:#e05555">▓▓▓▓▓</span>');
+    }, 600);
+    // Фаза 2: через 1.4с — новая строка с kosstarthe1st.welcome
     setTimeout(function () {
-      entry.className = "term-entry sys"; // зелёный системный цвет
-      entry.innerHTML = entry.innerHTML
-        .replace(/CURRENT: LVL <span[^>]*>▓▓▓▓▓<\/span>/, 'CURRENT: LVL <b>kosstarthe1st.welcome</b>')
-        .replace(/ТЕКУЩИЙ: УРОВЕНЬ <span[^>]*>▓▓▓▓▓<\/span>/, 'ТЕКУЩИЙ: УРОВЕНЬ <b>kosstarthe1st.welcome</b>');
-    }, 1300);
-    // Фаза 3: через 2.2с — терминал даёт доступ
+      termLog(lang === "en"
+        ? "LVL override: <b style='color:#e05555'>kosstarthe1st.welcome</b>"
+        : "ПЕРЕОПРЕД. УРОВНЯ: <b style='color:#e05555'>kosstarthe1st.welcome</b>", "err");
+    }, 1400);
+    // Фаза 3: через 2.5с — «принято», файл открыт
     setTimeout(function () {
       termLog(lang === "en"
         ? "File access granted // Monitoring user interaction..."
         : "Доступ к файлу предоставлен // Мониторинг действий пользователя...", "sys");
-    }, 2200);
+    }, 2500);
   }
   /* ---------- BLACKOUT / COOKIE PERSISTENCE ---------- */
   function setBlackoutCookie(until) {
@@ -725,171 +720,4 @@ function isBlackoutActive() {
       }, 160);
     });
   }
-  /* ---------- TERMINAL COMMANDS ---------- */
-  function rebootTerminal() {
-    termLog(lang === "en" ? "--- SYSTEM REBOOT INITIATED ---" : "--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
-    // clear intervals
-    if (escalationIntervalId) {
-      clearInterval(escalationIntervalId);
-      escalationIntervalId = null;
-    }
-    if (blackoutTimer) {
-      clearTimeout(blackoutTimer);
-      blackoutTimer = null;
-    }
-    // clear blackout
-    deactivateBlackout();
-    // reset mentions
-    try {
-      sessionStorage.removeItem("scp-km-states");
-      sessionStorage.removeItem(BLACKOUT_KEY);
-    } catch(e){}
-    clearBlackoutStorage();
-    isEasterEggActive = false;
-    unlockedCount = 0;
-    dynamicTotalMentions = baseTotalMentions;
-    mentions.forEach(function (el) { el.classList.remove("unlocked"); });
-    updateMeter();
-    // clear glitches
-    document.body.classList.remove("shake-body");
-    if (flash) { flash.classList.remove("on"); flash.style.opacity=""; }
-    if (whisperEl) { whisperEl.classList.remove("on"); whisperEl.style.opacity=""; }
-    if (floodEl) { floodEl.classList.add("hidden"); floodEl.innerHTML=""; }
-    termLog(lang === "en" ? "Memetic residue cleared" : "Меметический осадок очищен", "info");
-    termLog(lang === "en" ? "Session reset to pristine" : "Сессия сброшена до первозданной", "info");
-    termLog(lang === "en" ? "File re-encrypted // 0/5" : "Файл повторно зашифрован // 0/5", "sys");
-  }
-
-  function handleO5Erasure() {
-    termLog(lang === "en" ? "[O5] ERASURE PROTOCOL INITIATED // AUTH CODE ████" : "[O5] ПРОТОКОЛ СТИРАНИЯ ИНИЦИИРОВАН // КОД ████", "err");
-    termLog(lang === "en" ? "Purging document..." : "Очистка документа...", "warn");
-    var doc = document.querySelector(".doc-shell");
-    if (doc) {
-      doc.style.transition = "opacity 0.9s ease, filter 0.9s ease";
-      doc.style.opacity = "0";
-      doc.style.filter = "blur(18px)";
-    }
-    setTimeout(function () {
-      termLog(lang === "en" ? "Document erased by order of O5-█" : "Документ стёрт по приказу O5-█", "err");
-      // redirect to 404
-      var p404 = lang === "en" ? "./404.html" : "../404.html";
-      // respect github pages base? try both
-      if (lang === "ru") {
-        // if we're in /ru/, go to ../404.html else ./404.html
-        if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
-        else p404 = "./404.html";
-      }
-      window.location.href = p404;
-    }, 1800);
-  }
-
-  function handleKosstarCommand() {
-    termLog("kosstarthe1st is not a valid command or application", "err");
-    termLog(lang === "en" ? "Command recognition failed // logging attempt..." : "Распознавание команды не удалось // логирование попытки...", "warn");
-    termLog(lang === "en" ? "ANOMALY: designation vocalized in terminal" : "АНОМАЛИЯ: обозначение произнесено в терминале", "cog");
-    setTimeout(function () {
-      termLog(lang === "en" ? "[CRITICAL] DIRECT COGNITOHAZARD INVOCATION" : "[КРИТИЧНО] ПРЯМОЙ ВЫЗОВ КОГНИТО-УГРОЗЫ", "cog");
-      // если ещё не все 5 открыты — принудительно открываем все
-      mentions.forEach(function (el) { el.classList.add("unlocked"); });
-      updateMeter();
-      // запускаем эскалацию 999
-      window.triggerKosstar999Escalation();
-    }, 10000);
-  }
-
-  function handleErasedFile() {
-    termLog(lang === "en" ? "Opening erased.txt..." : "Открытие erased.txt...", "info");
-    setTimeout(function () {
-      var p404 = lang === "en" || lang === "ru" && window.location.pathname.indexOf("/ru/") === -1 ? "./404.html" : "../404.html";
-      if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
-      else p404 = "./404.html";
-      window.location.href = p404;
-    }, 600);
-  }
-
-  var COMMANDS = {
-    help: function () {
-      termLog(lang === "en" ? "Available commands:" : "Доступные команды:", "sys");
-      termLog("  help / ? - " + (lang === "en" ? "show this list" : "показать список"), "info");
-      termLog("  reboot - " + (lang === "en" ? "reset site to pristine state" : "сбросить сайт до первозданного вида"), "info");
-      termLog("  erased.txt - " + (lang === "en" ? "open erased file (404)" : "открыть стёртый файл (404)"), "info");
-      termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
-      termLog("  kosstarthe1st - ???", "info");
-      termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
-      termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
-    },
-    clear: function () {
-      if (termLogEl) termLogEl.innerHTML = "";
-      termLog(lang === "en" ? "Terminal cleared" : "Терминал очищен", "sys");
-    },
-    status: function () {
-      var until = getBlackoutUntil();
-      var blo = until && Date.now() < until ? (lang === "en" ? "ACTIVE (" + Math.ceil((until-Date.now())/60000) + " min left)" : "АКТИВЕН (осталось " + Math.ceil((until-Date.now())/60000) + " мин)") : "INACTIVE";
-      termLog("Session: " + sessionId, "info");
-      termLog("Mentions: " + unlockedCount + "/" + dynamicTotalMentions, "info");
-      termLog("Blackout: " + blo, (blo.indexOf("ACTIVE") !== -1 || blo.indexOf("АКТИВЕН") !== -1) ? "err" : "info");
-      termLog("Influence: " + (unlockedCount === 0 ? "0% — dormant" : Math.round((unlockedCount/(dynamicTotalMentions||1))*100) + "%"), "info");
-    }
-  };
-
-  function processCommand(raw) {
-    var cmd = raw.trim();
-    if (!cmd) return;
-    termAddEntry(cmd, "user");
-    var low = cmd.toLowerCase().replace(/\s+/g, "");
-    var spacedLow = cmd.toLowerCase().trim();
-
-    if (low === "help" || low === "?") {
-      COMMANDS.help();
-    } else if (low === "clear" || low === "cls") {
-      COMMANDS.clear();
-    } else if (low === "reboot" || low === "restart" || low === "clearall") {
-      rebootTerminal();
-    } else if (low.indexOf("erased.txt") !== -1 || spacedLow === "file erased.txt" || spacedLow === "cat erased.txt" || spacedLow === "open erased.txt") {
-      handleErasedFile();
-    } else if (low === "o5-erasure" || low === "o5erasure" || low === "erasure" || low === "o5") {
-      handleO5Erasure();
-    } else if (low === "kosstarthe1st" || low === "kosstar_the_1st" || spacedLow === "kosstar the 1st" || low === "kosstarthe1st.exe") {
-      handleKosstarCommand();
-    } else if (low === "status" || low === "whoami" || low === "id" || low === "location") {
-      COMMANDS.status();
-    } else {
-      termLog((lang === "en" ? "'" + cmd + "' is not recognized as a command" : "'" + cmd + "' не является командой"), "err");
-      termLog(lang === "en" ? "Type help for list" : "Введите help для списка", "info");
-    }
-  }
-
-  if (termInput) {
-    termInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        var v = termInput.value;
-        termInput.value = "";
-        processCommand(v);
-      }
-      if (e.key === "Tab") {
-        e.preventDefault();
-        var cur = termInput.value.toLowerCase();
-        var all = ["help","reboot","erased.txt","o5-erasure","kosstarthe1st","clear","status"];
-        for (var i = 0; i < all.length; i++) {
-          if (all[i].indexOf(cur) === 0) {
-            termInput.value = all[i];
-            break;
-          }
-        }
-      }
-    });
-  }
-
-  // Enter через submit формы (доп. страховка)
-  var termForm = document.getElementById("term-form");
-  if (termForm && termInput) {
-    termForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var v = termInput.value;
-      termInput.value = "";
-      processCommand(v);
-    });
-  }
-
 })();
