@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[DATA EXPUNGED] — SCP FOUNDATION</title>
+    <title>[ДАННЫЕ УДАЛЕНЫ] — ФОНД SCP</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../styles.css" />
     <style>
       :root {
         --red: #b3121b;
@@ -94,41 +94,40 @@
     </style>
   </head>
   <body>
-    <button id="term-toggle" class="term-toggle" type="button" title="Open recovery terminal">&gt;_</button>
+    <button id="term-toggle" class="term-toggle" type="button" title="Открыть терминал восстановления">&gt;_</button>
     <div class="scan"></div>
     <div class="vig"></div>
     <main>
-      <div class="tag">RECORD NOT FOUND IN ARCHIVE</div>
+      <div class="tag">ЗАПИСЬ НЕ НАЙДЕНА В АРХИВЕ</div>
       <div class="code">404</div>
       <div class="msg">
-        [DATA EXPUNGED] · this document does not exist<span class="blink">_</span>
+        [ДАННЫЕ УДАЛЕНЫ] · этого документа не существует<span class="blink">_</span>
       </div>
-      <div class="submsg">recovery possible only through terminal reboot</div>
-      <a class="return-link" href="./index.html">▸ RETURN TO SCP-KΣ-0001 FILE</a>
+      <div class="submsg">восстановление возможно только через reboot в терминале</div>
+      <a class="return-link" href="./index.html">▸ ВЕРНУТЬСЯ К ДЕЛУ SCP-KΣ-0001</a>
     </main>
 
     <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
       <div class="term-header">
-        <span class="term-title">SCP-KΣ-0001 // RECOVERY TERMINAL</span>
+        <span class="term-title">SCP-KΣ-0001 // ТЕРМИНАЛ ВОССТАНОВЛЕНИЯ</span>
         <div class="term-controls">
-          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> RECOVERY MODE</span>
+          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> РЕЖИМ ВОССТ.</span>
           <button id="term-close" class="term-close" type="button">[X]</button>
         </div>
       </div>
       <div id="term-log" class="term-log"></div>
       <form id="term-form" class="term-input-row" autocomplete="off" action="javascript:void(0)" method="get" onsubmit="return false;">
         <span class="term-prompt">&gt;_</span>
-        <input id="term-input" class="term-input" type="text" name="cmd" autocomplete="off" spellcheck="false" placeholder="enter command..." />
+        <input id="term-input" class="term-input" type="text" name="cmd" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
         <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" tabindex="-1" aria-hidden="true">go</button>
       </form>
-      <div class="term-help">help — commands · TAB — autocomplete · ESC — close</div>
+      <div class="term-help">help — список команд · TAB — автодополнение · ESC — закрыть</div>
     </div>
 
     <script>
       (function () {
         "use strict";
-        var lang = "en";
-        var locale = "en-GB";
+        var locale = "ru-RU";
         var ERASURE_KEY = "scp-erasure-active";
         var BLACKOUT_KEY = "scp-blackout-until";
         var termEl = document.getElementById("site-terminal");
@@ -163,7 +162,7 @@
           termEl.classList.remove("hidden");
           termEl.setAttribute("aria-hidden", "false");
           if (termInput) termInput.focus();
-          termLog("terminal opened", "cmd");
+          termLog("терминал открыт", "cmd");
         }
         function termCloseFn() {
           if (!termEl) return;
@@ -189,30 +188,30 @@
           return false;
         }
         function reboot() {
-          termLog("--- SYSTEM REBOOT INITIATED ---", "sys");
+          termLog("--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
           clearPersistentState();
-          termLog("Persistent erasure state cleared", "info");
-          termLog("Returning to SCP-KΣ-0001...", "sys");
+          termLog("Постоянное состояние стирания очищено", "info");
+          termLog("Возврат к SCP-KΣ-0001...", "sys");
           setTimeout(function () {
             window.location.href = "./index.html";
           }, 700);
         }
         var COMMANDS = {
           help: function () {
-            termLog("Available commands:", "sys");
-            termLog("  help / ? - show this list", "info");
-            termLog("  reboot - clear erasure state and restore access", "info");
-            termLog("  clear - clear terminal", "info");
-            termLog("  status - show recovery status", "info");
+            termLog("Доступные команды:", "sys");
+            termLog("  help / ? - показать список", "info");
+            termLog("  reboot - снять стирание и восстановить доступ", "info");
+            termLog("  clear - очистить терминал", "info");
+            termLog("  status - показать статус восстановления", "info");
           },
           clear: function () {
             if (termLogEl) termLogEl.innerHTML = "";
-            termLog("Terminal cleared", "sys");
+            termLog("Терминал очищен", "sys");
           },
           status: function () {
-            termLog("Erasure: " + (isErasureActive() ? "ACTIVE" : "INACTIVE"), isErasureActive() ? "err" : "info");
-            termLog("Blackout: cleared on reboot", "info");
-            termLog("Recovery route: ./index.html", "info");
+            termLog("Стирание: " + (isErasureActive() ? "АКТИВНО" : "НЕАКТИВНО"), isErasureActive() ? "err" : "info");
+            termLog("Блэкаут: будет снят при reboot", "info");
+            termLog("Маршрут восстановления: ./index.html", "info");
           }
         };
         function processCommand(raw) {
@@ -225,8 +224,8 @@
           else if (low === "status") COMMANDS.status();
           else if (low === "reboot" || low === "restart" || low === "clearall") reboot();
           else {
-            termLog("'" + cmd + "' is not recognized as a command", "err");
-            termLog("Type help for list", "info");
+            termLog("'" + cmd + "' не является командой", "err");
+            termLog("Введите help для списка", "info");
           }
         }
 
@@ -244,7 +243,7 @@
             termCloseFn();
             return;
           }
-          if (!inTerm && (e.key === "`" || e.key === "~")) {
+          if (!inTerm && (e.key === "`" || e.key === "ё")) {
             e.preventDefault();
             if (termEl.classList.contains("hidden")) termOpen();
             else termCloseFn();
@@ -280,13 +279,13 @@
           });
         }
 
-        termLog("RECOVERY TERMINAL READY", "sys");
-        termLog("Document erasure page loaded", "info");
+        termLog("ТЕРМИНАЛ ВОССТАНОВЛЕНИЯ ГОТОВ", "sys");
+        termLog("Загружена страница стирания документа", "info");
         if (isErasureActive()) {
-          termLog("[CRITICAL] DOCUMENT ERASURE STATE PERSISTS", "err");
-          termLog("Use reboot to restore archive access", "warn");
+          termLog("[КРИТИЧНО] СОСТОЯНИЕ СТИРАНИЯ ДОКУМЕНТА СОХРАНЯЕТСЯ", "err");
+          termLog("Используйте reboot для восстановления доступа к архиву", "warn");
         } else {
-          termLog("No persistent erasure flag detected", "info");
+          termLog("Постоянный флаг стирания не обнаружен", "info");
         }
       })();
     </script>

@@ -112,7 +112,9 @@
   var blackoutEl = document.getElementById("blackout");
   var floodEl = document.getElementById("kst-flood");
   var BLACKOUT_KEY = "scp-blackout-until";
+  var ERASURE_KEY = "scp-erasure-active";
   var BLACKOUT_DURATION = 10 * 60 * 1000;
+  var ERASURE_COOKIE_AGE = 60 * 60 * 24 * 365 * 10;
   var blackoutTimer = null;
   var blackoutCountdown = null;
   var escalationIntervalId = null;
@@ -182,6 +184,10 @@
       }
     }
   });
+
+  if (checkErasureOnLoad()) {
+    return;
+  }
 
   var clearanceEntryId = "clr-entry-" + Date.now();
   var clearanceGlitchDone = false;
@@ -259,6 +265,40 @@
       if (m) return parseInt(decodeURIComponent(m[1]), 10);
     } catch (e) {}
     return 0;
+  }
+  function setErasureState() {
+    try {
+      localStorage.setItem(ERASURE_KEY, "1");
+      document.cookie = ERASURE_KEY + "=1; max-age=" + ERASURE_COOKIE_AGE + "; path=/";
+    } catch (e) {}
+  }
+  function clearErasureState() {
+    try {
+      localStorage.removeItem(ERASURE_KEY);
+      document.cookie = ERASURE_KEY + "=; Max-Age=0; path=/";
+      sessionStorage.removeItem(ERASURE_KEY);
+    } catch (e) {}
+  }
+  function isErasureActive() {
+    try {
+      var v = localStorage.getItem(ERASURE_KEY);
+      if (v === "1") return true;
+      var m = document.cookie.match(new RegExp("(?:^| )" + ERASURE_KEY + "=([^;]+)"));
+      if (m) return decodeURIComponent(m[1]) === "1";
+    } catch (e) {}
+    return false;
+  }
+  function resolve404Path() {
+    return "./404.html";
+  }
+  function redirectToErasedDocument() {
+    window.location.replace(resolve404Path());
+  }
+  function checkErasureOnLoad() {
+    if (!isErasureActive()) return false;
+    if (/\/404\.html$/i.test(window.location.pathname)) return false;
+    redirectToErasedDocument();
+    return true;
   }
   function setBlackoutUiActive(active) {
     document.body.classList.toggle("blackout-active", !!active);
@@ -489,7 +529,7 @@
     });
   }
 
-   /* ---------- ACCORDIONS ---------- */
+  /* ---------- ACCORDIONS ---------- */
   document.querySelectorAll(".fold-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var fold = btn.parentElement;
@@ -696,12 +736,10 @@
     flash.classList.add("on");
     whisperEl.style.opacity = cfg.whisperOpacity;
     
-    // Выбираем случайное слово шепота и отображаем
     var phrase = rand(whispers);
     whisperEl.textContent = phrase;
     whisperEl.classList.add("on");
     
-    // ЛОГИРУЕМ появление шепота / глитча в полевом терминале
     termLog(
       lang === "en"
         ? "[COGNITOHAZARD DETECTED] Vocalization: «" + phrase + "»"
@@ -806,9 +844,11 @@
       blackoutTimer = null;
     }
     deactivateBlackout();
+    clearErasureState();
     try {
       sessionStorage.removeItem("scp-km-states");
       sessionStorage.removeItem(BLACKOUT_KEY);
+      sessionStorage.removeItem(ERASURE_KEY);
     } catch (e) {}
     clearBlackoutStorage();
     isEasterEggActive = false;
@@ -850,22 +890,20 @@
       doc.style.opacity = "0";
       doc.style.filter = "blur(18px)";
     }
+    setErasureState();
     setTimeout(function () {
       termLog(lang === "en" ? "Document erased by order of O5-█" : "Документ стёрт по приказу O5-█", "err");
-      var p404 = lang === "en" ? "./404.html" : "../404.html";
-      if (lang === "ru") {
-        if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
-        else p404 = "./404.html";
-      }
-      window.location.href = p404;
+      redirectToErasedDocument();
     }, 1800);
   }
 
   function handleKosstarCommand() {
-    termLog(lang === "en"
-          ? "'kosstarthe1st' is not recognized as a command"
-          : "'kosstarthe1st' не является командой",
-        "err");
+    termLog(
+      lang === "en"
+        ? "'kosstarthe1st' is not recognized as a command"
+        : "'kosstarthe1st' не является командой",
+      "err"
+    );
     setTimeout(function () {
       termLog(lang === "en" ? "[CRITICAL] DIRECT COGNITOHAZARD INVOCATION" : "[КРИТИЧНО] ПРЯМОЙ ВЫЗОВ КОГНИТО-УГРОЗЫ", "cog");
       mentions.forEach(function (el) {
@@ -879,13 +917,7 @@
   function handleErasedFile() {
     termLog(lang === "en" ? "Opening erased.txt..." : "Открытие erased.txt...", "info");
     setTimeout(function () {
-      var p404 =
-        (lang === "en" || (lang === "ru" && window.location.pathname.indexOf("/ru/") === -1))
-          ? "./404.html"
-          : "../404.html";
-      if (window.location.pathname.indexOf("/ru/") !== -1) p404 = "../404.html";
-      else p404 = "./404.html";
-      window.location.href = p404;
+      redirectToErasedDocument();
     }, 600);
   }
 
@@ -898,7 +930,7 @@
       termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
-      termLog(lang === "en" ? "  unknown - command undefined" : "  неизвестно - команда не определена", "info");
+      termLog(lang === "en" ? "Unknown: command undefined" : "Неизвестно: команда не определена", "info");
     },
     clear: function () {
       if (termLogEl) termLogEl.innerHTML = "";
