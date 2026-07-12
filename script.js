@@ -930,7 +930,7 @@
       termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
-      termLog(lang === "en" ? "Unknown: command undefined" : "Неизвестно: команда не определена", "info");
+      termLog(lang === "en" ? "  unknown - command undefined" : "  неизвестно - команда не определена", "info");
     },
     clear: function () {
       if (termLogEl) termLogEl.innerHTML = "";

@@ -103,7 +103,7 @@
       <div class="msg">
         [ДАННЫЕ УДАЛЕНЫ] · этого документа не существует<span class="blink">_</span>
       </div>
-      <div class="submsg">восстановление возможно только через reboot в терминале</div>
+      <div class="submsg">обнаружена сохранённая копия в базе данных</div>
       <a class="return-link" href="./index.html">▸ ВЕРНУТЬСЯ К ДЕЛУ SCP-KΣ-0001</a>
     </main>
 
@@ -190,8 +190,10 @@
         function reboot() {
           termLog("--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
           clearPersistentState();
-          termLog("Постоянное состояние стирания очищено", "info");
+          termLog("Копия файла обнаружена, восстановление состояния...", "info");
+          setTimeout(function () {
           termLog("Возврат к SCP-KΣ-0001...", "sys");
+        }, 1700);
           setTimeout(function () {
             window.location.href = "./index.html";
           }, 700);
@@ -200,17 +202,17 @@
           help: function () {
             termLog("Доступные команды:", "sys");
             termLog("  help / ? - показать список", "info");
-            termLog("  reboot - снять стирание и восстановить доступ", "info");
+            termLog("  reboot - перезапустить терминал и загрузить резервную копию файла (если доступно)", "info");
             termLog("  clear - очистить терминал", "info");
-            termLog("  status - показать статус восстановления", "info");
+            termLog("  status - статус документа", "info");
           },
           clear: function () {
             if (termLogEl) termLogEl.innerHTML = "";
             termLog("Терминал очищен", "sys");
           },
           status: function () {
-            termLog("Стирание: " + (isErasureActive() ? "АКТИВНО" : "НЕАКТИВНО"), isErasureActive() ? "err" : "info");
-            termLog("Блэкаут: будет снят при reboot", "info");
+            termLog("Состояние документа: " + (isErasureActive() ? "СТЁРТ" : "ДОСТУПЕН"), isErasureActive() ? "err" : "info");
+            termLog("Резервная копия: доступна командой reboot", "info");
             termLog("Маршрут восстановления: ./index.html", "info");
           }
         };
