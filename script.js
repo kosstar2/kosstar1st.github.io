@@ -300,8 +300,51 @@
     redirectToErasedDocument();
     return true;
   }
+  /* Гасит прокрутку страницы, пока активен блэкаут. Терминал скроллится сам,
+     потому что события внутри него не всплывают до этого обработчика. */
+  function blockBlackoutScroll(e) {
+    if (termEl && termEl.contains(e.target)) return;
+    e.preventDefault();
+  }
+  function blockBlackoutKeys(e) {
+    var ae = document.activeElement;
+    if (ae && (ae.id === "term-input" || (termEl && termEl.contains(ae)))) return;
+    var keys = [
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "PageUp",
+      "PageDown",
+      "Home",
+      "End",
+      " ",
+      "Spacebar",
+    ];
+    if (keys.indexOf(e.key) !== -1) e.preventDefault();
+  }
+  var blackoutScrollLocked = false;
+  function lockBlackoutScroll() {
+    if (blackoutScrollLocked) return;
+    blackoutScrollLocked = true;
+    window.addEventListener("wheel", blockBlackoutScroll, { passive: false });
+    window.addEventListener("touchmove", blockBlackoutScroll, { passive: false });
+    window.addEventListener("keydown", blockBlackoutKeys, false);
+  }
+  function unlockBlackoutScroll() {
+    if (!blackoutScrollLocked) return;
+    blackoutScrollLocked = false;
+    window.removeEventListener("wheel", blockBlackoutScroll, { passive: false });
+    window.removeEventListener("touchmove", blockBlackoutScroll, { passive: false });
+    window.removeEventListener("keydown", blockBlackoutKeys, false);
+  }
   function setBlackoutUiActive(active) {
     document.body.classList.toggle("blackout-active", !!active);
+    if (active) {
+      lockBlackoutScroll();
+    } else {
+      unlockBlackoutScroll();
+    }
     if (termToggle) {
       termToggle.setAttribute(
         "title",
@@ -541,6 +584,12 @@
       if (body) {
         body.style.maxHeight = open ? body.scrollHeight + "px" : "0px";
       }
+      if (fold && fold.id === "erasure-order") {
+        erasureOrderOpen = open;
+        if (open) {
+          setTimeout(handleErasureOrderOpened, 260);
+        }
+      }
     });
   });
 
@@ -576,14 +625,962 @@
   var dynamicTotalMentions = baseTotalMentions;
   var unlockedCount = 0;
   var isEasterEggActive = false;
+  var encryptionModeActive = false;
+  var hoverlessPointer = window.matchMedia("(hover: none)").matches;
   var UNLOCKED_HOVER = lang === "en" ? "There is no way back" : "Пути назад нет";
   var LOCKED_HOVER =
     lang === "en"
       ? "Designation classified // Click to decrypt"
       : "Обозначение засекречено // Нажмите для дешифровки";
+  var ENCRYPTION_HOVER =
+    lang === "en"
+      ? "Keep the encryption cursor over the designation"
+      : "Удерживайте курсор шифрования над обозначением";
+  var ENCRYPTION_FIX =
+    lang === "en"
+      ? "Encryption complete // Click to lock cipher"
+      : "Шифрование завершено // Нажмите для фиксации шифра";
+  var erasureOrderOpen = false;
+  var documentInfectionPhaseActive = false;
+  var documentScanComplete = false;
+  var infectionRecords = [];
+  var infectionSpreadTimer = null;
+  var infectionSerial = 0;
+  /* ---------- GLOBAL INFECTION COUNTER ---------- */
+  var infectionCount = 0;
+  var INFECTION_TARGET_COUNT = 10;
+  var INFECTION_PATTERN = Array.from("kosstarthe1st");
+
+  /* ---------- CORRUPTION METER (0..100) ---------- */
+  // Каждая активная (не вылеченная) заражённая зона прибавляет +0.1 в секунду.
+  // Отображается только целочисленное значение. По достижении 100 — total takeover.
+  var corruptionMeter = 0;
+  var CORRUPTION_MAX = 100;
+  var CORRUPTION_PER_ZONE_PER_SEC = 0.1;
+  var CORRUPTION_TICK_MS = 1000;
+  var corruptionTickTimer = null;
+  var corruptionTakeoverTriggered = false;
+  var METER_LABEL_DEFAULT_EN = "DECLASSIFIED";
+  var METER_LABEL_DEFAULT_RU = "РАССЕКРЕЧЕНО";
+  var METER_LABEL_CORRUPT_EN = "CORRUPTED";
+  var METER_LABEL_CORRUPT_RU = "ЗАРАЖЕНО";
+
+  function setMeterLabel(mode) {
+    var labelEl = document.getElementById("k-meter-label");
+    if (!labelEl) return;
+    if (mode === "corrupt") {
+      labelEl.textContent = lang === "en" ? METER_LABEL_CORRUPT_EN : METER_LABEL_CORRUPT_RU;
+    } else {
+      labelEl.textContent = lang === "en" ? METER_LABEL_DEFAULT_EN : METER_LABEL_DEFAULT_RU;
+    }
+  }
+
+  function renderCorruptionMeter() {
+    var meterText = document.getElementById("k-meter-text");
+    if (!meterText) return;
+    var whole = Math.floor(corruptionMeter);
+    if (whole > CORRUPTION_MAX) whole = CORRUPTION_MAX;
+    var maxVisualBars = 5;
+    var filledBars = Math.round((whole / CORRUPTION_MAX) * maxVisualBars);
+    var bars = "";
+    for (var i = 0; i < maxVisualBars; i++) {
+      bars += i < filledBars ? "█" : "░";
+    }
+    meterText.textContent = whole + "/" + CORRUPTION_MAX + " [" + bars + "] " + whole + "%";
+    if (whole >= CORRUPTION_MAX) {
+      meterText.classList.add("blink");
+    } else {
+      meterText.classList.remove("blink");
+    }
+  }
+
+  function countActiveInfections() {
+    var n = 0;
+    for (var i = 0; i < infectionRecords.length; i++) {
+      if (!infectionRecords[i].cleaned) n++;
+    }
+    return n;
+  }
+
+  function startCorruptionMeter() {
+    if (corruptionTickTimer) return;
+    corruptionTakeoverTriggered = false;
+    setMeterLabel("corrupt");
+    renderCorruptionMeter();
+    corruptionTickTimer = setInterval(function () {
+      if (!documentInfectionPhaseActive) return;
+      var active = countActiveInfections();
+      if (active <= 0) return;
+      corruptionMeter += active * CORRUPTION_PER_ZONE_PER_SEC;
+      if (corruptionMeter >= CORRUPTION_MAX) {
+        corruptionMeter = CORRUPTION_MAX;
+        renderCorruptionMeter();
+        if (!corruptionTakeoverTriggered) {
+          corruptionTakeoverTriggered = true;
+          stopCorruptionMeter();
+          triggerTotalTakeover();
+        }
+        return;
+      }
+      renderCorruptionMeter();
+    }, CORRUPTION_TICK_MS);
+  }
+
+  function stopCorruptionMeter() {
+    if (corruptionTickTimer) {
+      clearInterval(corruptionTickTimer);
+      corruptionTickTimer = null;
+    }
+  }
+
+  function resetCorruptionMeter() {
+    stopCorruptionMeter();
+    corruptionMeter = 0;
+    corruptionTakeoverTriggered = false;
+    setMeterLabel("default");
+    // После сброса вернём стандартный вывод метера (unlocked/total)
+    updateMeter();
+  }
+
+  function setInfectionSlot(record, slot, infected) {
+    if (slot.infected === infected) return;
+    slot.infected = infected;
+    slot.state.current[slot.index] = infected ? slot.replacement : slot.original;
+    slot.state.node.nodeValue = slot.state.current.join("");
+    record.infectedCount += infected ? 1 : -1;
+  }
+
+  function buildInfectionRecord(el) {
+    var states = [];
+    var slots = [];
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (node) {
+        var parent = node.parentElement;
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if (parent && parent.closest(".k-mention, .redacted, script, style")) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    var node;
+    while ((node = walker.nextNode())) {
+      var original = Array.from(node.nodeValue);
+      var state = {
+        node: node,
+        original: original.slice(),
+        current: original.slice(),
+      };
+      states.push(state);
+      original.forEach(function (ch, index) {
+        if (/\s/.test(ch)) return;
+        slots.push({
+          state: state,
+          index: index,
+          original: ch,
+          replacement: INFECTION_PATTERN[slots.length % INFECTION_PATTERN.length],
+          infected: false,
+        });
+      });
+    }
+    if (!slots.length) return null;
+    infectionSerial++;
+    var foldBtn = el.closest(".fold-btn");
+    var fold = foldBtn ? foldBtn.parentElement : null;
+    return {
+      id: "KST-" + (infectionSerial < 10 ? "0" : "") + infectionSerial,
+      el: el,
+      states: states,
+      slots: slots,
+      infectedCount: 0,
+      infectionTimer: null,
+      cleaningTimer: null,
+      resumeTimer: null,
+      reinfectionTimer: null,
+      spreadTriggered: false,
+      cleaned: false,
+      enterHandler: null,
+      leaveHandler: null,
+      isAppendix: !!foldBtn,
+      fold: fold,
+      logEl: fold ? fold.querySelector(".log") : null,
+    };
+  }
+
+  function infectionPercent(record) {
+    return Math.round((record.infectedCount / (record.slots.length || 1)) * 100);
+  }
+
+  /* ---------- LOCAL MINI-FLOWS ---------- */
+  function buildAppendixFlood(record) {
+    if (!record.logEl || record.floodEl) return;
+    if (!record._logOriginalHtml) {
+      record._logOriginalHtml = record.logEl.innerHTML;
+    }
+    var flood = document.createElement("div");
+    flood.className = "appendix-flood";
+    var count = 60;
+    for (var i = 0; i < count; i++) {
+      var span = document.createElement("span");
+      span.textContent = "kosstar the 1st";
+      span.style.left = (Math.random() * 100).toFixed(2) + "%";
+      span.style.top = (Math.random() * 100).toFixed(2) + "%";
+      span.style.transform =
+        "rotate(" + (Math.random() * 90 - 45).toFixed(1) + "deg) translate(-50%,-50%)";
+      span.style.opacity = (0.2 + Math.random() * 0.8).toFixed(2);
+      span.style.fontSize = (10 + Math.random() * 18).toFixed(0) + "px";
+      flood.appendChild(span);
+    }
+    record.floodEl = flood;
+  }
+  function showAppendixFlood(record) {
+    if (!record.isAppendix || !record.logEl) return;
+    buildAppendixFlood(record);
+    if (record.floodEl && record.logEl.firstChild !== record.floodEl) {
+      record.logEl.innerHTML = "";
+      record.logEl.appendChild(record.floodEl);
+    }
+    record.logEl.classList.add("appendix-infected");
+  }
+  function hideAppendixFlood(record) {
+    if (!record.isAppendix || !record.logEl) return;
+    record.logEl.classList.remove("appendix-infected");
+    if (typeof record._logOriginalHtml === "string") {
+      record.logEl.innerHTML = record._logOriginalHtml;
+    }
+    record.floodEl = null;
+  }
+
+  function stopRecordInfection(record) {
+    if (record.infectionTimer) {
+      clearInterval(record.infectionTimer);
+      record.infectionTimer = null;
+    }
+  }
+
+  function stopRecordCleaning(record) {
+    if (record.cleaningTimer) {
+      clearInterval(record.cleaningTimer);
+      record.cleaningTimer = null;
+    }
+    record.el.classList.remove("infection-cleansing");
+  }
+
+  function cancelRecordResume(record) {
+    if (record.resumeTimer) {
+      clearTimeout(record.resumeTimer);
+      record.resumeTimer = null;
+    }
+  }
+
+  function restoreRecordText(record) {
+    record.states.forEach(function (state) {
+      state.current = state.original.slice();
+      state.node.nodeValue = state.original.join("");
+    });
+    record.slots.forEach(function (slot) {
+      slot.infected = false;
+    });
+    record.infectedCount = 0;
+  }
+
+  function startRecordInfection(record, isReinfection) {
+    if (!documentInfectionPhaseActive || record.infectionTimer || record.cleaningTimer) return;
+    cancelRecordResume(record);
+    record.cleaned = false;
+    record.el.classList.remove("infection-cleansed");
+    record.el.classList.add("infection-target");
+    if (record.isAppendix) showAppendixFlood(record);
+    if (isReinfection) {
+      termLog(
+        lang === "en"
+          ? "[ANOMALY] CLEAN ZONE RECONTAMINATED // " + record.id
+          : "[АНОМАЛИЯ] ОЧИЩЕННАЯ ЗОНА ЗАРАЖЕНА ПОВТОРНО // " + record.id,
+        "cog"
+      );
+    }
+    record.infectionTimer = setInterval(function () {
+      var next = null;
+      for (var i = 0; i < record.slots.length; i++) {
+        if (!record.slots[i].infected) {
+          next = record.slots[i];
+          break;
+        }
+      }
+      if (!next) {
+        stopRecordInfection(record);
+        record.el.classList.add("infection-saturated");
+        if (record.isAppendix) showAppendixFlood(record);
+        termLog(
+          lang === "en"
+            ? "[ANOMALY] ZONE SATURATED // " + record.id
+            : "[АНОМАЛИЯ] ЗОНА ПОЛНОСТЬЮ ЗАРАЖЕНА // " + record.id,
+          "cog"
+        );
+        // Воспроизводим звук успешного заражения
+        var infectionSound = document.getElementById("infection-audio");
+        if (infectionSound) {
+          try {
+            var clone = infectionSound.cloneNode();
+            clone.volume = 0.5;
+            clone.currentTime = 0;
+            clone.play().catch(function () {});
+          } catch (err) {}
+        }
+        // КД 2 секунды перед попыткой нового заражения
+        setTimeout(function () {
+          var newZone = startRandomInfectionZone();
+          if (!newZone) {
+            var allSaturated = infectionRecords.every(function (r) {
+              return r.infectedCount >= r.slots.length;
+            });
+            if (allSaturated && infectionRecords.length >= 1 && infectionCount >= INFECTION_TARGET_COUNT) {
+              triggerTotalTakeover();
+            }
+          }
+        }, 2000);
+        return;
+      }
+      setInfectionSlot(record, next, true);
+    }, 50);
+  }
+
+  function getInfectionCandidates() {
+    // Захватываем практически весь читаемый текст документа: заголовки,
+    // абзацы, предупреждение, панель классификации, списки правил и
+    // названия приложений (кнопки .fold-btn). Внутренности приложений
+    // обрабатываются отдельно через мини-поток при раскрытии.
+    var selectors = [
+      ".doc-shell .hero-tag",
+      ".doc-shell .section-title",
+      ".doc-shell .block > p",
+      ".doc-shell .warn",
+      ".doc-shell .panel .k",
+      ".doc-shell .panel .v",
+      ".doc-shell .rules > li",
+      ".doc-shell .subtag",
+      ".doc-shell .fold-btn > span:first-child",
+      ".doc-shell .doc-footer > div",
+    ];
+    return Array.prototype.slice
+      .call(document.querySelectorAll(selectors.join(",")))
+      .filter(function (el) {
+        if (!el.offsetParent) return false;
+        if (el.closest(".fold-sign")) return false;
+        if (el.closest("#erasure-order .fold-body")) return false;
+        // Исключаем элементы внутри нераскрытых приложений
+        var parentFold = el.closest(".fold");
+        if (parentFold && !parentFold.classList.contains("open")) return false;
+        for (var i = 0; i < infectionRecords.length; i++) {
+          if (infectionRecords[i].el === el) return false;
+        }
+        if (el.classList.contains("infection-protected")) return false;
+        return true;
+      });
+  }
+
+  function startRandomInfectionZone() {
+    if (!documentInfectionPhaseActive) return null;
+    var candidates = getInfectionCandidates();
+    if (!candidates.length) return null;
+    var record = buildInfectionRecord(rand(candidates));
+    if (!record) return null;
+    infectionRecords.push(record);
+    infectionCount++;
+    if (infectionCount >= INFECTION_TARGET_COUNT) {
+      termLog(
+        lang === "en"
+          ? "[ANOMALY] CONTAMINATION THRESHOLD REACHED // " + infectionCount + " ZONES"
+          : "[АНОМАЛИЯ] ПОРОГ НАКОПЛЕНИЯ ДОСТИГНУТ // " + infectionCount + " ЗОН",
+        "cog"
+      );
+    }
+    record.el.dataset.infectionId = record.id;
+    record.enterHandler = function () {
+      startRecordCleaning(record);
+    };
+    record.leaveHandler = function () {
+      scheduleRecordInfectionResume(record);
+    };
+    record.el.addEventListener("pointerenter", record.enterHandler);
+    record.el.addEventListener("pointerleave", record.leaveHandler);
+    // Логируем с кликабельной ссылкой на зону
+    (function (rec) {
+      if (!termLogEl) return;
+      var div = document.createElement("div");
+      div.className = "term-entry cog";
+      var ts = document.createElement("span");
+      ts.className = "ts";
+      ts.textContent = "[" + nowTs() + "]";
+      div.appendChild(ts);
+      var text = document.createTextNode(
+        lang === "en"
+          ? " [SCAN] CONTAMINATED TEXT DETECTED // "
+          : " [СКАНИРОВАНИЕ] ОБНАРУЖЕН ЗАРАЖЁННЫЙ ТЕКСТ // "
+      );
+      div.appendChild(text);
+      var link = document.createElement("a");
+      link.href = "#";
+      link.className = "infection-link";
+      link.textContent = rec.id;
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        termCloseFn();
+        setTimeout(function () {
+          scrollToInfectionRecord(rec);
+        }, 120);
+      });
+      div.appendChild(link);
+      termLogEl.appendChild(div);
+      termLogEl.scrollTop = termLogEl.scrollHeight;
+    })(record);
+    startRecordInfection(record, false);
+    return record;
+  }
+
+  function scheduleInfectionSpread() {
+    if (!documentInfectionPhaseActive || infectionSpreadTimer) return;
+    infectionSpreadTimer = setTimeout(function () {
+      infectionSpreadTimer = null;
+      if (!documentInfectionPhaseActive) return;
+      var next = startRandomInfectionZone();
+      if (next) {
+        termLog(
+          lang === "en"
+            ? "[ANOMALY] CONTAMINATION SPREAD TO NEW PARAGRAPH"
+            : "[АНОМАЛИЯ] ЗАРАЖЕНИЕ РАСПРОСТРАНИЛОСЬ НА НОВЫЙ АБЗАЦ",
+          "cog"
+        );
+      } else if (infectionCount < INFECTION_TARGET_COUNT) {
+        // Нет кандидатов сейчас (все защищены), повторяем попытку через 5 секунд
+        scheduleInfectionSpread();
+      }
+    }, 1500);
+  }
+
+  function checkDocumentScanCompletion() {
+    if (infectionCount < INFECTION_TARGET_COUNT) {
+      // Пока не набрали достаточное количество заражений, сканирование не может завершиться
+      return;
+    }
+    // Проверяем, что нет ни одной активной (не cleaned) записи
+    var hasActiveInfection = infectionRecords.some(function (record) {
+      return !record.cleaned;
+    });
+    if (hasActiveInfection) {
+      return;
+    }
+    documentInfectionPhaseActive = false;
+    documentScanComplete = true;
+    document.body.classList.remove("document-scan-mode");
+    // Останавливаем и сбрасываем счётчик заражения, возвращаем лейбл
+    resetCorruptionMeter();
+    if (infectionSpreadTimer) {
+      clearTimeout(infectionSpreadTimer);
+      infectionSpreadTimer = null;
+    }
+    infectionRecords.forEach(function (record) {
+      if (record.reinfectionTimer) {
+        clearTimeout(record.reinfectionTimer);
+        record.reinfectionTimer = null;
+      }
+      record.el.classList.remove("infection-target", "infection-cleansing", "infection-saturated");
+    });
+    termLog(
+      lang === "en"
+        ? "[O5] DOCUMENT SCAN COMPLETE // ALL CONTAMINATED ZONES RESTORED"
+        : "[O5] СКАНИРОВАНИЕ ДОКУМЕНТА ЗАВЕРШЕНО // ВСЕ ЗАРАЖЁННЫЕ ЗОНЫ ВОССТАНОВЛЕНЫ",
+      "sys"
+    );
+  }
+
+  function triggerTotalTakeover() {
+    documentInfectionPhaseActive = false;
+    documentScanComplete = false;
+    document.body.classList.remove("document-scan-mode");
+    stopCorruptionMeter();
+    // Показываем meter на 100/100 в момент takeover'а
+    corruptionMeter = CORRUPTION_MAX;
+    renderCorruptionMeter();
+    if (infectionSpreadTimer) {
+      clearTimeout(infectionSpreadTimer);
+      infectionSpreadTimer = null;
+    }
+    infectionRecords.forEach(function (record) {
+      stopRecordInfection(record);
+      stopRecordCleaning(record);
+      cancelRecordResume(record);
+      if (record.reinfectionTimer) clearTimeout(record.reinfectionTimer);
+    });
+    termLog(
+      lang === "en"
+        ? "[ANOMALY] TOTAL TEXTUAL CORRUPTION // OBJECT CONTROLS DOCUMENT"
+        : "[АНОМАЛИЯ] ПОЛНОЕ ТЕКСТОВОЕ ПОВРЕЖДЕНИЕ // ОБЪЕКТ КОНТРОЛИРУЕТ ДОКУМЕНТ",
+      "cog"
+    );
+    setTimeout(function () {
+      startKSTTextFlood();
+    }, 800);
+  }
+
+  function rebindCorruptLines(container) {
+    if (reduce || !container) return;
+    container.querySelectorAll(".corrupt-line").forEach(function (el) {
+      var original = el.textContent;
+      setInterval(function () {
+        if (!el.offsetParent) return;
+        var out = "";
+        for (var i = 0; i < original.length; i++) {
+          var ch = original[i];
+          if (ch === " ") out += " ";
+          else if (Math.random() > 0.9) out += rand(GLYPHS);
+          else out += ch;
+        }
+        el.textContent = out;
+      }, 160);
+    });
+  }
+
+  function finishRecordCleaning(record) {
+    stopRecordCleaning(record);
+    stopRecordInfection(record);
+    cancelRecordResume(record);
+    restoreRecordText(record);
+    if (record.isAppendix) {
+      hideAppendixFlood(record);
+      if (record.logEl) rebindCorruptLines(record.logEl);
+    }
+    record.cleaned = true;
+    record.el.classList.remove("infection-target", "infection-saturated");
+
+    record.el.classList.add("infection-cleansed");
+    record.el.dataset.infectionId = "PROTECTED";
+    record.el.classList.add("infection-protected");
+    termLog(
+      lang === "en"
+        ? "[SCAN] ZONE RESTORED // " + record.id + " → PROTECTED (90s)"
+        : "[СКАНИРОВАНИЕ] ЗОНА ВОССТАНОВЛЕНА // " + record.id + " → ЗАЩИТА (90с)",
+      "sys"
+    );
+    // Через 900мс убираем анимацию очистки, но оставляем голубой статус защиты
+    setTimeout(function () {
+      record.el.classList.remove("infection-cleansed");
+    }, 900);
+    // Защита длится 90 секунд, после чего зона снова может быть заражена
+    record.protectionTimer = setTimeout(function () {
+      record.el.classList.remove("infection-protected");
+      record.el.removeAttribute("data-infection-id");
+      // Снимаем обработчики старой записи
+      if (record.enterHandler) record.el.removeEventListener("pointerenter", record.enterHandler);
+      if (record.leaveHandler) record.el.removeEventListener("pointerleave", record.leaveHandler);
+      // Удаляем запись из infectionRecords, чтобы элемент снова стал кандидатом
+      var idx = infectionRecords.indexOf(record);
+      if (idx !== -1) infectionRecords.splice(idx, 1);
+      // Если фаза заражения ещё активна, пробуем заразить снова
+      if (documentInfectionPhaseActive) {
+        scheduleInfectionSpread();
+      }
+    }, 90000);
+    scheduleInfectionSpread();
+    checkDocumentScanCompletion();
+  }
+
+  function startRecordCleaning(record) {
+    if (
+      !documentInfectionPhaseActive ||
+      record.cleaned ||
+      record.cleaningTimer ||
+      record.infectedCount <= 0
+    ) {
+      return;
+    }
+    cancelRecordResume(record);
+    stopRecordInfection(record);
+    record.el.classList.remove("infection-saturated");
+    record.el.classList.add("infection-cleansing");
+    if (!record.spreadTriggered) {
+      record.spreadTriggered = true;
+      scheduleInfectionSpread();
+    }
+    // Очистка всегда длится примерно 1 секунду: тик каждые 40 мс,
+    // а число символов за тик зависит от того, сколько заражено сейчас.
+    var CLEAN_DURATION = 1000;
+    var CLEAN_TICK = 40;
+    var perTick = Math.max(1, Math.ceil((record.infectedCount || 1) / (CLEAN_DURATION / CLEAN_TICK)));
+    record.cleaningTimer = setInterval(function () {
+      var cleared = 0;
+      for (var i = 0; i < record.slots.length && cleared < perTick; i++) {
+        if (record.slots[i].infected) {
+          setInfectionSlot(record, record.slots[i], false);
+          cleared++;
+        }
+      }
+      if (record.infectedCount <= 0) {
+        finishRecordCleaning(record);
+      }
+    }, CLEAN_TICK);
+  }
+
+  function scheduleRecordInfectionResume(record) {
+    stopRecordCleaning(record);
+    cancelRecordResume(record);
+    if (!documentInfectionPhaseActive || record.cleaned) return;
+    record.resumeTimer = setTimeout(function () {
+      record.resumeTimer = null;
+      startRecordInfection(record, false);
+    }, 1000);
+  }
+
+  function startDocumentInfectionPhase() {
+    if (documentInfectionPhaseActive || documentScanComplete) return;
+    if (countUnlockedMentions() > 0) return;
+    documentInfectionPhaseActive = true;
+    document.body.classList.add("document-scan-mode");
+    // Активируем счётчик заражения на верхней панели
+    corruptionMeter = 0;
+    corruptionTakeoverTriggered = false;
+    setMeterLabel("corrupt");
+    renderCorruptionMeter();
+    startCorruptionMeter();
+    termLog(
+      lang === "en"
+        ? "[O5] DOCUMENT INTEGRITY SCAN STARTED"
+        : "[O5] ЗАПУЩЕНО СКАНИРОВАНИЕ ЦЕЛОСТНОСТИ ДОКУМЕНТА",
+      "sys"
+    );
+    termLog(
+      lang === "en"
+        ? "[ANOMALY] UNAUTHORIZED TEXT MUTATION DETECTED"
+        : "[АНОМАЛИЯ] ОБНАРУЖЕНО НЕСАНКЦИОНИРОВАННОЕ ИЗМЕНЕНИЕ ТЕКСТА",
+      "cog"
+    );
+    startRandomInfectionZone();
+  }
+
+  function handleErasureOrderOpened() {
+    var exposed = countUnlockedMentions();
+    if (exposed > 0) {
+      activateEncryptionMode();
+      return;
+    }
+    startDocumentInfectionPhase();
+  }
+
+  function resetDocumentInfectionPhase() {
+    documentInfectionPhaseActive = false;
+    documentScanComplete = false;
+    document.body.classList.remove("document-scan-mode");
+    resetCorruptionMeter();
+    if (infectionSpreadTimer) {
+      clearTimeout(infectionSpreadTimer);
+      infectionSpreadTimer = null;
+    }
+    infectionRecords.forEach(function (record) {
+      stopRecordInfection(record);
+      stopRecordCleaning(record);
+      cancelRecordResume(record);
+      if (record.reinfectionTimer) clearTimeout(record.reinfectionTimer);
+      if (record.protectionTimer) clearTimeout(record.protectionTimer);
+      restoreRecordText(record);
+      if (record.isAppendix) {
+        hideAppendixFlood(record);
+        if (record.logEl) rebindCorruptLines(record.logEl);
+      }
+      record.el.classList.remove(
+        "infection-target",
+        "infection-cleansing",
+        "infection-cleansed",
+        "infection-saturated",
+        "infection-protected"
+      );
+      record.el.removeAttribute("data-infection-id");
+      if (record.enterHandler) record.el.removeEventListener("pointerenter", record.enterHandler);
+      if (record.leaveHandler) record.el.removeEventListener("pointerleave", record.leaveHandler);
+    });
+    infectionRecords = [];
+    infectionSerial = 0;
+    infectionCount = 0;
+  }
+
+  function scrollToInfectionRecord(record) {
+    if (!record || !record.el) return;
+    record.el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function logDocumentScanStatus() {
+    if (countUnlockedMentions() > 0) {
+      termLog(
+        lang === "en"
+          ? "[SCAN] BLOCKED // EXPOSED DESIGNATIONS MUST BE ENCRYPTED"
+          : "[СКАНИРОВАНИЕ] ЗАБЛОКИРОВАНО // ОТКРЫТЫЕ ОБОЗНАЧЕНИЯ ДОЛЖНЫ БЫТЬ ЗАШИФРОВАНЫ",
+        "err"
+      );
+      return;
+    }
+    if (documentScanComplete) {
+      termLog(
+        lang === "en" ? "[SCAN] DOCUMENT STATUS: CLEAN" : "[СКАНИРОВАНИЕ] СОСТОЯНИЕ ДОКУМЕНТА: ЧИСТО",
+        "sys"
+      );
+      return;
+    }
+    if (!documentInfectionPhaseActive) {
+      termLog(
+        lang === "en"
+          ? "[SCAN] AWAITING APPENDIX K-4 ACCESS"
+          : "[СКАНИРОВАНИЕ] ОЖИДАЕТСЯ ОТКРЫТИЕ ПРИЛОЖЕНИЯ К-4",
+        "warn"
+      );
+      return;
+    }
+    termLog(
+      lang === "en" ? "[SCAN] CONTAMINATED ZONES:" : "[СКАНИРОВАНИЕ] ЗАРАЖЁННЫЕ ЗОНЫ:",
+      "sys"
+    );
+    infectionRecords.forEach(function (record) {
+      var status = record.cleaned
+        ? (record.el.classList.contains("infection-protected") ? "PROTECTED" : "CLEAN")
+        : infectionPercent(record) + "%";
+      var cls = record.cleaned ? "info" : "cog";
+      // Используем HTML-ссылку для прокрутки к заражённому элементу
+      if (!termLogEl) return;
+      var div = document.createElement("div");
+      div.className = "term-entry " + cls;
+      var ts = document.createElement("span");
+      ts.className = "ts";
+      ts.textContent = "[" + nowTs() + "]";
+      div.appendChild(ts);
+      var link = document.createElement("a");
+      link.href = "#";
+      link.className = "infection-link";
+      link.textContent = "  " + record.id + " // " + status;
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        termCloseFn();
+        setTimeout(function () {
+          scrollToInfectionRecord(record);
+        }, 120);
+      });
+      div.appendChild(link);
+      termLogEl.appendChild(div);
+      termLogEl.scrollTop = termLogEl.scrollHeight;
+    });
+  }
+
+  function countUnlockedMentions() {
+    var count = 0;
+    mentions.forEach(function (el) {
+      if (el.classList.contains("unlocked")) count++;
+    });
+    return count;
+  }
+
+  function getMentionSource(el) {
+    var resolved = el.querySelector(".km-resolved");
+    if (!resolved) return "";
+    if (typeof el._encryptionSource !== "string") {
+      el._encryptionSource = resolved.textContent;
+    }
+    return el._encryptionSource;
+  }
+
+  function stopMentionEncryption(el) {
+    if (el._encryptionTimer) {
+      clearInterval(el._encryptionTimer);
+      el._encryptionTimer = null;
+    }
+    el.classList.remove("encryption-running");
+  }
+
+  function cancelMentionEncryptionRollback(el) {
+    if (el._encryptionRollbackTimer) {
+      clearTimeout(el._encryptionRollbackTimer);
+      el._encryptionRollbackTimer = null;
+    }
+    if (el._encryptionReverseTimer) {
+      clearInterval(el._encryptionReverseTimer);
+      el._encryptionReverseTimer = null;
+    }
+    el.classList.remove("encryption-reversing");
+  }
+
+  function scheduleMentionEncryptionRollback(el) {
+    stopMentionEncryption(el);
+    cancelMentionEncryptionRollback(el);
+    if (!encryptionModeActive || !el.classList.contains("unlocked") || !(el._encryptionProgress > 0)) {
+      return;
+    }
+    el._encryptionRollbackTimer = setTimeout(function () {
+      el._encryptionRollbackTimer = null;
+      el.classList.remove("encryption-ready");
+      el.classList.add("encryption-reversing");
+      refreshMentionHoverTitles();
+      el._encryptionReverseTimer = setInterval(function () {
+        el._encryptionProgress = Math.max(0, (el._encryptionProgress || 0) - 1);
+        renderMentionEncryption(el);
+        if (el._encryptionProgress <= 0) {
+          cancelMentionEncryptionRollback(el);
+          refreshMentionHoverTitles();
+        }
+      }, 250);
+    }, 1000);
+  }
+
+  function resetMentionEncryption(el) {
+    stopMentionEncryption(el);
+    cancelMentionEncryptionRollback(el);
+    var resolved = el.querySelector(".km-resolved");
+    if (resolved && typeof el._encryptionSource === "string") {
+      resolved.textContent = el._encryptionSource;
+    }
+    el._encryptionProgress = 0;
+    el.classList.remove("encryption-ready", "encryption-fixed", "encryption-rejected");
+  }
+
+  function deactivateEncryptionMode(logExit) {
+    if (!encryptionModeActive) return;
+    encryptionModeActive = false;
+    document.body.classList.remove("encryption-mode");
+    mentions.forEach(resetMentionEncryption);
+    refreshMentionHoverTitles();
+    if (logExit) {
+      termLog(
+        lang === "en" ? "ENCRYPTION MODE DISENGAGED" : "РЕЖИМ ШИФРОВАНИЯ ОТКЛЮЧЁН",
+        "sys"
+      );
+    }
+  }
+
+  function renderMentionEncryption(el) {
+    var resolved = el.querySelector(".km-resolved");
+    var source = getMentionSource(el);
+    if (!resolved || !source) return 0;
+    var chars = Array.from(source);
+    var progress = Math.min(el._encryptionProgress || 0, chars.length);
+    resolved.textContent = chars
+      .map(function (ch, i) {
+        return i < progress ? "█" : ch;
+      })
+      .join("");
+    return chars.length;
+  }
+
+  function startMentionEncryption(el) {
+    if (
+      !encryptionModeActive ||
+      !el.classList.contains("unlocked") ||
+      el.classList.contains("encryption-ready") ||
+      el._encryptionTimer
+    ) {
+      return;
+    }
+    cancelMentionEncryptionRollback(el);
+    var total = Array.from(getMentionSource(el)).length;
+    if (!total) return;
+    el.classList.add("encryption-running");
+    el._encryptionTimer = setInterval(function () {
+      el._encryptionProgress = Math.min(total, (el._encryptionProgress || 0) + 1);
+      renderMentionEncryption(el);
+      if (el._encryptionProgress >= total) {
+        stopMentionEncryption(el);
+        el.classList.add("encryption-ready");
+        refreshMentionHoverTitles();
+        termLog(
+          lang === "en"
+            ? "[CIPHER] DESIGNATION " + (Array.prototype.indexOf.call(mentions, el) + 1) + " MASKED // CLICK TO LOCK"
+            : "[ШИФР] ОБОЗНАЧЕНИЕ " + (Array.prototype.indexOf.call(mentions, el) + 1) + " СКРЫТО // НАЖМИТЕ ДЛЯ ФИКСАЦИИ",
+          "warn"
+        );
+      }
+    }, 250);
+  }
+
+  function fixMentionEncryption(el) {
+    if (!el.classList.contains("encryption-ready")) return;
+    stopMentionEncryption(el);
+    cancelMentionEncryptionRollback(el);
+    el.classList.remove("unlocked", "encryption-ready");
+    el.classList.add("encryption-fixed");
+    var resolved = el.querySelector(".km-resolved");
+    if (resolved) resolved.textContent = getMentionSource(el);
+    var remaining = updateMeter();
+    termLog(
+      lang === "en"
+        ? "[CIPHER] DESIGNATION LOCKED // EXPOSED NAMES REMAINING: " + remaining
+        : "[ШИФР] ОБОЗНАЧЕНИЕ ЗАФИКСИРОВАНО // ОТКРЫТЫХ ИМЁН ОСТАЛОСЬ: " + remaining,
+      "sys"
+    );
+    if (remaining === 0) {
+      termLog(
+        lang === "en"
+          ? "[O5] ALL EXPOSED DESIGNATIONS SECURED"
+          : "[O5] ВСЕ ОТКРЫТЫЕ ОБОЗНАЧЕНИЯ ЗАШИФРОВАНЫ",
+        "sys"
+      );
+      setTimeout(function () {
+        deactivateEncryptionMode(false);
+        if (erasureOrderOpen) {
+          startDocumentInfectionPhase();
+        }
+      }, 350);
+    }
+  }
+
+  function activateEncryptionMode() {
+    var exposed = countUnlockedMentions();
+    if (isEasterEggActive) {
+      termLog(
+        lang === "en"
+          ? "ENCRYPTION MODE DENIED // ANOMALY ESCALATION IN PROGRESS"
+          : "РЕЖИМ ШИФРОВАНИЯ ОТКЛОНЁН // ВЫПОЛНЯЕТСЯ ЭСКАЛАЦИЯ АНОМАЛИИ",
+        "err"
+      );
+      return;
+    }
+    if (encryptionModeActive) {
+      termLog(
+        lang === "en" ? "ENCRYPTION MODE ALREADY ACTIVE" : "РЕЖИМ ШИФРОВАНИЯ УЖЕ АКТИВЕН",
+        "warn"
+      );
+      return;
+    }
+    if (exposed === 0) {
+      termLog(
+        lang === "en"
+          ? "ENCRYPTION MODE NOT REQUIRED // NO EXPOSED DESIGNATIONS"
+          : "РЕЖИМ ШИФРОВАНИЯ НЕ ТРЕБУЕТСЯ // ОТКРЫТЫЕ ОБОЗНАЧЕНИЯ НЕ ОБНАРУЖЕНЫ",
+        "info"
+      );
+      return;
+    }
+    encryptionModeActive = true;
+    document.body.classList.add("encryption-mode");
+    mentions.forEach(function (el) {
+      getMentionSource(el);
+      resetMentionEncryption(el);
+    });
+    refreshMentionHoverTitles();
+    termLog(
+      lang === "en"
+        ? "[O5] ENCRYPTION MODE AUTO-ACTIVATED // EXPOSED DESIGNATIONS: " + exposed
+        : "[O5] РЕЖИМ ШИФРОВАНИЯ АВТОМАТИЧЕСКИ АКТИВИРОВАН // ОТКРЫТЫХ ОБОЗНАЧЕНИЙ: " + exposed,
+      "sys"
+    );
+    termLog(
+      lang === "en"
+        ? "Hold the modified cursor over each name, then click to lock the completed cipher."
+        : "Удерживайте изменённый курсор над каждым именем, затем нажмите для фиксации готового шифра.",
+      "info"
+    );
+  }
+
   function refreshMentionHoverTitles() {
     mentions.forEach(function (el) {
-      if (el.classList.contains("unlocked")) {
+      if (el.classList.contains("encryption-ready")) {
+        el.setAttribute("title", ENCRYPTION_FIX);
+      } else if (encryptionModeActive && el.classList.contains("unlocked")) {
+        el.setAttribute("title", ENCRYPTION_HOVER);
+      } else if (el.classList.contains("unlocked")) {
         el.setAttribute("title", UNLOCKED_HOVER);
       } else {
         el.setAttribute("title", LOCKED_HOVER);
@@ -606,7 +1603,8 @@
     });
     sessionStorage.setItem("scp-km-states", JSON.stringify(unlockedStates));
     var meterText = document.getElementById("k-meter-text");
-    if (meterText) {
+    // Пока идёт фаза заражения — meter отображает CORRUPTION, не переписываем его.
+    if (meterText && !documentInfectionPhaseActive) {
       var pct = Math.round((unlockedCount / (dynamicTotalMentions || 1)) * 100);
       var maxVisualBars = 5;
       var filledBars = Math.round((unlockedCount / (dynamicTotalMentions || 1)) * maxVisualBars);
@@ -636,10 +1634,42 @@
     }
     updateMeter();
     mentions.forEach(function (el) {
+      getMentionSource(el);
+      el.addEventListener("pointerenter", function () {
+        cancelMentionEncryptionRollback(el);
+        startMentionEncryption(el);
+      });
+      el.addEventListener("pointerleave", function () {
+        if (!hoverlessPointer) {
+          scheduleMentionEncryptionRollback(el);
+        }
+      });
       el.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
+        if (encryptionModeActive) {
+          if (el.classList.contains("encryption-ready")) {
+            fixMentionEncryption(el);
+          } else if (el.classList.contains("unlocked")) {
+            startMentionEncryption(el);
+            el.classList.add("encryption-rejected");
+            setTimeout(function () {
+              el.classList.remove("encryption-rejected");
+            }, 320);
+          }
+          return;
+        }
+        if (documentInfectionPhaseActive && !el.classList.contains("unlocked")) {
+          termLog(
+            lang === "en"
+              ? "[O5] DESIGNATION LOCKED DURING DOCUMENT SCAN"
+              : "[O5] ОБОЗНАЧЕНИЕ ЗАБЛОКИРОВАНО НА ВРЕМЯ СКАНИРОВАНИЯ ДОКУМЕНТА",
+            "warn"
+          );
+          return;
+        }
         if (!el.classList.contains("unlocked")) {
+          resetMentionEncryption(el);
           el.classList.add("unlocked");
           var newCount = updateMeter();
 
@@ -843,17 +1873,23 @@
       clearTimeout(blackoutTimer);
       blackoutTimer = null;
     }
+    deactivateEncryptionMode(false);
+    resetDocumentInfectionPhase();
     deactivateBlackout();
     clearErasureState();
+    // Полностью очищаем сохранённое состояние сессии, чтобы после перезагрузки
+    // страница открылась с экрана входа, а все спойлеры были закрыты.
     try {
       sessionStorage.removeItem("scp-km-states");
       sessionStorage.removeItem(BLACKOUT_KEY);
       sessionStorage.removeItem(ERASURE_KEY);
+      sessionStorage.clear();
     } catch (e) {}
     clearBlackoutStorage();
     isEasterEggActive = false;
     unlockedCount = 0;
     dynamicTotalMentions = baseTotalMentions;
+    infectionCount = 0;
     mentions.forEach(function (el) {
       el.classList.remove("unlocked");
     });
@@ -874,27 +1910,60 @@
     termLog(lang === "en" ? "Memetic residue cleared" : "Меметический осадок очищен", "info");
     termLog(lang === "en" ? "Session reset to pristine" : "Сессия сброшена до первозданной", "info");
     termLog(lang === "en" ? "File re-encryption // SUCCESS" : "Повторное шифрование файла // УСПЕХ", "sys");
+    termLog(lang === "en" ? "Reloading secure terminal..." : "Перезагрузка защищённого терминала...", "sys");
+    // Прокручиваем наверх и перезагружаем документ: возврат к экрану входа.
+    try {
+      window.scrollTo(0, 0);
+    } catch (e) {}
+    setTimeout(function () {
+      window.location.reload();
+    }, 900);
   }
 
   function handleO5Erasure() {
+    var exposed = countUnlockedMentions();
+    if (exposed > 0) {
+      termLog(
+        lang === "en"
+          ? "[O5] ERASURE INTERLOCK ACTIVE // EXPOSED DESIGNATIONS: " + exposed
+          : "[O5] БЛОКИРОВКА СТИРАНИЯ АКТИВНА // ОТКРЫТЫХ ОБОЗНАЧЕНИЙ: " + exposed,
+        "err"
+      );
+      termLog(
+        lang === "en"
+          ? "Open Appendix K-4 to begin preliminary encryption."
+          : "Откройте Приложение К-4 для начала предварительного шифрования.",
+        "warn"
+      );
+      return;
+    }
+    if (!documentScanComplete) {
+      termLog(
+        lang === "en"
+          ? "[O5] ERASURE INTERLOCK ACTIVE // DOCUMENT SCAN INCOMPLETE"
+          : "[O5] БЛОКИРОВКА СТИРАНИЯ АКТИВНА // СКАНИРОВАНИЕ ДОКУМЕНТА НЕ ЗАВЕРШЕНО",
+        "err"
+      );
+      termLog(
+        lang === "en"
+          ? "Open Appendix K-4 and restore all contaminated paragraphs."
+          : "Откройте Приложение К-4 и восстановите все заражённые абзацы.",
+        "warn"
+      );
+      return;
+    }
     termLog(
       lang === "en"
-        ? "[O5] ERASURE PROTOCOL INITIATED // AUTH CODE ████"
-        : "[O5] ПРОТОКОЛ СТИРАНИЯ ИНИЦИИРОВАН // КОД ████",
+        ? "[O5] LEGACY ERASURE COMMAND REVOKED"
+        : "[O5] УСТАРЕВШАЯ КОМАНДА СТИРАНИЯ ОТОЗВАНА",
       "err"
     );
-    termLog(lang === "en" ? "Purging document..." : "Очистка документа...", "warn");
-    var doc = document.querySelector(".doc-shell");
-    if (doc) {
-      doc.style.transition = "opacity 0.9s ease, filter 0.9s ease";
-      doc.style.opacity = "0";
-      doc.style.filter = "blur(18px)";
-    }
-    setErasureState();
-    setTimeout(function () {
-      termLog(lang === "en" ? "Document erased by order of O5-█" : "Документ стёрт по приказу O5-█", "err");
-      redirectToErasedDocument();
-    }, 1800);
+    termLog(
+      lang === "en"
+        ? "Document scan complete // Awaiting next authorization stage."
+        : "Сканирование документа завершено // Ожидается следующий этап авторизации.",
+      "warn"
+    );
   }
 
   function handleKosstarCommand() {
@@ -927,7 +1996,7 @@
       termLog("  help / ? - " + (lang === "en" ? "show this list" : "показать список"), "info");
       termLog("  reboot - " + (lang === "en" ? "reset site to pristine state" : "сбросить сайт до первозданного вида"), "info");
       termLog("  erased.txt - " + (lang === "en" ? "open erased file (404)" : "открыть стёртый файл (404)"), "info");
-      termLog("  o5-erasure - " + (lang === "en" ? "initiate document erasure protocol" : "запустить протокол уничтожения документа"), "info");
+      termLog("  scan document - " + (lang === "en" ? "show contaminated text zones" : "показать заражённые участки текста"), "info");
       termLog("  clear - " + (lang === "en" ? "clear terminal" : "очистить терминал"), "info");
       termLog("  status - " + (lang === "en" ? "show session status" : "показать статус сессии"), "info");
       termLog(lang === "en" ? "  unknown - command undefined" : "  неизвестно - команда не определена", "info");
@@ -946,6 +2015,20 @@
           : "INACTIVE";
       termLog("Session: " + sessionId, "info");
       termLog("Mentions: " + unlockedCount + "/" + dynamicTotalMentions, "info");
+      termLog(
+        (lang === "en" ? "Encryption mode: " : "Режим шифрования: ") +
+          (encryptionModeActive ? (lang === "en" ? "ACTIVE" : "АКТИВЕН") : (lang === "en" ? "INACTIVE" : "НЕАКТИВЕН")),
+        encryptionModeActive ? "warn" : "info"
+      );
+      termLog(
+        (lang === "en" ? "Document scan: " : "Сканирование документа: ") +
+          (documentScanComplete
+            ? (lang === "en" ? "CLEAN" : "ЧИСТО")
+            : documentInfectionPhaseActive
+              ? (lang === "en" ? "CONTAMINATED" : "ЗАРАЖЁН")
+              : (lang === "en" ? "PENDING" : "ОЖИДАНИЕ")),
+        documentInfectionPhaseActive ? "cog" : "info"
+      );
       termLog(
         "Blackout: " + blo,
         blo.indexOf("ACTIVE") !== -1 || blo.indexOf("АКТИВЕН") !== -1 ? "err" : "info"
@@ -973,6 +2056,8 @@
       COMMANDS.clear();
     } else if (low === "reboot" || low === "restart" || low === "clearall") {
       rebootTerminal();
+    } else if (low === "scandocument" || low === "documentscan" || low === "scan") {
+      logDocumentScanStatus();
     } else if (
       low.indexOf("erased.txt") !== -1 ||
       spacedLow === "file erased.txt" ||
@@ -1013,7 +2098,7 @@
       if (e.key === "Tab") {
         e.preventDefault();
         var cur = termInput.value.toLowerCase();
-        var all = ["help", "reboot", "erased.txt", "o5-erasure", "kosstarthe1st", "clear", "status"];
+        var all = ["help", "reboot", "scan document", "erased.txt", "kosstarthe1st", "clear", "status"];
         for (var i = 0; i < all.length; i++) {
           if (all[i].indexOf(cur) === 0) {
             termInput.value = all[i];
@@ -1033,4 +2118,4 @@
       processCommand(v);
     });
   }
-})();
+})()

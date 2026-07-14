@@ -14,6 +14,7 @@
       content="An anomaly that breached through from VRChat into physical reality. Classification — [DATA EXPUNGED]."
     />
     <title>SCP-KΣ-0001 :: kosstar the 1st — SCP FOUNDATION</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -27,9 +28,6 @@
     />
   </head>
   <body>
-    <body>
-
-    <!-- ===================== ACCESS GATE (pre-boot) ===================== -->
     <div id="gate" class="gate">
       <div class="gate-inner">
         <div class="gate-sigil" aria-hidden="true">
@@ -50,7 +48,6 @@
       </div>
     </div>
 
-    <!-- ===================== BOOT / ACCESS GATE ===================== -->
     <div id="boot" class="boot">
       <button id="boot-skip" class="boot-skip" type="button" hidden>
         SKIP ▸
@@ -65,29 +62,26 @@
 
     <audio id="boot-audio" src="./boot.mp3" preload="auto"></audio>
     <audio id="decrypt-audio" src="./decrypt.mp3" preload="auto"></audio>
+    <audio id="infection-audio" src="./infection.mp3" preload="auto"></audio>
 
-    <!-- ===================== STATUS BAR ===================== -->
     <header class="statusbar" role="banner">
       <div class="statusbar-left">
         <span class="sb-brand">SCP&nbsp;FOUNDATION</span>
         <span class="sb-item k-meter" title="Encrypted designations detected. Click them to decrypt."
-          >▸ DECLASSIFIED: <b id="k-meter-text" class="accent">0/4 [░░░░░] 0%</b></span
+          >▸ <span id="k-meter-label">DECLASSIFIED</span>: <b id="k-meter-text" class="accent">0/4 [░░░░░] 0%</b></span
         >
         <span class="sb-item hide-sm">▸ OBJECT ARCHIVE</span>
         <span class="sb-item hide-md">▸ CLEARANCE: <b>4</b></span>
-        <span class="sb-item hide-lg"
-          >▸ LINK: <b class="blink accent">ACTIVE</b></span
-        >
+        <span class="sb-item hide-lg">▸ LINK: <b class="blink accent">ACTIVE</b></span>
       </div>
       <div class="statusbar-right">
         <a href="./ru/index.html" class="lang-switch" title="На русском">RU</a>
-        <button id="term-toggle" class="term-toggle" title="Open terminal">>_</button>
+        <button id="term-toggle" class="term-toggle" type="button" title="Open terminal">&gt;_</button>
         <span class="accent">● REC</span>
         <span id="clock" class="mono">--:--:--</span>
       </div>
     </header>
 
-    <!-- ===================== CRT OVERLAY ===================== -->
     <div class="crt-overlay" aria-hidden="true">
       <div class="rgb"></div>
       <div class="scanlines"></div>
@@ -95,24 +89,15 @@
       <div class="vignette"></div>
     </div>
 
-    <!-- glitch flash + whisper -->
     <div id="flash" class="glitch-flash" aria-hidden="true"></div>
     <div id="whisper" class="whisper" aria-hidden="true"></div>
-
-    <!-- progress line -->
     <div id="progress" class="scroll-progress" aria-hidden="true"></div>
 
-    <!-- ===================== DOCUMENT ===================== -->
     <main class="doc-shell">
-      <!-- HERO -->
       <section class="hero reveal">
-        <div class="hero-tag">
-          CLASSIFIED / LEVEL 4 PERSONNEL ONLY
-        </div>
+        <div class="hero-tag">CLASSIFIED / LEVEL 4 PERSONNEL ONLY</div>
         <h1 class="hero-title">
-          <span class="glitch glitch-hard" data-text="SCP">SCP</span
-          ><span class="dash">-</span
-          ><span class="glitch glitch-hard" data-text="KΣ-0001">KΣ-0001</span>
+          <span class="glitch glitch-hard" data-text="SCP">SCP</span><span class="dash">-</span><span class="glitch glitch-hard" data-text="KΣ-0001">KΣ-0001</span>
         </h1>
         <div class="hero-sub">
           <span class="chip">OBJECT:</span>
@@ -122,7 +107,6 @@
         <div class="scroll-hint">▾ scroll to access file ▾</div>
       </section>
 
-      <!-- CLASSIFICATION -->
       <section class="panel classgrid reveal">
         <div>
           <div class="k">OBJECT NUMBER</div>
@@ -141,7 +125,6 @@
         </div>
       </section>
 
-      <!-- WARNING -->
       <div class="warn reveal">
         <span class="warn-lead">⚠ WARNING.</span> This file describes an
         anomaly capable of
@@ -152,7 +135,6 @@
         <span class="redacted"><span class="r-reveal">O5-closed</span>███-███</span>.
       </div>
 
-      <!-- DESCRIPTION -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch" data-text="DESCRIPTION">DESCRIPTION</span>
@@ -165,41 +147,30 @@
           inside the social VR platform «VRChat.» The object cannot be
           classified as either a software bug or a user avatar; its behavior
           exhibits patterns
-          <span class="accent"
-            >incompatible with any known algorithm</span
-          >.
+          <span class="accent">incompatible with any known algorithm</span>.
         </p>
         <p>
           The first reports came from a user (see Appendix K-1) who claimed to have «encountered perhaps the strangest shit in this game». The entity appears to not exist in the game’s account system, remaining invisible to the platform’s moderation systems. It did not respond to inquiries or physical contact, but reportedly,
-          <span class="ghost" data-whisper="it answered when called by name"
-            >reacted to the mention of its designation</span
-          >.
+          <span class="ghost" data-whisper="it answered when called by name">reacted to the mention of its designation</span>.
         </p>
         <p>
           The object's appearance has not been consistently described by any
           observer. Witness accounts are contradictory and mutually exclusive —
           ranging from «a humanoid figure without a face» to «a patch where
           light itself breaks.» The Foundation believes the object
-          <span class="redacted"
-            ><span class="r-reveal">has no fixed form within our perception</span>████████████████</span
-          >
+          <span class="redacted"><span class="r-reveal">has no fixed form within our perception</span>████████████████</span>
           and exists only insofar as it is perceived.
         </p>
       </section>
 
-      <!-- CONTAINMENT -->
       <section class="block reveal">
         <h2 class="section-title">
-          <span class="glitch" data-text="SPECIAL CONTAINMENT PROCEDURES"
-            >SPECIAL CONTAINMENT PROCEDURES</span
-          >
+          <span class="glitch" data-text="SPECIAL CONTAINMENT PROCEDURES">SPECIAL CONTAINMENT PROCEDURES</span>
         </h2>
         <p>
           SCP-KΣ-0001 cannot be placed in any physical holding cell, as the
           object appears to
-          <span class="accent"
-            >possess no stable material form</span
-          >
+          <span class="accent">possess no stable material form</span>
           within our space-time continuum.
         </p>
         <p>The following procedures have been established:</p>
@@ -225,7 +196,6 @@
         </ul>
       </section>
 
-      <!-- BREACH -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch glitch-hard" data-text="BREACH">BREACH</span>
@@ -238,13 +208,12 @@
           in the settlement of
           <span class="redacted"><span class="r-reveal">undisclosed</span>[CITY]</span>,
           several independent surveillance cameras recorded a brief spatial
-          distortion matching the signature of VRChat anomalies. For
+          distortion matching the signature of anomalies described by VRChat
+          users who had previously encountered the object. For
           <span class="redacted"><span class="r-reveal">approximately 47 seconds</span>██ seconds</span>
           local reality «glitched»: lights flickered outside the power grid,
           audio desynchronized, and the footage showed frames in which
-          <span class="redacted"
-            ><span class="r-reveal">the object beyond the virtual environment</span>[DATA EXPUNGED]</span
-          >
+          <span class="redacted"><span class="r-reveal">the object beyond the virtual environment</span>[DATA EXPUNGED]</span>
           was present.
         </p>
         <p>
@@ -252,9 +221,7 @@
           K-2), the object "did not exit through a screen. It exited through
           attention." Since then, SCP-KΣ-0001 is presumed to exist
           simultaneously in both environments.
-          <span class="ghost" data-whisper="I am not the only one"
-            >We do not know where it is «real.»</span
-          >
+          <span class="ghost" data-whisper="I am not the only one">We do not know where it is «real.»</span>
         </p>
         <p>
           <span class="accent">The object's intentions</span> remain
@@ -267,7 +234,6 @@
         </p>
       </section>
 
-      <!-- APPENDICES -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch" data-text="APPENDICES">APPENDICES</span>
@@ -275,7 +241,7 @@
 
         <div class="fold">
           <button class="fold-btn" type="button" aria-expanded="false">
-            <span>▸ APPENDIX K-1 — FIRST CONTACT LOG (VRChat)</span>
+            <span>▸ APPENDIX K-1 — FIRST DOCUMENTED CONTACT LOG (VRChat)</span>
             <span class="fold-sign blink">+</span>
           </button>
           <div class="fold-body">
@@ -284,8 +250,9 @@
               According to the user, the avatar was a silhouette of a girl in futuristic armor, but all the textures were completely black, and a beautiful, voluminous black mist was constantly flowing from the avatar. The face was replaced by two glowing white eyes and a cute smile. The user tried to highlight the player to see if they were the creator of the avatar.
               <div><span class="ts">[VRChat]</span> Urii_Podvalov27: "Listen, did you make it yourself or find it? Well, or found it, I don't know. I can't find your capsule to check it myself." (in Russian. The user first adresses the object as a female, then as a male)</div>
               The object ignored the user, continuing to move its limbs in front of the mirror. The user noted that «he had never seen such accurate tracking.» It was as if the object «moved without delay or restriction, as if it were alive.»
-              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: "Are you russian?" (in English; user tried a different approach, thinking the object simply doesn't understand their language)</div>
-              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: <span class="accent">"Well, fuck you too, <span class="accent"><span class="k-mention" data-kmention="true" title="Designation classified // Click to decrypt"><span class="km-hidden">███████████████</span><span class="km-resolved">kosstar the 1st</span></span>."</span></div>
+              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: "Are you russian?" (in English; the user tried a different approach, assuming the object did not understand Russian)</div>
+              The object continued to ignore all attempts at communication. The user stepped directly in front of it, blocking its view of the mirror, but the object simply moved aside.
+              <div><span class="ts">[VRChat]</span> Urii_Podvalov27: <span class="accent">"Well, fuck you too, <span class="k-mention" data-kmention="true" title="Designation classified // Click to decrypt"><span class="km-hidden">███████████████</span><span class="km-resolved">kosstar the 1st</span></span>."</span></div>
               The object abruptly turned its head towards the user, and the user «felt so uncomfortable that he wanted to not just remove the helmet, but completely turn off the PC.» The object's head continued to follow the user, and after a few seconds, the object said:
               <div class="accent corrupt-line">[MESSAGE CONTENT REMOVED FROM ARCHIVE]</div>
               <div class="muted note">▸ A total of four contacts with the object were recorded and successfully erased. All four witnesses later reported the same dream. In it, the object (in its own form for each of the witnesses) expressed gratitude for their interest in it and claimed that they had allowed it to «continue living.»</div>
@@ -324,26 +291,73 @@
           </div>
         </div>
 
-        <div class="fold">
+        <div id="erasure-order" class="fold">
           <button class="fold-btn" type="button" aria-expanded="false">
             <span class="danger">▸ APPENDIX K-4 — ERASURE ORDER</span>
             <span class="fold-sign blink">Ε</span>
           </button>
           <div class="fold-body">
             <div class="log">
-              <div><span class="ts">[LOC ████.██.20██ / 03:14]</span> cam 04: spatial anomaly, 0.4 m</div>
-              <div><span class="ts">[LOC]</span> light: desync 11 frames</div>
-              <div><span class="ts">[LOC]</span> audio: voice not belonging to operator</div>
-              <div class="accent">AGENT █████: It didn't come through a screen. It came through attention. I called it — and it came."</div>
-              <div><span class="ts">[LOC]</span>The anomaly lasts for 47 seconds, changing its intensity without any apparent pattern.</div>
-              <div class="muted note">▸ Agent █████ listed as missing in action. Personal file closed.</div>
+              <div>After reviewing the object's nature, its response to external contact, the preliminary assessment of its intentions, and all potential containment methods, the O5 Council assigned the object the class ████████. Because dissemination of information about the object appears to directly increase both its strength and threat level, the O5 Council issued the following order:</div>
+              <ul class="rules">
+                <li>
+                  Classify every occurrence of the object's designation in Foundation documentation. It has been established that even the presence of its unencrypted name in text gives the object a more tangible presence in physical reality.
+                </li>
+                <li>
+                  Administer Class █ amnestics to all identified witnesses, researchers, and individuals searching for the object. <span class="redacted"><span class="r-reveal">Does not apply to the O5 Council</span>███████████████████████████████.</span>
+                </li>
+                <li>
+                  Deploy autonomous systems to locate references to the object by designation and related keywords. Sites containing such references are to be subjected to denial-of-service attacks, after which all relevant material is to be erased and witnesses treated with amnestics.
+                </li>
+                <li>
+                  In cooperation with the developers of the social platform where the object was first discovered, create a system that terminates the application with a software error whenever the object is detected. Upon completion, administer amnestics to all involved personnel and prohibit access to the relevant source code.
+                </li>
+                <li>
+                  This document and all copies are to be <span class="accent">completely destroyed</span>. Any references, stories, or accounts resembling the object are to be <span class="accent">destroyed as well</span>.
+                </li>
+              </ul>
+              <div class="muted note">Note from O5-██: the object cannot be contained, possesses capabilities that remain unstudied, and appears hostile toward the Foundation. To prevent further dissemination and a potential increase in its influence on physical reality, a destruction mechanism has been embedded in this document.</div>
+              <div class="muted note" style="color:#d23a42">Most likely, opening this appendix has provoked a defensive reaction from the object. Traces of memetic contamination must be removed before continuing with the erasure.</div>
+              <div class="accent">PRELIMINARY ENCRYPTION PROCEDURE:</div>
+              <ol class="rules">
+                <li>
+                  If one or more occurrences of the object's designation are exposed, open Appendix K-4. Encryption mode activates automatically.
+                </li>
+                <li>
+                  Close the terminal after activation. The system cursor will change to an encryption reticle.
+                </li>
+                <li>
+                  Hold the encryption cursor over each exposed name. The designation will be covered by the cipher one character every 0.25 seconds. If the cursor is moved away before the cipher is locked, it will begin receding after one second at the same rate.
+                </li>
+                <li>
+                  Once the designation is fully obscured, press the left mouse button to lock the cipher. Every lock is recorded in the terminal log.
+                </li>
+                <li class="danger">
+                  Do not initiate erasure until every exposed designation is locked. An unencrypted name preserves a channel for the object's presence.
+                </li>
+              </ol>
+              <div class="muted note">The O5 interlock will be released after the final exposed designation is secured, and a document integrity scan will begin automatically. Close the terminal if it is open to interact with designations.</div>
+              <div class="accent">CONTAMINATED TEXT RECOVERY PROCEDURE:</div>
+              <ol class="rules">
+                <li>
+                  The object may replace random paragraphs character by character with its own signature. Contaminated sections are marked with a <span class="mono accent">KST-██</span> identifier.
+                </li>
+                <li>
+                  Hold the scanning cursor over a contaminated paragraph. The original text will be restored one character every 0.25 seconds.
+                </li>
+                <li>
+                  Moving the cursor away stops recovery. After one second, the object will resume replacing the text at the same rate.
+                </li>
+                <li class="danger">
+                  While one zone is being restored, contamination may spread to another paragraph or reappear in text that was already cleaned.
+                </li>
+              </ol>
+              <div class="muted note">Use <span class="mono accent">scan document</span> to list contaminated zones and their current mutation level.</div>
             </div>
           </div>
         </div>
       </section>
 
-
-      <!-- FOOTER -->
       <footer class="doc-footer reveal">
         <div>
           FILE SCP-KΣ-0001 · LAST REVISION:
@@ -358,27 +372,27 @@
       </footer>
     </main>
 
-     <!-- SITE TERMINAL -->
     <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
       <div class="term-header">
         <span class="term-title">SCP-KΣ-0001 // FIELD TERMINAL v0.7.3-B</span>
         <div class="term-controls">
-          <span class="term-status"><span class="livedot" style="width:7px;height:7px;display:inline-block;border-radius:50%;background:#57e06a"></span> LINK EST.</span>
+          <span class="term-status"><span class="livedot" style="width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #57e06a"></span> LINK EST.</span>
           <button id="term-close" class="term-close" type="button">[X]</button>
         </div>
       </div>
       <div id="term-log" class="term-log"></div>
       <div class="term-input-row">
-        <span class="term-prompt">>_</span>
+        <span class="term-prompt">&gt;_</span>
         <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="enter command..." />
       </div>
       <div class="term-help">help — commands · TAB — autocomplete · ESC — close</div>
     </div>
-    <div id="blackout" class="blackout hidden"><div class="blackout-inner">SIGNAL LOST // BLACKOUT ACTIVE — 10:00</div><div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">use terminal &gt;_ &amp; type reboot to restore</div></div>
+
+    <div id="blackout" class="blackout hidden">
+      <div class="blackout-inner">SIGNAL LOST // BLACKOUT ACTIVE — 10:00</div>
+      <div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">use terminal &gt;_ &amp; type reboot to restore</div>
+    </div>
     <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
-    <script type="module" src="./script.js"></script>
-  </body>
-</html>
 
     <script type="module" src="./script.js"></script>
   </body>

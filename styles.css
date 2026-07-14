@@ -338,6 +338,22 @@ b {
   color: var(--red-soft);
   box-shadow: 0 0 10px rgba(179, 18, 27, 0.3);
 }
+body.blackout-active {
+  /* Полностью запрещаем прокрутку и любые касания фонового документа. */
+  overflow: hidden !important;
+  height: 100vh;
+  touch-action: none;
+}
+body.blackout-active .doc-shell,
+body.blackout-active .crt-overlay {
+  pointer-events: none;
+}
+/* Прячем полосу прокрутки во время блэкаута. */
+body.blackout-active::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
 body.blackout-active .gate,
 body.blackout-active .boot {
   display: none !important;
@@ -843,6 +859,133 @@ p {
   letter-spacing: 0.06em;
   text-shadow: 0 0 10px rgba(210, 58, 66, 0.8);
 }
+body.encryption-mode,
+body.encryption-mode *,
+body.document-scan-mode,
+body.document-scan-mode * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%2336e0e6' stroke-width='1'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8' stroke='%23d23a42' stroke-width='2'/%3E%3C/svg%3E") 16 16, crosshair !important;
+}
+body.encryption-mode .k-mention.unlocked {
+  border-color: var(--cyan);
+  background: rgba(54, 224, 230, 0.08);
+  box-shadow: 0 0 14px rgba(54, 224, 230, 0.35);
+}
+.k-mention.encryption-running .km-resolved {
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(54, 224, 230, 0.85);
+}
+.k-mention.encryption-reversing .km-resolved {
+  color: var(--red-soft);
+  text-shadow: 0 0 12px rgba(210, 58, 66, 0.75);
+}
+.k-mention.encryption-ready {
+  border-color: #57e06a !important;
+  background: rgba(87, 224, 106, 0.12) !important;
+  box-shadow: 0 0 18px rgba(87, 224, 106, 0.55) !important;
+  animation: cipher-ready 0.8s steps(2) infinite;
+}
+.k-mention.encryption-ready .km-resolved {
+  color: #57e06a;
+  text-shadow: 0 0 12px rgba(87, 224, 106, 0.85);
+}
+.k-mention.encryption-fixed {
+  animation: cipher-fixed 0.4s ease-out;
+}
+.k-mention.encryption-rejected {
+  animation: cipher-rejected 0.32s linear;
+}
+@keyframes cipher-ready {
+  50% {
+    filter: brightness(1.45);
+  }
+}
+@keyframes cipher-fixed {
+  0% {
+    transform: scale(1.08);
+    filter: brightness(2);
+  }
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
+}
+@keyframes cipher-rejected {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+.infection-target {
+  position: relative;
+  border-left: 2px solid var(--red);
+  padding-left: 12px;
+  background: linear-gradient(90deg, rgba(179, 18, 27, 0.08), transparent 42%);
+  text-shadow: 0 0 8px rgba(179, 18, 27, 0.28);
+  transition: border-color 0.2s, background 0.2s, text-shadow 0.2s;
+}
+.infection-target::before {
+  content: "[" attr(data-infection-id) "]";
+  position: absolute;
+  right: 0;
+  top: -1.35em;
+  color: var(--red-soft);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.72;
+}
+.infection-target.infection-cleansing {
+  border-left-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(54, 224, 230, 0.1), transparent 42%);
+  text-shadow: 0 0 9px rgba(54, 224, 230, 0.3);
+}
+.infection-target.infection-saturated {
+  animation: infection-pulse 0.8s steps(2) infinite;
+}
+.infection-cleansed {
+  animation: infection-cleansed 0.9s ease-out;
+}
+.infection-protected {
+  border-left: 2px solid var(--cyan) !important;
+  padding-left: 12px;
+  background: linear-gradient(90deg, rgba(54, 224, 230, 0.06), transparent 42%);
+  text-shadow: none;
+  position: relative;
+}
+.infection-protected::before {
+  content: "[PROTECTED]";
+  position: absolute;
+  right: 0;
+  top: -1.35em;
+  color: var(--cyan);
+  font-family: "Share Tech Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.65;
+}
+@keyframes infection-pulse {
+  50% {
+    filter: brightness(1.35);
+  }
+}
+@keyframes infection-cleansed {
+  0% {
+    border-left: 2px solid #57e06a;
+    background: rgba(87, 224, 106, 0.12);
+    text-shadow: 0 0 12px rgba(87, 224, 106, 0.6);
+  }
+  100% {
+    border-left: 2px solid transparent;
+    background: transparent;
+    text-shadow: none;
+  }
+}
 @keyframes mention-unlock {
   0% {
     transform: scale(1);
@@ -1266,6 +1409,17 @@ p {
   color: #6b6b64;
   font-style: italic;
 }
+.infection-link {
+  color: var(--cyan);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.infection-link:hover {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(54, 224, 230, 0.7);
+}
 .term-input-row {
   display: flex;
   align-items: center;
@@ -1359,6 +1513,32 @@ p {
   50% {
     filter: brightness(1.25) hue-rotate(6deg);
   }
+}
+
+/* Локализованный поток "kosstar the 1st" внутри тела заражённого приложения. */
+.log.appendix-infected {
+  position: relative;
+  min-height: 160px;
+  background: #000;
+  overflow: hidden;
+}
+.appendix-flood {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.appendix-flood span {
+  position: absolute;
+  font-family: "VT323", monospace;
+  color: var(--red-soft);
+  text-transform: lowercase;
+  user-select: none;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(210, 58, 66, 0.5);
+  will-change: transform, opacity;
+  animation: flood-flick 0.18s steps(2) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -191,9 +191,7 @@
           termLog("--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
           clearPersistentState();
           termLog("Копия файла обнаружена, восстановление состояния...", "info");
-          setTimeout(function () {
-            termLog("Возврат к SCP-KΣ-0001...", "sys");
-        }, 10700);
+          termLog("Возврат к SCP-KΣ-0001...", "sys");
           setTimeout(function () {
             window.location.href = "./index.html";
           }, 700);

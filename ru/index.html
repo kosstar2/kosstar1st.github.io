@@ -28,7 +28,6 @@
     />
   </head>
   <body>
-    <!-- ===================== ACCESS GATE (перед интро) ===================== -->
     <div id="gate" class="gate">
       <div class="gate-inner">
         <div class="gate-sigil" aria-hidden="true">
@@ -49,7 +48,6 @@
       </div>
     </div>
 
-    <!-- ===================== BOOT / ACCESS GATE ===================== -->
     <div id="boot" class="boot">
       <button id="boot-skip" class="boot-skip" type="button" hidden>
         ПРОПУСТИТЬ ▸
@@ -64,29 +62,26 @@
 
     <audio id="boot-audio" src="../boot.mp3" preload="auto"></audio>
     <audio id="decrypt-audio" src="../decrypt.mp3" preload="auto"></audio>
+    <audio id="infection-audio" src="../infection.mp3" preload="auto"></audio>
 
-    <!-- ===================== STATUS BAR ===================== -->
     <header class="statusbar" role="banner">
       <div class="statusbar-left">
         <span class="sb-brand">ФОНД&nbsp;SCP</span>
         <span class="sb-item k-meter" title="Обнаружены зашифрованные данные. Для дешифровки нажимайте на текст."
-          >▸ РАССЕКРЕЧЕНО: <b id="k-meter-text" class="accent">0/4 [░░░░░] 0%</b></span
+          >▸ <span id="k-meter-label">РАССЕКРЕЧЕНО</span>: <b id="k-meter-text" class="accent">0/4 [░░░░░] 0%</b></span
         >
         <span class="sb-item hide-sm">▸ АРХИВ ОБЪЕКТОВ</span>
         <span class="sb-item hide-md">▸ ДОПУСК: <b>4</b></span>
-        <span class="sb-item hide-lg"
-          >▸ СОЕДИНЕНИЕ: <b class="blink accent">АКТИВНО</b></span
-        >
+        <span class="sb-item hide-lg">▸ СОЕДИНЕНИЕ: <b class="blink accent">АКТИВНО</b></span>
       </div>
       <div class="statusbar-right">
         <a href="../index.html" class="lang-switch" title="View in English">EN</a>
-        <button type="button" id="term-toggle" class="term-toggle" title="Открыть терминал">&gt;_</button>
+        <button id="term-toggle" class="term-toggle" type="button" title="Открыть терминал">&gt;_</button>
         <span class="accent">● REC</span>
         <span id="clock" class="mono">--:--:--</span>
       </div>
     </header>
 
-    <!-- ===================== CRT OVERLAY ===================== -->
     <div class="crt-overlay" aria-hidden="true">
       <div class="rgb"></div>
       <div class="scanlines"></div>
@@ -94,16 +89,11 @@
       <div class="vignette"></div>
     </div>
 
-    <!-- glitch flash + whisper -->
     <div id="flash" class="glitch-flash" aria-hidden="true"></div>
     <div id="whisper" class="whisper" aria-hidden="true"></div>
-
-    <!-- progress line -->
     <div id="progress" class="scroll-progress" aria-hidden="true"></div>
 
-    <!-- ===================== DOCUMENT ===================== -->
     <main class="doc-shell">
-      <!-- HERO -->
       <section class="hero reveal">
         <div class="hero-tag">
           КОНФИДЕНЦИАЛЬНО / ТОЛЬКО ДЛЯ ПЕРСОНАЛА УРОВНЯ 4
@@ -119,7 +109,6 @@
         <div class="scroll-hint">▾ прокрутите для доступа к делу ▾</div>
       </section>
 
-      <!-- CLASSIFICATION -->
       <section class="panel classgrid reveal">
         <div>
           <div class="k">НОМЕР ОБЪЕКТА</div>
@@ -138,7 +127,6 @@
         </div>
       </section>
 
-      <!-- WARNING -->
       <div class="warn reveal">
         <span class="warn-lead">⚠ ВНИМАНИЕ.</span> Данный файл описывает
         аномалию, способную к
@@ -149,7 +137,6 @@
         <span class="redacted"><span class="r-reveal">O5-закрытый</span>███-███</span>.
       </div>
 
-      <!-- DESCRIPTION -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch" data-text="ОПИСАНИЕ">ОПИСАНИЕ</span>
@@ -181,7 +168,6 @@
         </p>
       </section>
 
-      <!-- CONTAINMENT -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch" data-text="ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ">ОСОБЫЕ УСЛОВИЯ СОДЕРЖАНИЯ</span>
@@ -216,7 +202,6 @@
         </ul>
       </section>
 
-      <!-- BREACH -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch glitch-hard" data-text="ПРОРЫВ">ПРОРЫВ</span>
@@ -254,7 +239,6 @@
         </p>
       </section>
 
-      <!-- APPENDICES -->
       <section class="block reveal">
         <h2 class="section-title">
           <span class="glitch" data-text="ПРИЛОЖЕНИЯ">ПРИЛОЖЕНИЯ</span>
@@ -312,7 +296,7 @@
           </div>
         </div>
 
-        <div class="fold">
+        <div id="erasure-order" class="fold">
           <button class="fold-btn" type="button" aria-expanded="false">
             <span class="danger">▸ ПРИЛОЖЕНИЕ К-4 — ПРИКАЗ О СТИРАНИИ</span>
             <span class="fold-sign blink">Ε</span>
@@ -337,14 +321,48 @@
                   Документ и все его копии <span class="accent">полностью уничтожить</span>. Любые упоминания, истории, рассказы, напоминающие объект <span class="accent">также уничтожить</span>.
                 </li>
               </ul>
-              <div class="muted note">Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также по всей видимости враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения. Для его активации</div>
-              </div>
+              <div class="muted note">Примечание O5-██: объект невозможно содержать, он обладает неизученными способностями, а также, по всей видимости, враждебно настроен к Фонду. Чтобы не допустить распространения информации об объекте и потенциального усиления его влияния в физическом мире, в данный документ встроен механизм уничтожения.</div>
+              <div class="muted note" style="color:#d23a42">Скорее всего, открытием данного приложения вы спровоцировали защитную реакцию объекта. Необходимо устранить следы меметического заражения прежде, чем продолжить удаление.</div>
+              <div class="accent">ПОРЯДОК ПРЕДВАРИТЕЛЬНОГО ШИФРОВАНИЯ:</div>
+              <ol class="rules">
+                <li>
+                  Если в документе открыто одно или несколько упоминаний имени объекта, откройте Приложение К-4. Режим шифрования активируется автоматически.
+                </li>
+                <li>
+                  После активации режима закройте терминал. Системный курсор изменится на прицел шифрования.
+                </li>
+                <li>
+                  Наведите курсор шифрования на каждое открытое имя и удерживайте его над текстом. Обозначение будет покрываться шифром по одному символу каждые 0,25 секунды. Если отвести курсор до фиксации, через одну секунду шифр начнёт спадать с той же скоростью.
+                </li>
+                <li>
+                  После полного сокрытия обозначения нажмите левую кнопку мыши, чтобы зафиксировать шифр. Каждая фиксация регистрируется в журнале терминала.
+                </li>
+                <li class="danger">
+                  Не запускайте стирание до фиксации всех открытых обозначений. Незашифрованное имя сохраняет канал присутствия объекта.
+                </li>
+              </ol>
+              <div class="muted note">После фиксации последнего открытого обозначения межблокировка O5 будет снята и автоматически начнётся сканирование целостности документа. Закройте терминал, если он открыт, для взаимодействия с обозначениями.</div>
+              <div class="accent">ПОРЯДОК ОЧИСТКИ ЗАРАЖЁННОГО ТЕКСТА:</div>
+              <ol class="rules">
+                <li>
+                  Объект может посимвольно заменять содержимое случайных абзацев собственной сигнатурой. Заражённые участки отмечаются идентификатором <span class="mono accent">KST-██</span>.
+                </li>
+                <li>
+                  Удерживайте курсор сканирования над заражённым абзацем. Исходный текст будет восстанавливаться по одному символу каждые 0,25 секунды.
+                </li>
+                <li>
+                  При отведении курсора восстановление прекращается. Через одну секунду объект продолжит замену текста с той же скоростью.
+                </li>
+                <li class="danger">
+                  Во время очистки одной зоны заражение может перейти на другой абзац или повторно проявиться в уже восстановленном тексте.
+                </li>
+              </ol>
+              <div class="muted note">Команда <span class="mono accent">scan document</span> выводит текущий список заражённых зон и степень их изменения.</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- FOOTER -->
       <footer class="doc-footer reveal">
         <div>
           ФАЙЛ SCP-KΣ-0001 · ПОСЛЕДНЯЯ РЕДАКЦИЯ:
@@ -359,7 +377,6 @@
       </footer>
     </main>
 
-    <!-- SITE TERMINAL -->
     <div id="site-terminal" class="site-terminal hidden" aria-hidden="true">
       <div class="term-header">
         <span class="term-title">SCP-KΣ-0001 // ПОЛЕВОЙ ТЕРМИНАЛ v0.7.3-B</span>
@@ -369,20 +386,14 @@
         </div>
       </div>
       <div id="term-log" class="term-log"></div>
-      <form id="term-form" class="term-input-row" autocomplete="off" action="javascript:void(0)" method="get" onsubmit="return false;">
+      <div class="term-input-row">
         <span class="term-prompt">&gt;_</span>
-        <input id="term-input" class="term-input" type="text" name="cmd" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
-        <button type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0" tabindex="-1" aria-hidden="true">go</button>
-      </form>
+        <input id="term-input" class="term-input" type="text" autocomplete="off" spellcheck="false" placeholder="введите команду..." />
+      </div>
       <div class="term-help">help — список команд · TAB — автодополнение · ESC — закрыть</div>
     </div>
-
-    <div id="blackout" class="blackout hidden">
-      <div class="blackout-inner">СИГНАЛ ПОТЕРЯН // ПРОТОКОЛ BLACKOUT — 10:00</div>
-      <div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">используйте терминал &gt;_ и введите reboot для восстановления</div>
-    </div>
+    <div id="blackout" class="blackout hidden"><div class="blackout-inner">СИГНАЛ ПОТЕРЯН // БЛЭКАУТ АКТИВЕН — 10:00</div><div class="blackout-inner" style="font-size: 12px; letter-spacing: 0.2em; color: #555">используйте терминал &gt;_ и введите reboot для восстановления</div></div>
     <div id="kst-flood" class="kst-flood hidden" aria-hidden="true"></div>
-
-    <script src="../script.js"></script>
+    <script type="module" src="../script.js"></script>
   </body>
 </html>
