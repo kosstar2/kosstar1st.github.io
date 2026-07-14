@@ -338,18 +338,31 @@ b {
   color: var(--red-soft);
   box-shadow: 0 0 10px rgba(179, 18, 27, 0.3);
 }
-body.blackout-active {
+/* ===== SCROLL LOCK: gate / boot / blackout / reboot — одинаковое поведение ===== */
+body.blackout-active,
+body.gate-active,
+body.boot-active,
+body.reboot-active {
   /* Полностью запрещаем прокрутку и любые касания фонового документа. */
   overflow: hidden !important;
   height: 100vh;
   touch-action: none;
 }
 body.blackout-active .doc-shell,
-body.blackout-active .crt-overlay {
+body.blackout-active .crt-overlay,
+body.gate-active .doc-shell,
+body.gate-active .crt-overlay,
+body.boot-active .doc-shell,
+body.boot-active .crt-overlay,
+body.reboot-active .doc-shell,
+body.reboot-active .crt-overlay {
   pointer-events: none;
 }
-/* Прячем полосу прокрутки во время блэкаута. */
-body.blackout-active::-webkit-scrollbar {
+/* Прячем полосу прокрутки во время блэкаута и интро. */
+body.blackout-active::-webkit-scrollbar,
+body.gate-active::-webkit-scrollbar,
+body.boot-active::-webkit-scrollbar,
+body.reboot-active::-webkit-scrollbar {
   width: 0 !important;
   height: 0 !important;
   display: none !important;
@@ -357,6 +370,30 @@ body.blackout-active::-webkit-scrollbar {
 body.blackout-active .gate,
 body.blackout-active .boot {
   display: none !important;
+}
+/* Резервная блокировка до срабатывания JS — пока gate/boot видны */
+body:has(#gate:not(.gone)),
+body:has(#boot:not(.gone)) {
+  overflow: hidden !important;
+  height: 100vh;
+  touch-action: none;
+}
+body:has(#gate:not(.gone))::-webkit-scrollbar,
+body:has(#boot:not(.gone))::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+body:has(#gate:not(.gone)) .doc-shell,
+body:has(#gate:not(.gone)) .crt-overlay,
+body:has(#boot:not(.gone)) .doc-shell,
+body:has(#boot:not(.gone)) .crt-overlay {
+  pointer-events: none;
+}
+body.reboot-active .doc-shell {
+  opacity: 0.35;
+  filter: blur(2px);
+  transition: opacity 0.35s ease, filter 0.35s ease;
 }
 body.blackout-active .statusbar {
   z-index: 9960;
@@ -863,7 +900,33 @@ body.encryption-mode,
 body.encryption-mode *,
 body.document-scan-mode,
 body.document-scan-mode * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%2336e0e6' stroke-width='1'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8' stroke='%23d23a42' stroke-width='2'/%3E%3C/svg%3E") 16 16, crosshair !important;
+  cursor: none !important;
+}
+/* Кастомный вращающийся курсор — div, следующий за мышью */
+.custom-cursor {
+  position: fixed;
+  width: 42px;
+  height: 42px;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  display: none;
+  will-change: left, top, transform;
+}
+.custom-cursor img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: cursor-spin 3s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(210, 58, 66, 0.6));
+}
+body.encryption-mode .custom-cursor,
+body.document-scan-mode .custom-cursor {
+  display: block;
+}
+@keyframes cursor-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 body.encryption-mode .k-mention.unlocked {
   border-color: var(--cyan);

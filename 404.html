@@ -103,7 +103,7 @@
       <div class="msg">
         [DATA EXPUNGED] · this document does not exist<span class="blink">_</span>
       </div>
-      <div class="submsg">saved copy discovered in the database</div>
+      <div class="submsg">backup copy detected in database</div>
       <a class="return-link" href="./index.html">▸ RETURN TO SCP-KΣ-0001 FILE</a>
     </main>
 
@@ -127,7 +127,6 @@
     <script>
       (function () {
         "use strict";
-        var lang = "en";
         var locale = "en-GB";
         var ERASURE_KEY = "scp-erasure-active";
         var BLACKOUT_KEY = "scp-blackout-until";
@@ -191,8 +190,10 @@
         function reboot() {
           termLog("--- SYSTEM REBOOT INITIATED ---", "sys");
           clearPersistentState();
-          termLog("Persistent erasure state cleared", "info");
-          termLog("Returning to SCP-KΣ-0001...", "sys");
+          termLog("Backup file located, restoring state...", "info");
+          setTimeout(function () {
+            termLog("Returning to SCP-KΣ-0001...", "sys");
+          }, 10700);
           setTimeout(function () {
             window.location.href = "./index.html";
           }, 700);
@@ -201,17 +202,17 @@
           help: function () {
             termLog("Available commands:", "sys");
             termLog("  help / ? - show this list", "info");
-            termLog("  reboot - clear erasure state and restore access", "info");
+            termLog("  reboot - restart terminal and load backup file (if available)", "info");
             termLog("  clear - clear terminal", "info");
-            termLog("  status - show recovery status", "info");
+            termLog("  status - document status", "info");
           },
           clear: function () {
             if (termLogEl) termLogEl.innerHTML = "";
             termLog("Terminal cleared", "sys");
           },
           status: function () {
-            termLog("Erasure: " + (isErasureActive() ? "ACTIVE" : "INACTIVE"), isErasureActive() ? "err" : "info");
-            termLog("Blackout: cleared on reboot", "info");
+            termLog("Document state: " + (isErasureActive() ? "ERASED" : "AVAILABLE"), isErasureActive() ? "err" : "info");
+            termLog("Backup copy: available via reboot", "info");
             termLog("Recovery route: ./index.html", "info");
           }
         };
@@ -281,12 +282,12 @@
         }
 
         termLog("RECOVERY TERMINAL READY", "sys");
-        termLog("Document erasure page loaded", "info");
+        termLog("Backup copy of document loaded", "info");
         if (isErasureActive()) {
-          termLog("[CRITICAL] DOCUMENT ERASURE STATE PERSISTS", "err");
-          termLog("Use reboot to restore archive access", "warn");
+          termLog("[CRITICAL] BACKUP COPY: MEMETIC CONTAMINATION", "err");
+          termLog("Use reboot to restore document from backup", "warn");
         } else {
-          termLog("No persistent erasure flag detected", "info");
+          termLog("Persistent erasure flag not detected", "info");
         }
       })();
     </script>

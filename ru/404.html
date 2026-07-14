@@ -92,7 +92,7 @@
         z-index: 9960;
       }
     </style>
-  </head>
+</head>
   <body>
     <button id="term-toggle" class="term-toggle" type="button" title="Открыть терминал восстановления">&gt;_</button>
     <div class="scan"></div>
@@ -191,7 +191,9 @@
           termLog("--- ИНИЦИИРОВАНА ПЕРЕЗАГРУЗКА СИСТЕМЫ ---", "sys");
           clearPersistentState();
           termLog("Копия файла обнаружена, восстановление состояния...", "info");
-          termLog("Возврат к SCP-KΣ-0001...", "sys");
+          setTimeout(function () {
+            termLog("Возврат к SCP-KΣ-0001...", "sys");
+          }, 10700);
           setTimeout(function () {
             window.location.href = "./index.html";
           }, 700);

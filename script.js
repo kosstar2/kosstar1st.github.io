@@ -95,9 +95,14 @@
     if (bootAudio) {
       bootAudio.pause();
     }
-    boot.classList.add("gone");
+    if (boot) boot.classList.add("gone");
+    // Снимаем boot-lock, но сохраняем blackout-lock если он активен
+    document.body.classList.remove("boot-active", "gate-active");
+    if (!document.body.classList.contains("blackout-active")) {
+      unlockBlackoutScroll();
+    }
     setTimeout(function () {
-      boot.style.display = "none";
+      if (boot) boot.style.display = "none";
     }, 700);
   }
 
@@ -486,6 +491,21 @@
   gate = document.getElementById("gate");
   gateEnter = document.getElementById("gate-enter");
   var bootStarted = false;
+
+  // ===== INTRO SCROLL LOCK (gate/boot as blackout) =====
+  (function initIntroLocks() {
+    var until = getBlackoutUntil();
+    var isBlackout = until && Date.now() < until;
+    if (isBlackout) return; // blackout already locks
+    if (gate) {
+      document.body.classList.add("gate-active");
+      lockBlackoutScroll();
+    } else if (boot) {
+      document.body.classList.add("boot-active");
+      lockBlackoutScroll();
+    }
+  })();
+
   function startBoot() {
     if (bootStarted) return;
     bootStarted = true;
@@ -502,6 +522,12 @@
   function closeGate() {
     if (!gate) return;
     gate.classList.add("gone");
+    document.body.classList.remove("gate-active");
+    // Переходим к boot-фазе, оставляя скролл заблокированным
+    if (boot && boot.style.display !== "none") {
+      document.body.classList.add("boot-active");
+      // lock уже активен с gate, не снимаем
+    }
     setTimeout(function () {
       gate.style.display = "none";
     }, 500);
@@ -1073,6 +1099,7 @@
     documentInfectionPhaseActive = false;
     documentScanComplete = true;
     document.body.classList.remove("document-scan-mode");
+    if (!encryptionModeActive) customCursor.hide();
     // Останавливаем и сбрасываем счётчик заражения, возвращаем лейбл
     resetCorruptionMeter();
     if (infectionSpreadTimer) {
@@ -1098,6 +1125,7 @@
     documentInfectionPhaseActive = false;
     documentScanComplete = false;
     document.body.classList.remove("document-scan-mode");
+    customCursor.hide();
     stopCorruptionMeter();
     // Показываем meter на 100/100 в момент takeover'а
     corruptionMeter = CORRUPTION_MAX;
@@ -1231,11 +1259,48 @@
     }, 1000);
   }
 
+  /* ---------- CUSTOM ROTATING CURSOR ---------- */
+  var customCursor = (function () {
+    var el = document.createElement("div");
+    el.className = "custom-cursor";
+    var img = document.createElement("img");
+    // Определяем путь к cursor.png относительно HTML-файла
+    var isSubdir = /\/ru\//i.test(window.location.pathname);
+    img.src = (isSubdir ? "../" : "./") + "cursor.png";
+    img.alt = "";
+    img.draggable = false;
+    el.appendChild(img);
+    document.body.appendChild(el);
+    var active = false;
+    function onMove(e) {
+      if (!active) return;
+      el.style.left = e.clientX + "px";
+      el.style.top = e.clientY + "px";
+    }
+    document.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseenter", function () {
+      if (active) el.style.display = "block";
+    });
+    document.addEventListener("mouseleave", function () {
+      el.style.display = "none";
+    });
+    return {
+      show: function () {
+        active = true;
+      },
+      hide: function () {
+        active = false;
+        el.style.display = "none";
+      }
+    };
+  })();
+
   function startDocumentInfectionPhase() {
     if (documentInfectionPhaseActive || documentScanComplete) return;
     if (countUnlockedMentions() > 0) return;
     documentInfectionPhaseActive = true;
     document.body.classList.add("document-scan-mode");
+    customCursor.show();
     // Активируем счётчик заражения на верхней панели
     corruptionMeter = 0;
     corruptionTakeoverTriggered = false;
@@ -1270,6 +1335,7 @@
     documentInfectionPhaseActive = false;
     documentScanComplete = false;
     document.body.classList.remove("document-scan-mode");
+    if (!encryptionModeActive) customCursor.hide();
     resetCorruptionMeter();
     if (infectionSpreadTimer) {
       clearTimeout(infectionSpreadTimer);
@@ -1441,6 +1507,7 @@
     if (!encryptionModeActive) return;
     encryptionModeActive = false;
     document.body.classList.remove("encryption-mode");
+    if (!documentInfectionPhaseActive) customCursor.hide();
     mentions.forEach(resetMentionEncryption);
     refreshMentionHoverTitles();
     if (logExit) {
@@ -1555,6 +1622,7 @@
     }
     encryptionModeActive = true;
     document.body.classList.add("encryption-mode");
+    customCursor.show();
     mentions.forEach(function (el) {
       getMentionSource(el);
       resetMentionEncryption(el);
@@ -1911,10 +1979,19 @@
     termLog(lang === "en" ? "Session reset to pristine" : "Сессия сброшена до первозданной", "info");
     termLog(lang === "en" ? "File re-encryption // SUCCESS" : "Повторное шифрование файла // УСПЕХ", "sys");
     termLog(lang === "en" ? "Reloading secure terminal..." : "Перезагрузка защищённого терминала...", "sys");
-    // Прокручиваем наверх и перезагружаем документ: возврат к экрану входа.
+
+    // Бесшовная перезагрузка: сначала закрываем терминал и лочим скролл как в блэкауте,
+    // без scrollTo, чтобы не было рывка.
     try {
-      window.scrollTo(0, 0);
+      termCloseFn();
     } catch (e) {}
+    document.body.classList.add("reboot-active");
+    document.body.classList.add("gate-active");
+    lockBlackoutScroll();
+    try {
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    } catch (e) {}
+
     setTimeout(function () {
       window.location.reload();
     }, 900);
