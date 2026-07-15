@@ -1287,6 +1287,8 @@
     return {
       show: function () {
         active = true;
+        // Явно показываем элемент, перебивая любой предыдущий inline display:none
+        el.style.display = "block";
       },
       hide: function () {
         active = false;

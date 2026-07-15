@@ -920,10 +920,8 @@ body.document-scan-mode * {
   animation: cursor-spin 3s linear infinite;
   filter: drop-shadow(0 0 6px rgba(210, 58, 66, 0.6));
 }
-body.encryption-mode .custom-cursor,
-body.document-scan-mode .custom-cursor {
-  display: block;
-}
+/* Видимость управляется из JS (customCursor.show/hide),
+   чтобы inline-стиль не конфликтовал с режимными классами body. */
 @keyframes cursor-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
