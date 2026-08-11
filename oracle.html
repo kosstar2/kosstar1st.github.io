@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORACLE // Control Panel — SCP Foundation</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04101c;--bg2:#061a2b;--panel:rgba(8,26,44,.72);--panel-solid:#08192b;
+  --line:rgba(94,180,255,.22);--line-strong:rgba(120,200,255,.5);
+  --cy:#63c8ff;--cy-dim:#3d7fa8;--txt:#bfe4ff;--txt-dim:#6a95b5;
+  --red:#ff4d5e;--amber:#ffb648;--green:#4dffb8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(1200px 700px at 50% 40%,#0b2439 0%,#04101c 70%),#04101c;
+  color:var(--txt);font-family:'Rajdhani',system-ui,sans-serif;overflow:hidden;
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0px,rgba(0,0,0,.22) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:multiply;opacity:.5}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:61;box-shadow:inset 0 0 220px rgba(0,0,0,.85)}
+.mono{font-family:'Share Tech Mono',monospace}
+
+#app{display:grid;grid-template-rows:52px 1fr 26px;height:100vh}
+#main{display:grid;grid-template-columns:300px 1fr 330px;gap:8px;padding:8px;min-height:0}
+.col{display:flex;flex-direction:column;gap:8px;min-height:0}
+
+.panel{background:var(--panel);border:1px solid var(--line);position:relative;backdrop-filter:blur(3px)}
+.panel:before,.panel:after{content:"";position:absolute;width:9px;height:9px;border:1px solid var(--line-strong)}
+.panel:before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.panel:after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.p-head{display:flex;align-items:center;justify-content:space-between;padding:5px 9px;border-bottom:1px solid var(--line);
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cy);
+  background:linear-gradient(90deg,rgba(60,150,220,.16),transparent)}
+.p-head .tag{font-size:9px;color:var(--txt-dim);letter-spacing:.1em}
+.p-body{padding:8px 9px;overflow:auto;min-height:0}
+.p-body::-webkit-scrollbar{width:5px}
+.p-body::-webkit-scrollbar-thumb{background:rgba(90,170,230,.35)}
+.p-body::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}
+
+header{display:flex;align-items:center;gap:16px;padding:0 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(12,40,66,.9),rgba(4,16,28,.6))}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .mark{width:32px;height:32px;border:1px solid var(--cy);border-radius:50%;display:grid;place-items:center;
+  color:var(--cy);font-size:15px;font-weight:700;position:relative;
+  box-shadow:0 0 14px rgba(90,190,255,.35) inset,0 0 10px rgba(90,190,255,.25)}
+.mark:after{content:"";position:absolute;inset:-5px;border:1px dashed rgba(99,200,255,.4);border-radius:50%;animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:17px;letter-spacing:.34em;font-weight:700;color:#dff1ff}
+.sub{font-size:9.5px;letter-spacing:.22em;color:var(--txt-dim);margin-top:-2px}
+.hstats{margin-left:auto;display:flex;gap:14px;align-items:center}
+.hstat{text-align:right}
+.hstat .k{font-size:8.5px;letter-spacing:.16em;color:var(--txt-dim)}
+.hstat .v{font-size:14px;color:#e6f6ff}
+.badge{padding:3px 9px;border:1px solid var(--red);color:var(--red);font-size:10px;letter-spacing:.18em;
+  background:rgba(255,77,94,.08);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+.node{border:1px solid var(--line);margin-bottom:6px;padding:7px 8px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;
+  background:linear-gradient(90deg,rgba(40,120,180,.10),rgba(10,30,50,.2))}
+.node:hover{border-color:var(--line-strong);background:linear-gradient(90deg,rgba(60,160,230,.2),rgba(10,30,50,.25))}
+.node.prime{border-color:rgba(255,182,72,.45)}
+.node.sel{border-color:var(--cy);box-shadow:0 0 12px rgba(90,190,255,.25)}
+.node .row1{display:flex;align-items:center;gap:6px}
+.node .name{font-size:12.5px;font-weight:600;letter-spacing:.1em;color:#dff1ff}
+.node .geo{font-size:9.5px;color:var(--txt-dim);letter-spacing:.1em;margin-left:auto}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.warn{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.dot.busy{background:var(--red);box-shadow:0 0 8px var(--red)}
+.node .row2{display:flex;justify-content:space-between;font-size:10px;color:var(--txt-dim);margin-top:2px}
+.bar{height:3px;background:rgba(255,255,255,.07);margin-top:5px;position:relative}
+.bar>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#2a86c4,#79dcff);box-shadow:0 0 8px rgba(105,210,255,.6)}
+.spark{display:flex;align-items:flex-end;gap:1px;height:18px;margin-top:5px}
+.spark i{flex:1;background:rgba(99,200,255,.5);min-height:1px}
+
+#mapPanel{flex:1;min-height:0;position:relative;overflow:hidden;
+  background:radial-gradient(900px 500px at 50% 50%,rgba(20,70,115,.55),rgba(4,16,28,.9))}
+#map{width:100%;height:100%;display:block}
+.map-hud{position:absolute;pointer-events:none;font-size:9px;letter-spacing:.14em;color:rgba(140,205,245,.7)}
+.hud-tl{top:8px;left:10px}.hud-tr{top:8px;right:10px;text-align:right}.hud-bl{bottom:8px;left:10px}
+.scanline{position:absolute;left:0;right:0;height:70px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(110,205,255,.10),transparent);animation:scan 9s linear infinite}
+@keyframes scan{0%{top:-70px}100%{top:100%}}
+
+.log-item{border-left:2px solid var(--cy);padding:4px 6px;margin-bottom:4px;font-size:10.5px;
+  background:rgba(30,90,140,.13);animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.log-item.ddos{border-color:var(--red);background:rgba(140,30,45,.15)}
+.log-item.scan{border-color:var(--amber);background:rgba(150,110,30,.12)}
+.log-item.sync{border-color:var(--green);background:rgba(30,140,110,.12)}
+.log-item .t{color:var(--txt-dim);font-size:9px}
+.log-item .a{font-weight:700;letter-spacing:.08em}
+.log-item.erase .a{color:var(--cy)}.log-item.ddos .a{color:var(--red)}
+.log-item.scan .a{color:var(--amber)}.log-item.sync .a{color:var(--green)}
+.log-item .u{color:#cfe9ff;word-break:break-all}
+.kv{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px dotted rgba(120,190,240,.14)}
+.kv span:first-child{color:var(--txt-dim);letter-spacing:.08em}
+.kv span:last-child{color:#dff1ff}
+
+footer{border-top:1px solid var(--line);display:flex;align-items:center;overflow:hidden;
+  background:rgba(6,22,38,.9);font-size:10.5px;letter-spacing:.1em;color:var(--txt-dim)}
+.tick-label{padding:0 10px;color:#04101c;background:var(--cy);height:100%;display:flex;align-items:center;font-weight:700;letter-spacing:.16em}
+#ticker{white-space:nowrap;animation:tick 48s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+
+#modal{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(2,10,18,.72);backdrop-filter:blur(2px)}
+#modal.on{display:grid}
+.mbox{width:min(860px,92vw);max-height:86vh;overflow-y:auto;overflow-x:hidden;background:var(--panel-solid);
+  border:1px solid var(--line-strong);box-shadow:0 0 60px rgba(0,0,0,.7),0 0 40px rgba(60,160,230,.12);
+  scrollbar-width:thin;scrollbar-color:#3d95cf rgba(8,26,44,.9)}
+.mbox::-webkit-scrollbar{width:8px}
+.mbox::-webkit-scrollbar-track{background:rgba(6,22,38,.9);border-left:1px solid var(--line)}
+.mbox::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#2a86c4,#63c8ff);border:1px solid rgba(140,215,255,.45);box-shadow:0 0 8px rgba(99,200,255,.4)}
+.mbox::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#3ba2e6,#9ce8ff)}
+table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;word-break:break-word}
+th{text-align:left;color:var(--cy);font-size:9.5px;letter-spacing:.14em;padding:5px 6px;border-bottom:1px solid var(--line);text-transform:uppercase}
+td{padding:4px 6px;border-bottom:1px dotted rgba(120,190,240,.12);color:#cfe9ff}
+td.dim{color:var(--txt-dim)}
+.pill{padding:1px 6px;border:1px solid currentColor;font-size:9px;letter-spacing:.1em}
+.pill.e{color:var(--cy)}.pill.d{color:var(--red)}.pill.p{color:var(--amber)}
+.btn{border:1px solid var(--line-strong);background:rgba(60,150,220,.12);color:var(--txt);padding:4px 12px;
+  font-family:'Rajdhani';font-size:11px;letter-spacing:.14em;cursor:pointer;text-transform:uppercase}
+.btn:hover{background:rgba(90,190,255,.25);color:#fff}
+
+/* ---------- node tabs & shell ---------- */
+.mtabs{display:flex;border-bottom:1px solid var(--line);background:rgba(4,16,28,.55)}
+.mtab{padding:6px 18px;background:transparent;border:0;border-right:1px solid var(--line);color:var(--txt-dim);
+  font-family:'Rajdhani';font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.15s}
+.mtab:hover{color:var(--cy);background:rgba(60,150,220,.10)}
+.mtab.active{color:#dff1ff;background:linear-gradient(180deg,rgba(60,150,220,.22),transparent);box-shadow:inset 0 -2px 0 var(--cy)}
+.nterm{display:flex;flex-direction:column;height:430px}
+.nterm-log{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px;font-family:'Share Tech Mono',monospace;
+  font-size:11px;line-height:1.55;background:linear-gradient(180deg,rgba(3,12,22,.92),rgba(6,22,38,.72));
+  border-bottom:1px solid var(--line);scrollbar-width:thin;scrollbar-color:#3d95cf rgba(6,22,38,.9)}
+.nterm-log::-webkit-scrollbar{width:8px}
+.nterm-log::-webkit-scrollbar-track{background:rgba(6,22,38,.9)}
+.nterm-log::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#2a86c4,#63c8ff);border:1px solid rgba(140,215,255,.45)}
+.nl{white-space:pre-wrap;word-break:break-word;margin:1px 0;color:var(--txt-dim)}
+.nl.sys{color:#9fd7ff}.nl.ok{color:var(--green)}.nl.warn{color:var(--amber)}
+.nl.err{color:var(--red)}.nl.cmd{color:#dff1ff}.nl.evt{color:#79b6de}
+.nterm-in{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(4,16,28,.9)}
+.nterm-in .p{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);white-space:nowrap}
+.nterm-in input{flex:1;background:transparent;border:0;outline:0;color:#dff1ff;font-family:'Share Tech Mono',monospace;font-size:11.5px}
+.nterm-hint{padding:5px 12px 9px;font-size:9px;letter-spacing:.1em;color:var(--txt-dim);border-top:1px dashed rgba(120,190,240,.14)}
+.node.dead{opacity:.42;filter:grayscale(1);border-color:rgba(255,255,255,.07);cursor:not-allowed}
+.dot.dead{background:#59636c;box-shadow:none}
+
+/* ---------- detonation countdown ---------- */
+#nuke{position:fixed;inset:0;z-index:95;display:none;place-items:center;background:rgba(2,4,8,.95)}
+#nuke.on{display:grid}
+#nuke .wrap{text-align:center;padding:20px}
+#nuke .wtop,#nuke .wbot{font-family:'Rajdhani';font-weight:700;font-size:clamp(13px,2.3vw,26px);letter-spacing:.28em;
+  color:var(--red);text-shadow:0 0 20px rgba(255,60,70,.85);visibility:hidden;animation:nblink .55s steps(1) infinite}
+#nuke.crit .wtop,#nuke.crit .wbot{visibility:visible}
+#nuke .dig{font-family:'Share Tech Mono',monospace;font-size:clamp(44px,13vw,148px);color:#ffd52e;letter-spacing:.05em;
+  text-shadow:0 0 34px rgba(255,205,40,.6);animation:nblink 1s steps(1) infinite;margin:20px 0}
+#nuke .sub{font-family:'Share Tech Mono',monospace;font-size:10.5px;letter-spacing:.22em;color:var(--txt-dim)}
+@keyframes nblink{0%,58%{opacity:1}59%,100%{opacity:.22}}
+
+/* ---------- guaranteed visible node destruction flash ---------- */
+.node-blast{position:fixed;z-index:94;pointer-events:none;width:1px;height:1px}
+.node-blast>*{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%)}
+.node-blast .blast-glow{width:34px;height:34px;background:#ff122d;box-shadow:0 0 28px 18px rgba(255,12,40,.98),0 0 110px 54px rgba(255,25,40,.8);animation:blastGlow 2s ease-out forwards}
+.node-blast .blast-core{width:12px;height:12px;background:#fff1e0;box-shadow:0 0 22px 12px #ff2a1b,0 0 65px 26px #ff001e;animation:blastCore 2s ease-out forwards}
+.node-blast .blast-wave{width:18px;height:18px;border:5px solid #ff2135;box-shadow:0 0 22px 4px rgba(255,25,45,.9);animation:blastWave 2s cubic-bezier(.1,.7,.2,1) forwards}
+.node-blast .blast-wave.b{animation-delay:.12s;border-color:#ff6a43;box-shadow:0 0 26px 5px rgba(255,80,45,.7)}
+@keyframes blastGlow{0%{opacity:1;transform:translate(-50%,-50%) scale(.2)}14%{opacity:1;transform:translate(-50%,-50%) scale(4.8)}48%{opacity:.82;transform:translate(-50%,-50%) scale(7)}100%{opacity:0;transform:translate(-50%,-50%) scale(8.5)}}
+@keyframes blastCore{0%{opacity:1;transform:translate(-50%,-50%) scale(.2)}16%{opacity:1;transform:translate(-50%,-50%) scale(8)}42%{opacity:.95;transform:translate(-50%,-50%) scale(4)}100%{opacity:0;transform:translate(-50%,-50%) scale(.1)}}
+@keyframes blastWave{0%{opacity:1;transform:translate(-50%,-50%) scale(.1)}100%{opacity:0;transform:translate(-50%,-50%) scale(11)}}
+@media (max-width:1200px){#main{grid-template-columns:240px 1fr 270px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo">
+      <div class="mark">Ω</div>
+      <div>
+        <h1>O&#8203;R&#8203;A&#8203;C&#8203;L&#8203;E</h1>
+        <div class="sub">SCP FOUNDATION · GLOBAL INFORMATION SUPPRESSION GRID · v9.4.2</div>
+      </div>
+    </div>
+    <div class="hstats">
+      <div class="hstat"><div class="k">ERASURES / 24H</div><div class="v mono" id="hErase">0</div></div>
+      <div class="hstat"><div class="k">ACTIVE DDoS</div><div class="v mono" id="hDdos" style="color:var(--red)">0</div></div>
+      <div class="hstat"><div class="k">NETWORK TRAFFIC</div><div class="v mono" id="hTraffic">0 Gbit/s</div></div>
+      <div class="hstat"><div class="k">UTC</div><div class="v mono" id="hClock">--:--:--</div></div>
+      <div class="badge">CLEARANCE 4/ORACLE</div>
+    </div>
+  </header>
+
+  <div id="main">
+    <div class="col">
+      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:0">
+        <div class="p-head"><span>Network nodes</span><span class="tag" id="nodesTag">6 / 6 ONLINE</span></div>
+        <div class="p-body" id="nodeList" style="flex:1"></div>
+      </div>
+      <div class="panel">
+        <div class="p-head"><span>Synchronization</span><span class="tag">PRIME → NODES</span></div>
+        <div class="p-body" id="syncBody" style="max-height:150px"></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel" id="mapPanel">
+        <svg id="map" viewBox="0 19 1000 393" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="scanline"></div>
+        <div class="map-hud hud-tl mono">ORACLE MESH · EQUIRECTANGULAR WGS84<br>LAYER: TRAFFIC + SUPPRESSION OPS</div>
+        <div class="map-hud hud-tr mono" id="hudStatus">UPDATING STATUS<br>LINK-STATE: CONVERGED</div>
+        <div class="map-hud hud-bl mono">◈ NODE &nbsp;&nbsp; ⟶ MESH CHANNEL &nbsp;&nbsp; <span style="color:#ff8b96">◎ SUPPRESSION TARGET</span></div>
+      </div>
+      <div class="panel" style="height:150px;display:flex">
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <div class="p-head"><span>Backbone throughput</span><span class="tag" id="chartTag">IN / OUT · Gbit/s</span></div>
+          <canvas id="chart" style="flex:1;width:100%"></canvas>
+        </div>
+        <div style="width:230px;border-left:1px solid var(--line);display:flex;flex-direction:column">
+          <div class="p-head"><span>Node load</span></div>
+          <div class="p-body" id="loadBody" style="flex:1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="panel">
+        <div class="p-head"><span>Observed object</span><span class="tag">PRIORITY α</span></div>
+        <div class="p-body" id="objBody"></div>
+      </div>
+      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:0">
+        <div class="p-head"><span>Operation log</span><span class="tag" id="logRate">LIVE</span></div>
+        <div class="p-body" id="log" style="flex:1"></div>
+      </div>
+      <div class="panel">
+        <div class="p-head"><span>Suppression summary</span></div>
+        <div class="p-body" id="sumBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="tick-label">ORACLE//BULLETIN</div>
+    <div id="ticker" class="mono"></div>
+  </footer>
+</div>
+
+<div id="modal"><div class="mbox panel" id="mbox"></div></div>
+
+<div id="nuke"><div class="wrap">
+  <div class="wtop">☢ DETONATION IMMINENT ☢</div>
+  <div class="dig" id="nukeDig">01:00.000</div>
+  <div class="wbot">☢ DETONATION IMMINENT ☢</div>
+  <div class="sub" id="nukeSub">DEVICE ARMED</div>
+</div></div>
+
+<script>
+if(sessionStorage.getItem('oracle_auth_passed') !== 'true') {
+  document.documentElement.innerHTML = '<head><title>UNAUTHORIZED</title><style>body{margin:0;background:#000;overflow:hidden}</style></head><body><div style="position:fixed;inset:0;z-index:9999999;"><video src="video.mp4" autoplay loop playsinline style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video><div style="position:absolute;inset:0;z-index:2;"></div></div></body>';
+  throw new Error("Unauthorized");
+}
+/* ========================= PROJECTION (equirectangular, WGS84) ========================= */
+const W = 1000, H = 500;
+const project = (lon, lat) => [ (lon + 180) / 360 * W, (90 - lat) / 180 * H ];
+
+/* ========================= ORACLE NODES ========================= */
+const NODES = [
+  { id:'ORACLE-01', role:'PRIME', city:'Frankfurt am Main', cc:'DE', country:'Germany',
+    lat:50.1109, lon:8.6821, ip:'10.7.0.1', mac:'00:1B:44:11:3A:01', asn:'AS64701',
+    site:'Site-51-DE / DE-CIX node', dx:12, dy:-8, load:.62 },
+  { id:'ORACLE-02', role:'RELAY', city:'Moscow', cc:'RU', country:'Russia',
+    lat:55.7558, lon:37.6173, ip:'10.7.0.2', mac:'00:1B:44:11:3A:02', asn:'AS64702',
+    site:'Site-14-RU / MSK-IX', dx:12, dy:-6, load:.48 },
+  { id:'ORACLE-03', role:'RELAY', city:'Montreal', cc:'CA', country:'Canada',
+    lat:45.5019, lon:-73.5674, ip:'10.7.0.3', mac:'00:1B:44:11:3A:03', asn:'AS64703',
+    site:'Site-09-CA / QIX', dx:-14, dy:-8, load:.41, anchor:'end' },
+  { id:'ORACLE-04', role:'RELAY', city:'Dallas, Texas', cc:'US', country:'United States',
+    lat:32.7767, lon:-96.7970, ip:'10.7.0.4', mac:'00:1B:44:11:3A:04', asn:'AS64704',
+    site:'Site-19-TX / Equinix DA', dx:-14, dy:10, load:.55, anchor:'end' },
+  { id:'ORACLE-05', role:'RELAY', city:'Tokyo', cc:'JP', country:'Japan',
+    lat:35.6762, lon:139.6503, ip:'10.7.0.5', mac:'00:1B:44:11:3A:05', asn:'AS64705',
+    site:'Site-33-JP / JPNAP', dx:13, dy:-6, load:.51 },
+  { id:'ORACLE-06', role:'RELAY', city:'Sydney', cc:'AU', country:'Australia',
+    lat:-33.8688, lon:151.2093, ip:'10.7.0.6', mac:'00:1B:44:11:3A:06', asn:'AS64706',
+    site:'Site-27-AU / IX Australia', dx:12, dy:12, load:.37 }
+];
+NODES.forEach(n => { const p = project(n.lon, n.lat); n.x = p[0]; n.y = p[1];
+  n.rx = 0; n.tx = 0; n.ops = []; n.state='ONLINE'; n.hist = new Array(28).fill(0).map(()=>Math.random()*.4+.2);
+  n.uptime = 60*60*24*(120+Math.random()*400)|0; n.sessions = 400+Math.random()*3000|0;
+  n.term = []; n.auth = false; n.dead = false; n.loginStage = 0; n.loginTmp = ''; n.payloadArmed = false; });
+
+let PRIME = NODES[0];
+const LINKS = [
+  [0,1],[0,2],[0,3],[0,4],[0,5],
+  [2,3],[3,4],[4,5],[1,4],[1,2]
+].map(([a,b]) => ({ a:NODES[a], b:NODES[b], prime: a===0, pk:[] }));
+
+/* ========================= SUPPRESSION TARGETS ========================= */
+const TARGET_CITIES = [
+  ['London',51.5074,-0.1278],['New York',40.7128,-74.006],['Sao Paulo',-23.55,-46.63],
+  ['Mumbai',19.076,72.877],['Lagos',6.5244,3.3792],['Seoul',37.5665,126.978],
+  ['Istanbul',41.0082,28.9784],['Los Angeles',34.05,-118.24],['Johannesburg',-26.2041,28.0473],
+  ['Cairo',30.0444,31.2357],['Buenos Aires',-34.6037,-58.3816],['Jakarta',-6.2088,106.8456],
+  ['Kyiv',50.4501,30.5234],['Mexico City',19.4326,-99.1332],['Oslo',59.9139,10.7522],
+  ['Beijing',39.9042,116.4074],['Tehran',35.6892,51.389],['Perth',-31.9523,115.8613],
+  ['Vancouver',49.2827,-123.1207],['Madrid',40.4168,-3.7038],['Warsaw',52.2297,21.0122]
+];
+const DOMAINS = ['anomaly-watch.net','deepfile.ru','uncoveredtruth.org','cryptid-forum.co.uk','pastewell.io',
+ 'nightvision-blog.de','archive-mirror.jp','freeleaks.au','the-hidden-signal.com','redroom-board.onion',
+ 'sat-imagery-open.org','ufo-registry.ca','local-news-tribune.tx.us','videovault.cdn.net','miskatonic-wiki.org',
+ 'reddit-mirror.cc','telegra.ph','gov-archive-leak.se','skywatchers.club','darkstack.exchange'];
+const REGIONAL_SITES = {
+  'London':['reddit.com','x.com','facebook.com','paranormal-uk.co.uk','unexplained.co.uk'],
+  'New York':['reddit.com','x.com','facebook.com','above-top-secret.com','paranormal-forum.com'],
+  'Sao Paulo':['reddit.com','facebook.com','uol.com.br','misterios-brasil.com.br'],
+  'Mumbai':['reddit.com','x.com','facebook.com','paranormalindia.in'],
+  'Lagos':['nairaland.com','facebook.com','x.com','mysteries.ng'],
+  'Seoul':['theqoo.net','dcinside.com','x.com','reddit.com'],
+  'Istanbul':['eksisozluk.com','x.com','facebook.com','paranormalturkiye.com.tr'],
+  'Los Angeles':['reddit.com','x.com','facebook.com','mufon.com','above-top-secret.com'],
+  'Johannesburg':['reddit.com','facebook.com','x.com','mysteries.co.za'],
+  'Cairo':['facebook.com','x.com','masrawy.com','paranormalarabia.com'],
+  'Buenos Aires':['reddit.com','facebook.com','taringa.net','misterios.com.ar'],
+  'Jakarta':['kaskus.co.id','reddit.com','x.com','facebook.com'],
+  'Kyiv':['reddit.com','facebook.com','x.com','mysteries.ua'],
+  'Mexico City':['reddit.com','facebook.com','x.com','misterios.mx'],
+  'Oslo':['reddit.com','facebook.com','x.com','mysteries.no'],
+  'Beijing':['weibo.com','zhihu.com','tieba.baidu.com','douban.com'],
+  'Tehran':['telegram.org','x.com','aparat.com','paranormaliran.ir'],
+  'Perth':['reddit.com','facebook.com','x.com','paranormal.com.au'],
+  'Vancouver':['reddit.com','facebook.com','x.com','mysteries.ca'],
+  'Madrid':['reddit.com','facebook.com','x.com','misterios.es'],
+  'Warsaw':['wykop.pl','facebook.com','x.com','paranormalne.pl']
+};
+const PATHS = ['/thread/','/post/','/upload/','/mirror/','/wiki/','/gallery/','/incident/','/report/','/video/','/dump/'];
+const OBJ = 'SCP-KΣ-0001';
+const MEASURES = {
+  ERASE:['FULL ERASURE','CACHE PURGE','MIRROR CLEANUP','CONTENT REPLACEMENT','CDN SANITIZE'],
+  DDOS:['SYN-FLOOD','UDP AMPLIFICATION','HTTP/2 RAPID RESET','DNS AVALANCHE','SLOWLORIS'],
+  SCAN:['SEMANTIC SWEEP','MIRROR INDEXING','EXIF ANALYSIS','DEEP SEARCH','OSINT FOLD']
+};
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const pad = n => String(n).padStart(2,'0');
+const nowUTC = () => { const d=new Date(); return pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+':'+pad(d.getUTCSeconds()); };
+const randIP = () => `${45+Math.floor(Math.random()*160)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${1+Math.floor(Math.random()*253)}`;
+const mkTarget = () => {
+  const c = rnd(TARGET_CITIES);
+  return { host: rnd(REGIONAL_SITES[c[0]] || DOMAINS), url: rnd(PATHS)+ (100000+Math.floor(Math.random()*899999)),
+           city:c[0], lat:c[1], lon:c[2], ip:randIP() };
+};
+
+/* ========================= MAP RENDERING ========================= */
+const SVG='http://www.w3.org/2000/svg';
+const map = document.getElementById('map');
+const el = (t,attrs={}) => { const e=document.createElementNS(SVG,t); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; };
+
+const defs = el('defs');
+defs.innerHTML = `
+ <radialGradient id="glow"><stop offset="0%" stop-color="#7fd8ff" stop-opacity=".55"/><stop offset="100%" stop-color="#7fd8ff" stop-opacity="0"/></radialGradient>
+ <radialGradient id="rglow"><stop offset="0%" stop-color="#ff5f6f" stop-opacity=".5"/><stop offset="100%" stop-color="#ff5f6f" stop-opacity="0"/></radialGradient>
+ <linearGradient id="land" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0%" stop-color="#2e648f"/><stop offset="100%" stop-color="#1c4569"/>
+ </linearGradient>
+ <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+   <feGaussianBlur stdDeviation="1.3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+ </filter>`;
+map.appendChild(defs);
+
+const gGrid=el('g',{id:'grid'}), gLand=el('g',{id:'land'}), gLink=el('g',{id:'links'}),
+      gAtk=el('g',{id:'attacks'}), gPk=el('g',{id:'packets'}), gNode=el('g',{id:'nodes'});
+[gGrid,gLand,gLink,gAtk,gPk,gNode].forEach(g=>map.appendChild(g));
+
+for(let lon=-180; lon<=180; lon+=15){ const p1=project(lon,90),p2=project(lon,-90);
+  gGrid.appendChild(el('line',{x1:p1[0],y1:0,x2:p2[0],y2:H,stroke:'rgba(90,170,230,.10)','stroke-width':.5})); }
+for(let lat=-90; lat<=90; lat+=15){ const p=project(-180,lat);
+  gGrid.appendChild(el('line',{x1:0,y1:p[1],x2:W,y2:p[1],stroke:'rgba(90,170,230,.10)','stroke-width':.5})); }
+[0].forEach(lat=>{ const p=project(-180,lat);
+  gGrid.appendChild(el('line',{x1:0,y1:p[1],x2:W,y2:p[1],stroke:'rgba(120,200,255,.28)','stroke-width':.7,'stroke-dasharray':'6 4'})); });
+
+function ringPath(pts){
+  if (!pts || pts.length === 0) return '';
+  let d = 'M', prevLon = pts[0][0], lonShift = 0;
+  for(let i=0; i<pts.length; i++){
+    let lon = pts[i][0], lat = pts[i][1];
+    if (i > 0) { const diff = lon - prevLon;
+      if (diff > 180) lonShift -= 360; else if (diff < -180) lonShift += 360; }
+    prevLon = lon;
+    const q = project(lon + lonShift, lat);
+    d += (i ? 'L' : '') + q[0].toFixed(1) + ' ' + q[1].toFixed(1);
+  }
+  return d + 'Z';
+}
+function drawTopo(topo){
+  const o = topo.objects.countries || topo.objects.land;
+  const t = topo.transform;
+  const arcs = topo.arcs.map(arc=>{ let x=0,y=0; return arc.map(p=>{ x+=p[0]; y+=p[1];
+    return [x*t.scale[0]+t.translate[0], y*t.scale[1]+t.translate[1]]; }); });
+  const getArc = i => i<0 ? arcs[~i].slice().reverse() : arcs[i];
+  const ringPts = ring => { let pts=[]; for(const idx of ring){ const a=getArc(idx); pts = pts.concat(pts.length? a.slice(1) : a);} return pts; };
+  const geoms = o.type==='GeometryCollection' ? o.geometries : [o];
+  geoms.forEach(g=>{
+    const polys = g.type==='Polygon' ? [g.arcs] : g.type==='MultiPolygon' ? g.arcs : null;
+    if(!polys) return;
+    let d = '';
+    polys.forEach(poly=>poly.forEach(ring=>{
+      const pts = ringPts(ring);
+      if (pts.length > 0) {
+        let sumLat = 0;
+        for (let j = 0; j < pts.length; j++) sumLat += pts[j][1];
+        if (sumLat / pts.length < -58) return;
+        d += ringPath(pts);
+      }
+    }));
+    if (d) gLand.appendChild(el('path',{d, fill:'url(#land)', stroke:'rgba(150,215,255,.45)','stroke-width':.35,
+      'vector-effect':'non-scaling-stroke'}));
+  });
+  gLand.setAttribute('filter','url(#soft)');
+}
+(async ()=>{
+  const urls=['https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
+              'https://unpkg.com/world-atlas@2/countries-110m.json'];
+  for(const u of urls){
+    try{ const r=await fetch(u); if(!r.ok) continue; drawTopo(await r.json()); break; }catch(e){}
+  }
+})();
+
+/* mesh links */
+LINKS.forEach(L=>{
+  const mid = midArc(L.a,L.b);
+  const p = el('path',{d:mid.d, fill:'none',
+    stroke: L.prime ? 'rgba(140,215,255,.55)' : 'rgba(110,180,230,.28)',
+    'stroke-width': L.prime? 1.1 : .7, 'stroke-dasharray': L.prime? '0':'3 3','vector-effect':'non-scaling-stroke'});
+  gLink.appendChild(p); L.path=p; L.geo=mid;
+});
+function midArc(a,b){
+  const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy);
+  const cx=(a.x+b.x)/2 - dy*0.16, cy=(a.y+b.y)/2 + dx*0.16;
+  return { d:`M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`, cx, cy, dist };
+}
+function createMeshLink(a,b,prime){
+  const geo=midArc(a,b);
+  const path=el('path',{d:geo.d,fill:'none',stroke:prime?'rgba(140,215,255,.55)':'rgba(110,180,230,.28)',
+    'stroke-width':prime?1.1:.7,'stroke-dasharray':prime?'0':'3 3','vector-effect':'non-scaling-stroke'});
+  gLink.appendChild(path);
+  const link={a,b,prime,pk:[],path,geo,dead:false};
+  LINKS.push(link);
+  return link;
+}
+function styleMeshLink(L){
+  if(L.dead) return;
+  L.path.setAttribute('stroke',L.prime?'rgba(140,215,255,.55)':'rgba(110,180,230,.28)');
+  L.path.setAttribute('stroke-width',L.prime?1.1:.7);
+  L.path.setAttribute('stroke-dasharray',L.prime?'0':'3 3');
+}
+const qpoint=(a,c,b,t)=>{ const u=1-t; return [u*u*a.x+2*u*t*c.cx+t*t*b.x, u*u*a.y+2*u*t*c.cy+t*t*b.y]; };
+
+/* node markers */
+NODES.forEach(n=>{
+  const g = el('g',{class:'node-g', style:'cursor:pointer'});
+  g.appendChild(el('circle',{cx:n.x,cy:n.y,r:16,fill:'url(#glow)'}));
+  const ring = el('circle',{cx:n.x,cy:n.y,r:6,fill:'none',stroke:'#7fd8ff','stroke-width':.9,opacity:.9,'vector-effect':'non-scaling-stroke'});
+  g.appendChild(ring);
+  const pulse = el('circle',{cx:n.x,cy:n.y,r:6,fill:'none',stroke: n.role==='PRIME'?'#ffc766':'#7fd8ff','stroke-width':.8,'vector-effect':'non-scaling-stroke'});
+  pulse.innerHTML = `<animate attributeName="r" values="6;20" dur="2.6s" repeatCount="indefinite"/>
+                     <animate attributeName="opacity" values=".8;0" dur="2.6s" repeatCount="indefinite"/>`;
+  g.appendChild(pulse);
+  if(n.role==='PRIME'){
+    g.appendChild(el('circle',{cx:n.x,cy:n.y,r:10,fill:'none',stroke:'#ffc766','stroke-width':.8,'stroke-dasharray':'2 2','vector-effect':'non-scaling-stroke'}));
+  }
+  const dotEl=el('circle',{cx:n.x,cy:n.y,r:2.6,fill: n.role==='PRIME' ? '#ffd88a':'#d9f4ff'});
+  g.appendChild(dotEl); n.dotEl=dotEl;
+  const anchor=n.anchor||'start';
+  const t1=el('text',{x:n.x+n.dx,y:n.y+n.dy,fill:'#e2f4ff','font-size':8.5,'font-family':'Share Tech Mono, monospace','text-anchor':anchor,'letter-spacing':'.5'});
+  t1.textContent = n.id + (n.role==='PRIME'?' ★':'');
+  const t2=el('text',{x:n.x+n.dx,y:n.y+n.dy+8,fill:'rgba(150,205,240,.8)','font-size':6.5,'font-family':'Share Tech Mono, monospace','text-anchor':anchor});
+  t2.textContent = n.city.toUpperCase()+' · '+n.ip;
+  g.appendChild(t1); g.appendChild(t2);
+  g.addEventListener('click',()=>openNode(n));
+  gNode.appendChild(g); n.gEl=g; n.ringEl=ring; n.labelEl=t1;
+});
+
+/* ========================= PACKETS ========================= */
+const packets=[];
+function spawnPacket(L,dir){
+  const c=el('circle',{r:1.5,fill: L.prime?'#ffe0a3':'#9ce8ff'});
+  gPk.appendChild(c);
+  packets.push({L,dir,t:0,sp:.004+Math.random()*.006,e:c});
+}
+function stepPackets(){
+  for(let i=packets.length-1;i>=0;i--){
+    const p=packets[i]; p.t+=p.sp;
+    if(p.t>=1){ p.e.remove(); packets.splice(i,1); continue; }
+    const t = p.dir? p.t : 1-p.t;
+    const [x,y]=qpoint(p.L.a,p.L.geo,p.L.b,t);
+    p.e.setAttribute('cx',x); p.e.setAttribute('cy',y);
+  }
+}
+
+/* ========================= MAP OPERATIONS ========================= */
+const activeAttacks=[];
+function visualOp(node,target,type){
+  const tp = project(target.lon,target.lat);
+  const g = el('g');
+  const col = type==='DDOS' ? '#ff5f6f' : type==='ERASE' ? '#79dcff' : '#ffc766';
+  g.appendChild(el('circle',{cx:tp[0],cy:tp[1],r:11,fill: type==='DDOS'?'url(#rglow)':'url(#glow)'}));
+  const ring=el('circle',{cx:tp[0],cy:tp[1],r:3,fill:'none',stroke:col,'stroke-width':.9,'stroke-dasharray': type==='DDOS'?'2 2':'0','vector-effect':'non-scaling-stroke'});
+  ring.innerHTML=`<animate attributeName="r" values="3;14" dur="1.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="1;0" dur="1.5s" repeatCount="indefinite"/>`;
+  g.appendChild(ring);
+  g.appendChild(el('circle',{cx:tp[0],cy:tp[1],r:1.8,fill:col}));
+  const lbl=el('text',{x:tp[0]+6,y:tp[1]-5,fill:col,'font-size':5.6,'font-family':'Share Tech Mono, monospace'});
+  lbl.textContent = target.host;
+  g.appendChild(lbl);
+
+  const srcs = type==='DDOS' ? NODES.filter(s=>!s.dead && Math.random()<.6).concat([node]) : [node];
+  if(type==='DDOS') [...new Set(srcs)].forEach(s=>{ if(s!==node)
+    termPush(s,'evt','joined distributed suppression → '+target.host+' ('+target.city+')'); });
+  const beams=[];
+  [...new Set(srcs)].forEach(s=>{
+    const dx=tp[0]-s.x, dy=tp[1]-s.y;
+    const cx=(s.x+tp[0])/2 - dy*.2, cy=(s.y+tp[1])/2 + dx*.2;
+    const d=`M${s.x} ${s.y} Q${cx} ${cy} ${tp[0]} ${tp[1]}`;
+    const path=el('path',{d,fill:'none',stroke:col,'stroke-width': type==='DDOS'?.9:.6,opacity:.75,
+      'stroke-dasharray':'4 6','vector-effect':'non-scaling-stroke'});
+    path.innerHTML=`<animate attributeName="stroke-dashoffset" from="40" to="0" dur="${type==='DDOS'?'.7s':'1.4s'}" repeatCount="indefinite"/>`;
+    g.appendChild(path); beams.push({path,s});
+  });
+  gAtk.appendChild(g);
+  const life = type==='DDOS' ? 9000+Math.random()*9000 : 4500;
+  const rec={g,until:performance.now()+life,type,beams,node};
+  activeAttacks.push(rec);
+  setTimeout(()=>{ g.style.transition='opacity .8s'; g.style.opacity=0; setTimeout(()=>g.remove(),800);
+    const i=activeAttacks.indexOf(rec); if(i>=0) activeAttacks.splice(i,1); updateHeader(); }, life);
+  updateHeader();
+}
+
+/* ========================= OPERATIONS / LOG ========================= */
+let stats={erase:0,ddos:0,scan:0,blocked:0,mirrors:0,gb:0};
+const logEl=document.getElementById('log');
+function addLog(type,node,target,measure,extra){
+  const d=document.createElement('div');
+  d.className='log-item '+type.toLowerCase();
+  const act = {ERASE:'ERASURE',DDOS:'SUPPRESSION',SCAN:'DETECTION',SYNC:'SYNCHRONIZATION'}[type];
+  d.innerHTML = `<div class="t mono">${nowUTC()} UTC · ${node.id} · ${node.ip}</div>
+    <div><span class="a">${act}</span> <span class="mono" style="color:var(--txt-dim)">[${measure}]</span></div>
+    <div class="u mono">${target? target.host+target.url : extra}</div>
+    ${target?`<div class="t mono">${target.ip} · ${target.city}${extra?' · '+extra:''}</div>`:''}`;
+  logEl.prepend(d);
+  while(logEl.children.length>60) logEl.lastChild.remove();
+}
+function doOp(){
+  const pool = NODES.filter(n=>!n.dead);
+  if(!pool.length) return;
+  const node = rnd(pool);
+  const roll = Math.random();
+  const target = mkTarget();
+  let type, measure;
+  if(roll<.42){ type='ERASE'; measure=rnd(MEASURES.ERASE); stats.erase++; stats.mirrors+=1+Math.floor(Math.random()*4); }
+  else if(roll<.68){ type='DDOS'; measure=rnd(MEASURES.DDOS); stats.ddos++; stats.blocked++; }
+  else { type='SCAN'; measure=rnd(MEASURES.SCAN); stats.scan++; }
+  const extra = type==='DDOS' ? `${(20+Math.random()*880).toFixed(0)} Gbit/s · field team: owner contact` :
+                type==='ERASE'? `${1+Math.floor(Math.random()*9)} copies · ${OBJ}` : `match ${(70+Math.random()*29).toFixed(1)}% · ${OBJ}`;
+  addLog(type,node,target,measure,extra);
+  termPush(node,'evt',({ERASE:'erasure operation',DDOS:'suppression operation',SCAN:'scan sweep'})[type]+
+    ' → '+target.host+target.url+' ['+measure+']');
+  node.ops.unshift({t:nowUTC(),type,measure,host:target.host+target.url,ip:target.ip,city:target.city,
+    status: type==='DDOS' ? 'ACTIVE' : type==='ERASE' ? 'COMPLETE':'QUEUED'});
+  if(node.ops.length>25) node.ops.pop();
+  visualOp(node,target,type);
+  if(type==='DDOS'){ node.load=Math.min(.97,node.load+.14); node.state='SUPPRESSION'; setTimeout(()=>{ if(!node.dead) node.state='ONLINE'; },9000); }
+  renderNodes(); renderSummary(); updateHeader();
+}
+function doSync(){
+  if(PRIME.dead) return;
+  const pool = NODES.filter(x=>!x.dead);
+  const delta=(Math.random()*90+4).toFixed(1), recs=(Math.random()*40+800|0);
+  addLog('SYNC',PRIME,null,'GLOBAL SYNCHRONIZATION',`PRIME ⇄ ALL RELAYS · delta ${delta} MB · ${recs} records`);
+  termPremisePush(PRIME,'evt','broadcast index delta to all relay nodes · delta '+delta+' MB');
+  pool.forEach(n=>{
+    n.lastSync=0;
+    if(n!==PRIME) termPush(n,'ok','simultaneous synchronization with PRIME node ('+PRIME.id+') · '+recs+' records');
+  });
+  renderSync();
+}
+function termPremisePush(n,cls,text,raw){ termPush(n,cls,text,raw); }
+
+/* ========================= PANEL RENDERING ========================= */
+const nodeList=document.getElementById('nodeList');
+const loadBody=document.getElementById('loadBody');
+let selected=null;
+function renderNodes(){
+  nodeList.innerHTML = NODES.map(n=>{
+    const st = n.dead?'dead': n.state==='SUPPRESSION'?'busy': n.load>.8?'warn':'';
+    return `<div class="node ${n.role==='PRIME'?'prime':''} ${n.dead?'dead':''} ${selected===n?'sel':''}" data-id="${n.id}">
+      <div class="row1"><i class="dot ${st}"></i><span class="name">${n.id}</span>
+        <span class="geo">${n.cc} · ${n.city}</span></div>
+      <div class="row2 mono"><span>${n.ip}/24</span><span>${n.dead?'NODE LOST':(n.role==='PRIME'?'PRIME NODE':'RELAY')}</span></div>
+      <div class="row2 mono"><span>RX ${n.rx.toFixed(1)}</span><span>TX ${n.tx.toFixed(1)} Gbit/s</span></div>
+      <div class="bar"><i style="width:${(n.load*100).toFixed(0)}%; ${n.state==='SUPPRESSION'?'background:linear-gradient(90deg,#a3243a,#ff6d7c)':''}"></i></div>
+      <div class="spark">${n.hist.map(v=>`<i style="height:${Math.max(1,v*100).toFixed(0)}%"></i>`).join('')}</div>
+    </div>`;
+  }).join('');
+  [...nodeList.children].forEach(c=>c.addEventListener('click',()=>openNode(NODES.find(n=>n.id===c.dataset.id))));
+
+  loadBody.innerHTML = NODES.map(n=>`
+    <div style="margin-bottom:6px">
+      <div class="kv" style="border:0;padding:0"><span class="mono">${n.id}</span>
+        <span class="mono" style="color:${n.dead?'var(--red)':n.load>.8?'var(--red)':'#dff1ff'}">${n.dead?'LOST':(n.load*100).toFixed(0)+'%'}</span></div>
+      <div class="bar"><i style="width:${(n.load*100).toFixed(0)}%"></i></div>
+    </div>`).join('');
+}
+function renderSync(){
+  document.getElementById('syncBody').innerHTML = NODES.map(n=>{
+    if(n.dead) return `<div class="kv"><span class="mono">${n.id}</span><span style="color:var(--red)">NODE LOST</span></div>`;
+    if(n.role==='PRIME') return `<div class="kv"><span class="mono">${n.id}</span><span style="color:var(--amber)">SOURCE OF TRUTH</span></div>`;
+    const ms = (n.rtt||0).toFixed(0);
+    return `<div class="kv"><span class="mono">${n.id} ← PRIME</span>
+      <span class="mono">${ms} ms · ${n.lastSync<3?'<span style="color:var(--green)">SYNC OK</span>':'Δ '+n.lastSync+' s'}</span></div>`;
+  }).join('') + `<div class="kv"><span>INDEX HASH</span><span class="mono" style="color:var(--cy)">${hash()}</span></div>`;
+}
+let curHash='';
+function hash(){ return curHash; }
+function newHash(){ curHash = Array.from({length:12},()=> '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join(''); }
+newHash();
+
+function renderSummary(){
+  document.getElementById('sumBody').innerHTML=`
+    <div class="kv"><span>Records erased</span><span class="mono">${stats.erase}</span></div>
+    <div class="kv"><span>Mirrors cleaned</span><span class="mono">${stats.mirrors}</span></div>
+    <div class="kv"><span>Resources under DDoS</span><span class="mono" style="color:var(--red)">${activeAttacks.filter(a=>a.type==='DDOS').length}</span></div>
+    <div class="kv"><span>Total suppressions</span><span class="mono">${stats.ddos}</span></div>
+    <div class="kv"><span>Detections (scan)</span><span class="mono">${stats.scan}</span></div>
+    <div class="kv"><span>Owner negotiations</span><span class="mono" style="color:var(--amber)">${Math.max(0,stats.ddos-stats.blocked+activeAttacks.length)} active</span></div>`;
+}
+document.getElementById('objBody').innerHTML=`
+  <div class="kv"><span>Object</span><span class="mono" style="color:var(--amber)">${OBJ}</span></div>
+  <div class="kv"><span>Class</span><span>KETER / INFORMATIONAL</span></div>
+  <div class="kv"><span>Directive</span><span>TOTAL CONCEALMENT</span></div>
+  <div class="kv"><span>Trigger patterns</span><span class="mono">14 802</span></div>
+  <div class="kv"><span>Monitoring languages</span><span class="mono">61</span></div>
+  <div class="kv"><span>Task force</span><span>MTF Ω-4 "Silent Archive"</span></div>`;
+
+function updateHeader(){
+  document.getElementById('hErase').textContent = stats.erase.toLocaleString('en-US');
+  document.getElementById('hDdos').textContent = activeAttacks.filter(a=>a.type==='DDOS').length;
+  const tot = NODES.reduce((s,n)=>s+n.rx+n.tx,0);
+  document.getElementById('hTraffic').textContent = tot.toFixed(1)+' Gbit/s';
+  const tag=document.getElementById('nodesTag');
+  if(tag){ const on=NODES.filter(n=>!n.dead).length;
+    tag.textContent = on+' / '+NODES.length+' ONLINE';
+    tag.style.color = on<NODES.length ? 'var(--red)' : ''; }
+}
+
+/* ========================= NODE MODAL ========================= */
+const modal=document.getElementById('modal'), mbox=document.getElementById('mbox');
+modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('on'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') modal.classList.remove('on'); });
+function fmtUp(s){ const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60); return `${d}d ${pad(h)}h ${pad(m)}m`; }
+function openNode(n){
+  selected=n; renderNodes();
+  const peers = LINKS.filter(L=>L.a===n||L.b===n).map(L=> L.a===n?L.b:L.a);
+  mbox.innerHTML=`
+   <div class="p-head" style="font-size:12px"><span>${n.id} · ${n.city.toUpperCase()} (${n.cc})</span>
+     <span class="tag">${n.dead?'NODE LOST':(n.role==='PRIME'?'PRIMARY SYNCHRONIZATION NODE':'RELAY NODE')}</span></div>
+   <div class="mtabs">
+     <button class="mtab ${modalTab==='info'?'active':''}" data-tab="info">Overview</button>
+     <button class="mtab ${modalTab==='term'?'active':''}" data-tab="term">Node shell</button>
+   </div>
+   <div id="paneInfo" style="display:${modalTab==='info'?'block':'none'}">
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;padding:10px 14px">
+     <div>
+       <div class="kv"><span>Location</span><span>${n.country}, ${n.city}</span></div>
+       <div class="kv"><span>Coordinates</span><span class="mono">${n.lat.toFixed(4)}°, ${n.lon.toFixed(4)}°</span></div>
+       <div class="kv"><span>Facility</span><span>${n.site}</span></div>
+       <div class="kv"><span>IPv4 / mask</span><span class="mono">${n.ip} /24</span></div>
+       <div class="kv"><span>MAC / ASN</span><span class="mono">${n.mac} · ${n.asn}</span></div>
+       <div class="kv"><span>Gateway</span><span class="mono">10.7.0.254</span></div>
+     </div>
+     <div>
+       <div class="kv"><span>State</span><span style="color:${n.dead?'var(--red)':n.state==='SUPPRESSION'?'var(--red)':'var(--green)'}">${n.state}</span></div>
+       <div class="kv"><span>Uptime</span><span class="mono">${fmtUp(n.uptime)}</span></div>
+       <div class="kv"><span>RX / TX</span><span class="mono">${n.rx.toFixed(2)} / ${n.tx.toFixed(2)} Gbit/s</span></div>
+       <div class="kv"><span>Mesh CPU load</span><span class="mono">${(n.load*100).toFixed(0)}%</span></div>
+       <div class="kv"><span>Suppression sessions</span><span class="mono">${n.sessions}</span></div>
+       <div class="kv"><span>Synchronization</span><span class="mono">${n.role==='PRIME'?'SOURCE':'← '+PRIME.ip+' · '+(n.rtt||0).toFixed(0)+' ms'}</span></div>
+     </div>
+   </div>
+   <div style="padding:0 14px 6px"><div class="kv"><span>Mesh switch ports</span>
+     <span class="mono">${peers.map((p,i)=>'ge-0/'+i+' → '+p.id).join(' · ')}</span></div></div>
+   <div class="p-head" style="border-top:1px solid var(--line)"><span>Latest node operations</span><span class="tag">${n.ops.length} records</span></div>
+   <div style="padding:0 14px 12px">
+     <table><thead><tr><th>UTC</th><th>Type</th><th>Method</th><th>Resource</th><th>Target IP</th><th>Region</th><th>Status</th></tr></thead>
+     <tbody>${n.ops.length? n.ops.map(o=>`<tr>
+        <td class="dim mono">${o.t}</td>
+        <td><span class="pill ${o.type==='DDOS'?'d':o.type==='ERASE'?'e':'p'}">${o.type}</span></td>
+        <td class="dim">${o.measure}</td><td class="mono">${o.host}</td>
+        <td class="mono dim">${o.ip}</td><td class="dim">${o.city}</td>
+        <td style="color:${o.status==='ACTIVE'?'var(--red)':o.status==='COMPLETE'?'var(--green)':'var(--amber)'}">${o.status}</td>
+     </tr>`).join('') : '<tr><td colspan="7" class="dim">no operations recorded</td></tr>'}</tbody></table>
+   </div>
+   </div>
+   <div id="paneTerm" style="display:${modalTab==='term'?'block':'none'}">
+     <div class="nterm">
+       <div class="nterm-log" id="ntLog"></div>
+       <div class="nterm-in"><span class="p" id="ntPrompt">${nodePrompt(n)}</span>
+         <input id="ntInput" autocomplete="off" spellcheck="false" placeholder="type a command..."></div>
+       <div class="nterm-hint">help — command list · Tab — autocomplete · login — ORACLE operator sign-in · Esc — close window</div>
+     </div>
+   </div>
+   <div style="padding:0 14px 14px;display:flex;gap:8px;justify-content:flex-end">
+     <button class="btn" id="mClose">Close</button>
+   </div>`;
+  modal.classList.add('on');
+  mbox.querySelector('#mClose').onclick=()=>modal.classList.remove('on');
+  mbox.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>{ modalTab=b.dataset.tab; openNode(n); });
+  if(modalTab==='term'){
+    renderNodeTerm(n);
+    const i=document.getElementById('ntInput');
+    i.type = n.loginStage===2 ? 'password' : 'text';
+    i.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){ const v=i.value; i.value=''; nodeExec(n,v); return; }
+      if(e.key==='Tab'){ e.preventDefault(); completeCmd(n,i); }
+    });
+    setTimeout(()=>i.focus(),30);
+  }
+}
+
+/* =========================================================
+   NODE SHELL · OPERATOR ACCOUNT
+   Credentials match the main document logs:
+   EMP-8817 / OR-KEY-7731 · Sr. Res. L. Arden · ORACLE-CTL
+   ========================================================= */
+const ADMIN={ id:'EMP-8817', key:'OR-KEY-7731', name:'Sr. Res. L. Arden', clearance:'5', perm:'ORACLE-CTL' };
+let modalTab='info';
+const alive=()=>NODES.filter(n=>!n.dead);
+
+const CMDS=['help','status','ping','traceroute','ifconfig','netstat','arp','uptime','date','whoami','clear',
+  'login','logout','sysctl','oraclectl','filterctl','queue','purge','sessions','mesh','route','journalctl',
+  'payload','shutdown','reboot'];
+const SUBS={ oraclectl:['status','sync','resync','halt'], filterctl:['list','reload'], queue:['ls'], purge:['auto'] };
+
+function completeCmd(n,input){
+  if(n.loginStage!==0) return;
+  const v=input.value;
+  if(/\s$/.test(v) && v.trim().split(/\s+/).length>1) return;
+  const parts=v.trim().split(/\s+/);
+  if(parts.length>2) return;
+  const pool = parts.length===2 ? (SUBS[parts[0].toLowerCase()]||[]) : CMDS;
+  if(!pool.length) return;
+  const cur=(parts[parts.length-1]||'').toLowerCase();
+  const m=pool.filter(c=>c.indexOf(cur)===0);
+  if(!m.length) return;
+  let common=m[0];
+  m.forEach(s=>{ let k=0; while(k<common.length && k<s.length && common[k]===s[k]) k++; common=common.slice(0,k); });
+  const head = parts.length===2 ? parts[0]+' ' : '';
+  input.value = head + common + (m.length===1?' ':'');
+  if(m.length>1) termPush(n,'dim',m.join('   '),true);
+}
+
+function nodePrompt(n){ return (n.auth?ADMIN.id:'guest')+'@'+n.id.toLowerCase()+':~'+(n.auth?'#':'$'); }
+function mkLine(rec){
+  const d=document.createElement('div');
+  d.className='nl '+(rec.cls||'dim');
+  d.textContent=(rec.raw?'':'['+rec.t+'] ')+rec.text;
+  return d;
+}
+function termPush(n,cls,text,raw){
+  const rec={t:nowUTC(),cls,text,raw:!!raw};
+  n.term.push(rec); if(n.term.length>400) n.term.shift();
+  if(selected===n && modalTab==='term'){
+    const box=document.getElementById('ntLog');
+    if(box){ box.appendChild(mkLine(rec)); box.scrollTop=box.scrollHeight; }
+  }
+}
+function termLines(n,cls,arr){ arr.forEach(s=>termPush(n,cls,s,true)); }
+function renderNodeTerm(n){
+  const box=document.getElementById('ntLog'); if(!box) return;
+  box.innerHTML=''; n.term.forEach(r=>box.appendChild(mkLine(r)));
+  box.scrollTop=box.scrollHeight;
+}
+function updatePrompt(n){ const p=document.getElementById('ntPrompt'); if(p) p.textContent=nodePrompt(n); }
+function setPwd(on){ const i=document.getElementById('ntInput'); if(i) i.type=on?'password':'text'; }
+
+function nodeExec(n,rawLine){
+  const line=(rawLine||'').trim();
+
+  if(n.loginStage===1){
+    termPush(n,'cmd','operator ID: '+line,true);
+    n.loginTmp=line.toUpperCase(); n.loginStage=2; setPwd(true);
+    termPush(n,'sys','ORACLE key:',true); return;
+  }
+  if(n.loginStage===2){
+    termPush(n,'cmd','ORACLE key: '+'*'.repeat(Math.min(line.length,24)),true);
+    setPwd(false); n.loginStage=0;
+    if(n.loginTmp===ADMIN.id && line.toUpperCase()===ADMIN.key){
+      n.auth=true;
+      termPush(n,'ok','authentication accepted · '+ADMIN.name+' ('+ADMIN.id+')');
+      termPush(n,'dim','clearance '+ADMIN.clearance+' · permission '+ADMIN.perm+' · session encrypted',true);
+      updatePrompt(n);
+    }else{
+      termPush(n,'err','AUTHENTICATION FAILURE · attempt recorded');
+      addLog('SCAN',n,null,'FAILED AUTHENTICATION','operator '+(n.loginTmp||'—'));
+    }
+    n.loginTmp=''; return;
+  }
+
+  termPush(n,'cmd',nodePrompt(n)+' '+line,true);
+  if(!line) return;
+  if(n.dead){ termPush(n,'err','no response: node destroyed, routes withdrawn'); return; }
+
+  const parts=line.split(/\s+/), c=parts[0].toLowerCase(), a1=(parts[1]||'');
+  const need=()=>{ if(n.auth) return true;
+    termPush(n,'err','denied: operator authorization required · run login'); return false; };
+  const peers=LINKS.filter(L=>L.a===n||L.b===n).map(L=>L.a===n?L.b:L.a);
+
+  switch(c){
+    case 'help': termLines(n,'sys',[
+      'BASIC COMMANDS',
+      '  status              node state',
+      '  ping <node|host>    channel check',
+      '  traceroute <host>   route trace',
+      '  ifconfig            network interfaces',
+      '  netstat             active suppression connections',
+      '  arp                 mesh neighbour table',
+      '  uptime · date       uptime and system time',
+      '  whoami              current account',
+      '  clear               clear screen',
+      '  login · logout      operator sign-in and sign-out',
+      'PRIVILEGED COMMANDS (login required)',
+      '  sysctl              suppression kernel parameters',
+      '  oraclectl <status|sync|resync|halt>',
+      '  filterctl <list|reload>',
+      '  queue ls            erasure queue',
+      '  purge <host|auto>   forced target erasure',
+      '  sessions            node suppression sessions',
+      '  mesh · route        channel and routing state',
+      '  journalctl          node system journal',
+      '  payload             [TEST] deploy payload'
+    ]); break;
+
+    case 'login':
+      if(n.auth){ termPush(n,'warn','session already authorized ('+ADMIN.id+')'); break; }
+      n.loginStage=1; termPush(n,'sys','operator ID:',true); break;
+
+    case 'logout':
+      if(!n.auth){ termPush(n,'dim','no active session',true); break; }
+      n.auth=false; updatePrompt(n); termPush(n,'ok','operator session closed'); break;
+
+    case 'whoami': termLines(n,'dim', n.auth
+        ? ['operator  : '+ADMIN.name,'code      : '+ADMIN.id,'clearance : '+ADMIN.clearance+' · '+ADMIN.perm,'node      : '+n.id]
+        : ['account   : guest','clearance : 0 (read only)','hint      : login']); break;
+
+    case 'status': termLines(n,'dim',[
+      'node      : '+n.id+' ('+n.role+')',
+      'facility  : '+n.site,
+      'state     : '+n.state,
+      'load      : '+(n.load*100).toFixed(0)+'%',
+      'RX / TX   : '+n.rx.toFixed(2)+' / '+n.tx.toFixed(2)+' Gbit/s',
+      'sessions  : '+n.sessions,
+      'sync      : '+(n.role==='PRIME'?'SOURCE OF TRUTH':'← '+PRIME.ip+' · '+(n.rtt||0).toFixed(0)+' ms')
+    ]); break;
+
+    case 'ifconfig': case 'ipconfig': termLines(n,'dim',[
+      'mesh0  inet '+n.ip+'  netmask 255.255.255.0  gw 10.7.0.254',
+      '       ether '+n.mac+'  '+n.asn+'  mtu 9000',
+      '       RX '+n.rx.toFixed(2)+' Gbit/s   TX '+n.tx.toFixed(2)+' Gbit/s',
+      'sup0   logical suppression interface · '+(n.state==='SUPPRESSION'?'UNDER LOAD':'idle'),
+      'lo0    inet 127.0.0.1  netmask 255.0.0.0'
+    ]); break;
+
+    case 'uptime': termPush(n,'dim','uptime '+fmtUp(n.uptime)+' · load average '+(n.load).toFixed(2),true); break;
+    case 'date': termPush(n,'dim',nowUTC()+' UTC · node clock synchronized with ORACLE',true); break;
+
+    case 'ping': {
+      const t=a1||PRIME.id;
+      const tgt=NODES.find(x=>x.id.toLowerCase()===t.toLowerCase()||x.ip===t);
+      if(tgt&&tgt.dead){ termPush(n,'err','node '+tgt.id+' unreachable · 100% packet loss'); break; }
+      const base=tgt?Math.max(1,Math.abs((n.rtt||0)-(tgt.rtt||0))+4):40+Math.random()*90;
+      termPush(n,'dim','PING '+(tgt?tgt.id+' ('+tgt.ip+')':t)+' · 56 bytes',true);
+      for(let i=0;i<4;i++) termPush(n,'dim','  64 bytes seq='+i+' ttl=61 time='+(base+Math.random()*4).toFixed(1)+' ms',true);
+      termPush(n,'ok','4 transmitted, 4 received, 0% loss'); break;
+    }
+
+    case 'traceroute': case 'tracert': {
+      const t=a1||PRIME.ip;
+      termPush(n,'dim','tracing route to '+t+' · max 8 hops',true);
+      const hops=['10.7.0.254 (node gateway)','10.7.255.1 (ORACLE backbone)',PRIME.ip+' ('+PRIME.id+')',t];
+      hops.forEach((h,i)=>termPush(n,'dim','  '+(i+1)+'  '+h+'  '+(2+i*7+Math.random()*6).toFixed(1)+' ms',true));
+      break;
+    }
+
+    case 'netstat': {
+      const rows=n.ops.slice(0,6);
+      if(!rows.length){ termPush(n,'dim','no active connections',true); break; }
+      termPush(n,'dim','PROTO  LOCAL             REMOTE            STATE',true);
+      rows.forEach(o=>termPush(n,'dim','  tcp  '+n.ip+':443   '+o.ip+':443    '+o.status,true));
+      break;
+    }
+
+    case 'arp':
+      termPush(n,'dim','NEIGHBOUR    IPv4        MAC                 PORT',true);
+      peers.forEach((p,i)=>termPush(n,'dim','  '+p.id+'  '+p.ip+'  '+p.mac+'  ge-0/'+i+(p.dead?'  [LOST]':''),true));
+      break;
+
+    case 'clear': n.term=[]; renderNodeTerm(n); break;
+
+    case 'sysctl': if(!need()) break; termLines(n,'dim',[
+      'oracle.suppression.enabled   = 1',
+      'oracle.mesh.replication      = prime-locked ('+PRIME.id+')',
+      'oracle.filter.patterns       = 14802',
+      'oracle.filter.languages      = 61',
+      'oracle.object.target         = '+OBJ,
+      'oracle.amnestic.policy       = class-B',
+      'oracle.audit.retention       = 3650d'
+    ]); break;
+
+    case 'oraclectl': {
+      if(!need()) break;
+      const sub=a1.toLowerCase();
+      if(sub==='sync'||sub==='resync'){
+        if(n.role==='PRIME'){ termPush(n,'ok','index delta broadcast to all relay nodes · done');
+          alive().slice(1).forEach(p=>termPush(p,'evt','unscheduled index delta received from '+PRIME.id)); }
+        else if(PRIME.dead) termPush(n,'err','PRIME node unreachable · synchronization impossible');
+        else { n.lastSync=0; termPush(n,'ok','synchronized with '+PRIME.id+' · delta '+(Math.random()*60+5).toFixed(1)+' MB'); }
+        renderSync();
+      } else if(sub==='halt'){
+        termPush(n,'err','denied: node halt prohibited by O5 directive');
+      } else {
+        termLines(n,'dim',['oracle.service — ORACLE suppression service',
+          '  state   : '+(n.state==='SUPPRESSION'?'active (under load)':'active (running)'),
+          '  pid     : '+(1400+NODES.indexOf(n)*37),
+          '  started : '+fmtUp(n.uptime)+' ago',
+          '  task    : total concealment of '+OBJ]);
+      }
+      break;
+    }
+
+    case 'filterctl': {
+      if(!need()) break;
+      if(a1.toLowerCase()==='reload'){ termPush(n,'ok','memetic filter chain reloaded · 11/11 nodes'); break; }
+      termLines(n,'dim',['filter chain on '+n.id,
+        '  [1] lexical interceptor      active',
+        '  [2] semantic analyzer        active',
+        '  [3] visual EXIF scanner      active',
+        '  [4] search result rewrite    active',
+        '  [5] amnestic trigger         awaiting operator']);
+      break;
+    }
+
+    case 'queue': {
+      if(!need()) break;
+      termPush(n,'dim','ID   RESOURCE                       REGION        PRIORITY',true);
+      for(let i=0;i<5;i++){ const t=mkTarget();
+        termPush(n,'dim','  '+i+'  '+t.host+'  '+t.city+'  '+(i===0?'0 (urgent)':i),true); }
+      break;
+    }
+
+    case 'purge': {
+      if(!need()) break;
+      const t=mkTarget();
+      addLog('ERASE',n,t,'FORCED ERASURE (OPERATOR)','priority 0 · '+OBJ);
+      n.ops.unshift({t:nowUTC(),type:'ERASE',measure:'FORCED ERASURE',host:t.host+t.url,ip:t.ip,city:t.city,status:'COMPLETE'});
+      if(n.ops.length>25) n.ops.pop();
+      stats.erase++; visualOp(n,t,'ERASE');
+      termPush(n,'ok','target '+t.host+' erased · mirrors cleaned');
+      renderSummary(); updateHeader(); break;
+    }
+
+    case 'sessions': {
+      if(!need()) break;
+      if(!n.ops.length){ termPush(n,'dim','no sessions recorded',true); break; }
+      n.ops.slice(0,8).forEach(o=>termPush(n,'dim','  '+o.t+'  '+o.type+'  '+o.host+'  '+o.status,true));
+      break;
+    }
+
+    case 'mesh': {
+      if(!need()) break;
+      peers.forEach(p=>termPush(n,'dim','  '+p.id+'  '+p.ip+'  rtt '+(Math.abs((n.rtt||0)-(p.rtt||0))+4).toFixed(0)+' ms  '+(p.dead?'LOST':'established'),true));
+      break;
+    }
+
+    case 'route': {
+      if(!need()) break;
+      termPush(n,'dim','DESTINATION     GATEWAY      IFACE      METRIC',true);
+      termPush(n,'dim','  10.7.0.0/24   0.0.0.0      mesh0      1',true);
+      termPush(n,'dim','  0.0.0.0/0     10.7.0.254   mesh0      10',true);
+      termPush(n,'dim','  '+PRIME.ip+'/32  10.7.0.254   mesh0      '+(n.role==='PRIME'?'0':'5'),true);
+      break;
+    }
+
+    case 'journalctl': {
+      if(!need()) break;
+      const ev=n.term.filter(r=>r.cls==='evt').slice(-12);
+      if(!ev.length){ termPush(n,'dim','journal is empty',true); break; }
+      ev.forEach(r=>termPush(n,'dim','  '+r.t+'  '+r.text,true));
+      break;
+    }
+
+    case 'payload': {
+      if(!need()) break;
+      if(n.role !== 'PRIME'){
+        termPush(n,'err','error: payload deployment is permitted only on the PRIMARY node (PRIME)');
+        break;
+      }
+      if(n.payloadArmed){ termPush(n,'warn','payload already deployed on this node'); break; }
+      n.payloadArmed=true;
+      termPush(n,'warn','payload --deploy');
+      const audio=document.createElement('audio'); audio.src='nuke.mp3'; audio.play().catch(e=>console.log(e));
+
+      setTimeout(()=>{ if(!n.dead) termPush(n,'sys','New instruction set detected, reading...'); }, 1000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'ok','Success'); }, 5000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'sys','New instructions: 768'); }, 7000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'sys','Reconciling with security policies...'); }, 9000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'ok','No discrepancies found, applying...'); }, 15000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'sys','Instruction set applied, auto-sync in 120s'); }, 22000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'err','IRREVERSIBLE INFECTION, GRAVE WHISPER PROTOCOL'); }, 27000);
+      setTimeout(()=>{ if(!n.dead) termPush(n,'ok','Success'); }, 29000);
+      setTimeout(()=>{ if(!n.dead){ modal.classList.remove('on'); startNuke(n); } }, 30000);
+      break;
+    }
+
+    case 'shutdown': case 'reboot':
+      if(!need()) break;
+      termPush(n,'err','denied: node is part of the '+OBJ+' suppression chain · O5 authorization required');
+      break;
+
+    default:
+      termPush(n,'err','command not found: '+c+' · type help');
+  }
+}
+
+/* ---------- detonation countdown and node loss ---------- */
+let nukeTimer=null;
+function startNuke(n){
+  if(n.dead) return;
+  modal.classList.remove('on');
+  const ov=document.getElementById('nuke'), dig=document.getElementById('nukeDig'), sub=document.getElementById('nukeSub');
+  sub.textContent=n.id+' · '+n.city.toUpperCase()+' · DEVICE ARMED';
+  ov.classList.add('on'); ov.classList.remove('crit');
+  const end=performance.now()+60000;
+  clearInterval(nukeTimer);
+  nukeTimer=setInterval(()=>{
+    const left=Math.max(0,end-performance.now());
+    dig.textContent=pad(Math.floor(left/60000))+':'+pad(Math.floor(left%60000/1000))+'.'+String(Math.floor(left%1000)).padStart(3,'0');
+    if(left<=10000) ov.classList.add('crit');
+    if(left<=0){ clearInterval(nukeTimer); nukeTimer=null; ov.classList.remove('on','crit'); killNode(n); }
+  },31);
+}
+function spawnNodeBlast(n){
+  const r=n.dotEl?n.dotEl.getBoundingClientRect():n.gEl.getBoundingClientRect();
+  const blast=document.createElement('div');
+  blast.className='node-blast';
+  blast.style.left=(r.left+r.width/2)+'px';
+  blast.style.top=(r.top+r.height/2)+'px';
+  blast.innerHTML='<i class="blast-glow"></i><i class="blast-core"></i><i class="blast-wave"></i><i class="blast-wave b"></i>';
+  document.body.appendChild(blast);
+  setTimeout(()=>blast.remove(),2100);
+}
+function killNode(n){
+  if(n.dead) return;
+  n.dead=true; n.auth=false; n.state='OFFLINE'; n.load=0; n.rx=0; n.tx=0; n.hist=n.hist.map(()=>0);
+
+  spawnNodeBlast(n);
+
+  if(n.dotEl){
+    n.dotEl.setAttribute('fill','#fff');
+    n.dotEl.innerHTML='<animate attributeName="r" values="2.6;12;9;0" keyTimes="0;.2;.45;1" dur="1.1s" fill="freeze"/>';
+  }
+  n.gEl.querySelectorAll('animate').forEach(a=>{ if(a.parentNode!==n.dotEl) a.remove(); });
+  n.gEl.style.transition='opacity 1.1s ease .55s, filter 1.1s ease .55s';
+  n.gEl.style.filter='grayscale(1) brightness(.4)';
+  n.gEl.style.opacity='.14';
+  n.gEl.style.pointerEvents='none';
+
+  LINKS.forEach(L=>{ if(L.a===n||L.b===n){ L.dead=true; L.path.remove(); } });
+  for(let i=packets.length-1;i>=0;i--){ const L=packets[i].L;
+    if(L.a===n||L.b===n){ packets[i].e.remove(); packets.splice(i,1); } }
+  for(let i=activeAttacks.length-1;i>=0;i--){
+    const rec=activeAttacks[i];
+    if(!rec.beams) continue;
+    for(let j=rec.beams.length-1;j>=0;j--)
+      if(rec.beams[j].s===n){ rec.beams[j].path.remove(); rec.beams.splice(j,1); }
+    if(!rec.beams.length || rec.node===n){ rec.g.remove(); activeAttacks.splice(i,1); }
+  }
+
+  termPush(n,'err','*** LINK LOST · NODE DESTROYED ***');
+  addLog('DDOS',n,null,'NODE LOSS',n.id+' unreachable · routes withdrawn');
+  alive().forEach(p=>termPush(p,'evt','route to '+n.id+' withdrawn · neighbour unreachable'));
+  if(n===PRIME) promotePrime(n);
+  renderNodes(); renderSync(); renderSummary(); updateHeader();
+}
+
+/* ---------- prime role succession ---------- */
+function promotePrime(lost){
+  lost.role='LOST';
+  if(lost.labelEl) lost.labelEl.textContent=lost.id;
+  const next=NODES.find(x=>!x.dead);
+  if(!next){
+    addLog('DDOS',lost,null,'GRID COLLAPSE','no active nodes remaining');
+    return;
+  }
+  PRIME=next; next.role='PRIME';
+  if(next.labelEl) next.labelEl.textContent=next.id+' ★';
+  if(next.dotEl) next.dotEl.setAttribute('fill','#ffd88a');
+  if(!next.primeRing){
+    next.primeRing=el('circle',{cx:next.x,cy:next.y,r:10,fill:'none',stroke:'#ffc766',
+      'stroke-width':.8,'stroke-dasharray':'2 2','vector-effect':'non-scaling-stroke'});
+    next.gEl.appendChild(next.primeRing);
+  }
+  const active=alive();
+  active.forEach(n=>{
+    if(n===PRIME) return;
+    let link=LINKS.find(L=>!L.dead&&((L.a===PRIME&&L.b===n)||(L.b===PRIME&&L.a===n)));
+    if(!link) link=createMeshLink(PRIME,n,true);
+    link.prime=true;
+  });
+  LINKS.forEach(L=>{
+    if(L.dead) return;
+    L.prime=(L.a===PRIME||L.b===PRIME);
+    styleMeshLink(L);
+  });
+  NODES.forEach(x=>{ x.rtt = x===PRIME?0 : 8+Math.hypot(x.x-PRIME.x,x.y-PRIME.y)*0.55; x.lastSync=0; });
+  addLog('SYNC',PRIME,null,'PRIVILEGE HANDOVER',lost.id+' lost · PRIME role assumed by '+PRIME.id);
+  termPush(PRIME,'warn','PRIME node '+lost.id+' lost · privileges transferred to this node');
+  termPush(PRIME,'ok','SOURCE OF TRUTH role assumed · index restored from local replica');
+  alive().forEach(p=>{ if(p!==PRIME) termPush(p,'evt','new PRIME node: '+PRIME.id+' ('+PRIME.ip+') · replication re-pointed'); });
+}
+
+/* shell banners */
+NODES.forEach(n=>{
+  n.term.push({t:nowUTC(),cls:'sys',raw:true,text:'ORACLE NODE SHELL v3.1 · '+n.id+' ('+n.city+')'});
+  n.term.push({t:nowUTC(),cls:'dim',raw:true,text:'suppression kernel 6.4.2-oracle · mesh0 '+n.ip});
+  n.term.push({t:nowUTC(),cls:'dim',raw:true,text:'session: guest · read only. help — commands, login — operator sign-in.'});
+});
+
+/* ========================= TRAFFIC CHART ========================= */
+const cv=document.getElementById('chart'), cx=cv.getContext('2d');
+const seriesIn=new Array(120).fill(0), seriesOut=new Array(120).fill(0);
+function drawChart(){
+  const r=cv.getBoundingClientRect(); const dpr=devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
+  const w=r.width,h=r.height; cx.clearRect(0,0,w,h);
+  cx.strokeStyle='rgba(90,170,230,.12)'; cx.lineWidth=1;
+  for(let i=1;i<5;i++){ cx.beginPath(); cx.moveTo(0,h*i/5); cx.lineTo(w,h*i/5); cx.stroke(); }
+  for(let i=1;i<10;i++){ cx.beginPath(); cx.moveTo(w*i/10,0); cx.lineTo(w*i/10,h); cx.stroke(); }
+  const max=Math.max(20,...seriesIn,...seriesOut)*1.15;
+  const line=(s,col,fill)=>{
+    cx.beginPath();
+    s.forEach((v,i)=>{ const x=i/(s.length-1)*w, y=h-(v/max)*h; i?cx.lineTo(x,y):cx.moveTo(x,y); });
+    cx.strokeStyle=col; cx.lineWidth=1.4; cx.stroke();
+    if(fill){ cx.lineTo(w,h); cx.lineTo(0,h); cx.closePath();
+      const g=cx.createLinearGradient(0,0,0,h); g.addColorStop(0,fill); g.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=g; cx.fill(); }
+  };
+  line(seriesIn,'#5ec2ff','rgba(94,194,255,.22)');
+  line(seriesOut,'#ff7c8a','rgba(255,124,138,.14)');
+  cx.fillStyle='rgba(150,205,240,.8)'; cx.font='10px Share Tech Mono';
+  cx.fillText('RX '+seriesIn[seriesIn.length-1].toFixed(1)+' Gbit/s',8,13);
+  cx.fillStyle='rgba(255,150,160,.9)';
+  cx.fillText('TX '+seriesOut[seriesOut.length-1].toFixed(1)+' Gbit/s',8,26);
+}
+addEventListener('resize',drawChart);
+
+/* ========================= LOOPS ========================= */
+NODES.forEach(n=>{ n.rtt = n===PRIME?0 : 8+Math.hypot(n.x-PRIME.x,n.y-PRIME.y)*0.55; n.lastSync=0; });
+
+function tickFast(){ stepPackets(); requestAnimationFrame(tickFast); }
+requestAnimationFrame(tickFast);
+
+setInterval(()=>{
+  NODES.forEach(n=>{
+    if(n.dead){ n.rx=0; n.tx=0; n.load=0; return; }
+    const boost = n.state==='SUPPRESSION' ? 55 : 0;
+    n.rx = Math.max(.4, (n.rx||8)*.72 + (Math.random()*14+4+boost*.4)*.28);
+    n.tx = Math.max(.4, (n.tx||8)*.72 + (Math.random()*12+3+boost)*.28);
+    n.load = Math.min(.99, Math.max(.15, n.load*.94 + (Math.random()*.5+.15)*.06 + (n.state==='SUPPRESSION'?.05:0)));
+    n.hist.push(Math.min(1,(n.rx+n.tx)/90)); if(n.hist.length>28) n.hist.shift();
+    n.uptime+=1; n.lastSync++;
+  });
+  const tin=NODES.reduce((s,n)=>s+n.rx,0), tout=NODES.reduce((s,n)=>s+n.tx,0);
+  seriesIn.push(tin); seriesIn.shift(); seriesOut.push(tout); seriesOut.shift();
+  drawChart(); renderNodes(); renderSync(); updateHeader();
+},1000);
+
+setInterval(()=>{
+  LINKS.forEach(L=>{ if(L.dead||L.a.dead||L.b.dead) return;
+    const c = L.prime?2:1; for(let i=0;i<c;i++) if(Math.random()<.65) spawnPacket(L,Math.random()<.5); });
+},420);
+
+setInterval(doOp, 2600);
+setInterval(doSync, 120000);
+setInterval(()=>{ newHash(); renderSync(); }, 11000);
+setInterval(()=>{ document.getElementById('hClock').textContent = nowUTC(); },1000);
+setInterval(()=>{
+  document.getElementById('hudStatus').innerHTML =
+    `UPDATING STATUS · ${nowUTC()}Z<br>MESH: ${LINKS.filter(L=>!L.dead).length} CHANNELS · CONVERGED<br>PRIME: ${PRIME.ip} · ${PRIME.city.toUpperCase()}`;
+},1000);
+
+const TICK = [
+  'ORACLE active · total concealment directive for '+OBJ+' confirmed by O5 Council',
+  'PRIME NODE ORACLE-01 (Frankfurt, DE, 10.7.0.1) is the index source of truth; all nodes replicate from it',
+  'If direct deletion is impossible, the resource enters denial-of-service mode until MTF Ω-4 contacts the owner',
+  'Reminder: Class-B amnestics are mandatory for operators after shift rotation',
+  'ORACLE-04 (Dallas, TX) reports increased North America segment load',
+  'All panel actions are logged. Unauthorized access is punished under protocol 12-BLUE'
+].join('  ///  ');
+document.getElementById('ticker').textContent = TICK + '  ///  ';
+
+renderNodes(); renderSync(); renderSummary(); updateHeader(); drawChart();
+for(let i=0;i<6;i++) setTimeout(doOp, i*400);
+</script>
+</body>
+</html>
