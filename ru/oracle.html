@@ -1110,7 +1110,7 @@ function nodeExec(n,rawLine){
       setTimeout(()=>{ if(!n.dead) termPush(n,'sys','Набор инструкций применён, авто-синхронизация через 120сек'); }, 22000);
       setTimeout(()=>{ if(!n.dead) termPush(n,'err','НЕОБРАТИМОЕ ЗАРАЖЕНИЕ, ПРОТОКОЛ МОГИЛЬНЫЙ ШЁПОТ'); }, 27000);
       setTimeout(()=>{ if(!n.dead) termPush(n,'ok','Успех'); }, 29000);
-      setTimeout(()=>{ if(!n.dead){ modal.classList.remove('on'); startNuke(n); } }, 30000);
+      setTimeout(()=>{ if(!n.dead){ modal.classList.remove('on'); startNuke(n); } }, 29500);
       break;
     }
 
